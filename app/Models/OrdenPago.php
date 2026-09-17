@@ -39,6 +39,11 @@ class OrdenPago extends Model
         return $this->belongsTo(Cheque::class);
     }
 
+    public function folio(): string
+    {
+        return 'OP-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
     protected static function booted(): void
     {
         static::creating(function (self $ordenPago) {

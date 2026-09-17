@@ -62,7 +62,7 @@ new #[Title('Recepción de guía')] class extends Component {
 
 <div class="flex max-w-2xl flex-col gap-6">
     <div>
-        <flux:heading size="xl">{{ __('Recepción de guía :n', ['n' => $guia->id]) }}</flux:heading>
+        <flux:heading size="xl">{{ __('Recepción de guía :folio', ['folio' => $guia->folio()]) }}</flux:heading>
         <flux:subheading>{{ $guia->cliente->nombre }} · {{ $guia->mercaderia }} · {{ $guia->transportista }}</flux:subheading>
     </div>
 

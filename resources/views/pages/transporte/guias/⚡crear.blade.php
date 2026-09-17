@@ -102,7 +102,7 @@ new #[Title('Cargar guía')] class extends Component {
             'usuario_carga_id' => auth()->id(),
         ]);
 
-        Flux::toast(variant: 'success', text: __('Guía Nº:number cargada.', ['number' => $guia->id]));
+        Flux::toast(variant: 'success', text: __('Guía :folio cargada.', ['folio' => $guia->folio()]));
 
         $this->redirect(route('guias.index'), navigate: true);
     }

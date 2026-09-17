@@ -136,16 +136,19 @@ new #[Title('Órdenes de pago')] class extends Component {
 
     <flux:table>
         <flux:table.columns>
+            <flux:table.column>{{ __('Folio') }}</flux:table.column>
             <flux:table.column>{{ __('Fecha') }}</flux:table.column>
             <flux:table.column>{{ __('Transporte') }}</flux:table.column>
             <flux:table.column>{{ __('Concepto') }}</flux:table.column>
             <flux:table.column>{{ __('Medio de pago') }}</flux:table.column>
             <flux:table.column align="end">{{ __('Monto') }}</flux:table.column>
+            <flux:table.column></flux:table.column>
         </flux:table.columns>
 
         <flux:table.rows>
             @forelse ($this->ordenesPago as $orden)
                 <flux:table.row wire:key="orden-{{ $orden->id }}">
+                    <flux:table.cell class="font-mono">{{ $orden->folio() }}</flux:table.cell>
                     <flux:table.cell>{{ $orden->fecha->format('d/m/Y') }}</flux:table.cell>
                     <flux:table.cell class="font-medium">{{ $orden->transporte->nombre }}</flux:table.cell>
                     <flux:table.cell>{{ $orden->concepto ?: '—' }}</flux:table.cell>
@@ -156,10 +159,13 @@ new #[Title('Órdenes de pago')] class extends Component {
                         @endif
                     </flux:table.cell>
                     <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $orden->monto, 2, ',', '.') }}</flux:table.cell>
+                    <flux:table.cell align="end">
+                        <flux:button size="sm" variant="ghost" icon="printer" :href="route('ordenes-pago.pdf', $orden)" target="_blank" />
+                    </flux:table.cell>
                 </flux:table.row>
             @empty
                 <flux:table.row>
-                    <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                    <flux:table.cell colspan="7" class="text-center text-zinc-500">
                         {{ __('Todavía no hay órdenes de pago.') }}
                     </flux:table.cell>
                 </flux:table.row>

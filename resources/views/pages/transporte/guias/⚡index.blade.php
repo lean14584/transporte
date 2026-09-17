@@ -63,7 +63,7 @@ new #[Title('Guías')] class extends Component {
         <flux:table.rows>
             @forelse ($this->guias as $guia)
                 <flux:table.row wire:key="guia-{{ $guia->id }}">
-                    <flux:table.cell class="font-mono">#{{ $guia->id }}</flux:table.cell>
+                    <flux:table.cell class="font-mono">{{ $guia->folio() }}</flux:table.cell>
                     <flux:table.cell>{{ $guia->fecha_carga->format('d/m/Y') }}</flux:table.cell>
                     <flux:table.cell>{{ $guia->cliente->nombre }}</flux:table.cell>
                     <flux:table.cell>{{ $guia->transporte->nombre }}</flux:table.cell>
@@ -82,6 +82,7 @@ new #[Title('Guías')] class extends Component {
                                 {{ __('Recepcionar') }}
                             </flux:button>
                         @endif
+                        <flux:button size="sm" variant="ghost" icon="printer" :href="route('guias.pdf', $guia)" target="_blank" />
                     </flux:table.cell>
                 </flux:table.row>
             @empty

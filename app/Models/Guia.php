@@ -64,6 +64,11 @@ class Guia extends Model
         return $this->hasOne(CuentaCorrienteMovimiento::class);
     }
 
+    public function folio(): string
+    {
+        return 'G-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
     /**
      * Cierra la recepción: calcula neto (bruto - tara) y la ganancia sobre el neto,
      * y carga esa ganancia como saldo en la cta cte del cliente.
@@ -88,7 +93,7 @@ class Guia extends Model
             CuentaCorrienteMovimiento::registrar(
                 $this->cliente,
                 'cargo',
-                "Guía Nº{$this->id} - flete {$this->mercaderia}",
+                "Guía {$this->folio()} - flete {$this->mercaderia}",
                 $montoGanancia,
                 ['guia_id' => $this->id],
             );

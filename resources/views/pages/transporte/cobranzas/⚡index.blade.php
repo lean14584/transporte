@@ -41,16 +41,19 @@ new #[Title('Cobranzas')] class extends Component {
 
     <flux:table>
         <flux:table.columns>
+            <flux:table.column>{{ __('Folio') }}</flux:table.column>
             <flux:table.column>{{ __('Fecha') }}</flux:table.column>
             <flux:table.column>{{ __('Cliente') }}</flux:table.column>
             <flux:table.column>{{ __('Concepto') }}</flux:table.column>
             <flux:table.column>{{ __('Medio de pago') }}</flux:table.column>
             <flux:table.column align="end">{{ __('Monto') }}</flux:table.column>
+            <flux:table.column></flux:table.column>
         </flux:table.columns>
 
         <flux:table.rows>
             @forelse ($this->recibos as $recibo)
                 <flux:table.row wire:key="recibo-{{ $recibo->id }}">
+                    <flux:table.cell class="font-mono">{{ $recibo->folio() }}</flux:table.cell>
                     <flux:table.cell>{{ $recibo->fecha->format('d/m/Y') }}</flux:table.cell>
                     <flux:table.cell>
                         <flux:link :href="route('clientes.cta-cte', $recibo->cliente)" wire:navigate>
@@ -60,10 +63,13 @@ new #[Title('Cobranzas')] class extends Component {
                     <flux:table.cell>{{ $recibo->concepto ?: '—' }}</flux:table.cell>
                     <flux:table.cell>{{ ucfirst($recibo->medio_pago) }}</flux:table.cell>
                     <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $recibo->monto, 2, ',', '.') }}</flux:table.cell>
+                    <flux:table.cell align="end">
+                        <flux:button size="sm" variant="ghost" icon="printer" :href="route('recibos.pdf', $recibo)" target="_blank" />
+                    </flux:table.cell>
                 </flux:table.row>
             @empty
                 <flux:table.row>
-                    <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                    <flux:table.cell colspan="7" class="text-center text-zinc-500">
                         {{ __('Todavía no hay cobranzas registradas.') }}
                     </flux:table.cell>
                 </flux:table.row>

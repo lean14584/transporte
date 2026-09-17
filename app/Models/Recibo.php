@@ -39,6 +39,11 @@ class Recibo extends Model
         return $this->hasOne(CuentaCorrienteMovimiento::class);
     }
 
+    public function folio(): string
+    {
+        return 'R-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
     /**
      * Registra el cobro: crea el recibo y descuenta el pago de la cta cte del cliente.
      */
@@ -57,7 +62,7 @@ class Recibo extends Model
             CuentaCorrienteMovimiento::registrar(
                 $cliente,
                 'pago',
-                $concepto ?: "Recibo Nº{$recibo->id}",
+                $concepto ?: "Recibo {$recibo->folio()}",
                 $monto,
                 ['recibo_id' => $recibo->id],
             );
