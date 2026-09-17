@@ -66,39 +66,65 @@ new #[Title('Recepción de guía')] class extends Component {
         <flux:subheading>{{ $guia->cliente->nombre }} · {{ $guia->mercaderia }} · {{ $guia->transportista }}</flux:subheading>
     </div>
 
-    <flux:callout icon="information-circle">
-        <flux:callout.text>
-            {{ __('Cargado el :fecha para :transporte. Cantidad declarada: :cantidad :unidad.', [
-                'fecha' => $guia->fecha_carga->format('d/m/Y'),
-                'transporte' => $guia->transporte->nombre,
-                'cantidad' => number_format((float) $guia->cantidad, 0, ',', '.'),
-                'unidad' => $guia->unidad,
-            ]) }}
-        </flux:callout.text>
-    </flux:callout>
+    <form wire:submit="recepcionar">
+        <div class="overflow-hidden rounded-2xl border border-blue-200/70 bg-gradient-to-br from-blue-100/70 via-blue-50/40 to-indigo-100/70 shadow-sm dark:border-blue-900/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-indigo-950/60">
+            <div class="space-y-6 p-6">
+                <div>
+                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                        {{ __('Datos de la carga') }}
+                    </flux:heading>
 
-    <form wire:submit="recepcionar" class="space-y-6">
-        <div class="grid grid-cols-2 gap-4">
-            <flux:input wire:model.live="pesaje_bruto" :label="__('Pesaje bruto (kg)')" type="number" step="0.01" min="0.01" required autofocus />
-            <flux:input wire:model.live="tara" :label="__('Tara (kg)')" type="number" step="0.01" min="0" required />
-        </div>
+                    <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                        {{ __('Cargado el :fecha para :transporte. Cantidad declarada: :cantidad :unidad.', [
+                            'fecha' => $guia->fecha_carga->format('d/m/Y'),
+                            'transporte' => $guia->transporte->nombre,
+                            'cantidad' => number_format((float) $guia->cantidad, 0, ',', '.'),
+                            'unidad' => $guia->unidad,
+                        ]) }}
+                    </p>
+                </div>
 
-        <flux:input wire:model.live="porcentaje_ganancia" :label="__('Porcentaje de ganancia (%)')" type="number" step="0.01" min="0" required />
+                <flux:separator />
 
-        <div class="rounded-lg border border-zinc-200 p-4 dark:border-white/10">
-            <div class="flex justify-between">
-                <flux:text>{{ __('Neto') }}</flux:text>
-                <flux:text class="font-mono">{{ $this->neto !== null ? number_format($this->neto, 2, ',', '.').' kg' : '—' }}</flux:text>
+                <div>
+                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                        {{ __('Pesaje') }}
+                    </flux:heading>
+
+                    <div class="mt-3 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <flux:input wire:model.live="pesaje_bruto" :label="__('Pesaje bruto (kg)')" type="number" step="0.01" min="0.01" required autofocus />
+                            <flux:input wire:model.live="tara" :label="__('Tara (kg)')" type="number" step="0.01" min="0" required />
+                        </div>
+
+                        <flux:input wire:model.live="porcentaje_ganancia" :label="__('Porcentaje de ganancia (%)')" type="number" step="0.01" min="0" required />
+                    </div>
+                </div>
+
+                <flux:separator />
+
+                <div>
+                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                        {{ __('Resultado') }}
+                    </flux:heading>
+
+                    <div class="mt-3 rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                        <div class="flex justify-between">
+                            <flux:text>{{ __('Neto') }}</flux:text>
+                            <flux:text class="font-mono">{{ $this->neto !== null ? number_format($this->neto, 2, ',', '.').' kg' : '—' }}</flux:text>
+                        </div>
+                        <div class="mt-2 flex justify-between">
+                            <flux:text>{{ __('Ganancia a cargar en cta cte del cliente') }}</flux:text>
+                            <flux:heading class="font-mono">{{ $this->montoGanancia !== null ? '$ '.number_format($this->montoGanancia, 2, ',', '.') : '—' }}</flux:heading>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mt-2 flex justify-between">
-                <flux:text>{{ __('Ganancia a cargar en cta cte del cliente') }}</flux:text>
-                <flux:heading class="font-mono">{{ $this->montoGanancia !== null ? '$ '.number_format($this->montoGanancia, 2, ',', '.') : '—' }}</flux:heading>
-            </div>
-        </div>
 
-        <div class="flex justify-end gap-2">
-            <flux:button variant="filled" :href="route('guias.index')" wire:navigate>{{ __('Cancelar') }}</flux:button>
-            <flux:button type="submit" variant="primary">{{ __('Confirmar recepción') }}</flux:button>
+            <div class="flex justify-end gap-2 border-t border-blue-200/70 bg-white/50 px-6 py-4 dark:border-blue-900/40 dark:bg-black/10">
+                <flux:button variant="filled" :href="route('guias.index')" wire:navigate>{{ __('Cancelar') }}</flux:button>
+                <flux:button type="submit" variant="primary">{{ __('Confirmar recepción') }}</flux:button>
+            </div>
         </div>
     </form>
 </div>
