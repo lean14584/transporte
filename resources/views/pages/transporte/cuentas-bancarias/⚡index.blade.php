@@ -79,23 +79,54 @@ new #[Title('Cuentas bancarias')] class extends Component {
         </flux:button>
     </div>
 
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column>{{ __('Banco') }}</flux:table.column>
-            <flux:table.column>{{ __('Número de cuenta') }}</flux:table.column>
-            <flux:table.column>{{ __('Alias / CBU') }}</flux:table.column>
-            <flux:table.column align="end">{{ __('Saldo') }}</flux:table.column>
-            <flux:table.column></flux:table.column>
-        </flux:table.columns>
+    <div class="hidden overflow-x-auto md:block">
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>{{ __('Banco') }}</flux:table.column>
+                <flux:table.column>{{ __('Número de cuenta') }}</flux:table.column>
+                <flux:table.column>{{ __('Alias / CBU') }}</flux:table.column>
+                <flux:table.column align="end">{{ __('Saldo') }}</flux:table.column>
+                <flux:table.column></flux:table.column>
+            </flux:table.columns>
 
-        <flux:table.rows>
-            @forelse ($this->cuentas as $cuenta)
-                <flux:table.row wire:key="cuenta-{{ $cuenta->id }}">
-                    <flux:table.cell class="font-medium">{{ $cuenta->banco }}</flux:table.cell>
-                    <flux:table.cell>{{ $cuenta->numero_cuenta ?: '—' }}</flux:table.cell>
-                    <flux:table.cell>{{ $cuenta->alias_cbu ?: '—' }}</flux:table.cell>
-                    <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $cuenta->saldo, 2, ',', '.') }}</flux:table.cell>
-                    <flux:table.cell align="end">
+            <flux:table.rows>
+                @forelse ($this->cuentas as $cuenta)
+                    <flux:table.row wire:key="cuenta-{{ $cuenta->id }}">
+                        <flux:table.cell class="font-medium">{{ $cuenta->banco }}</flux:table.cell>
+                        <flux:table.cell>{{ $cuenta->numero_cuenta ?: '—' }}</flux:table.cell>
+                        <flux:table.cell>{{ $cuenta->alias_cbu ?: '—' }}</flux:table.cell>
+                        <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $cuenta->saldo, 2, ',', '.') }}</flux:table.cell>
+                        <flux:table.cell align="end">
+                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cuenta->id }})" />
+                            <flux:button
+                                size="sm"
+                                variant="ghost"
+                                icon="trash"
+                                wire:click="eliminar({{ $cuenta->id }})"
+                                wire:confirm="{{ __('¿Eliminar esta cuenta bancaria?') }}"
+                            />
+                        </flux:table.cell>
+                    </flux:table.row>
+                @empty
+                    <flux:table.row>
+                        <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                            {{ __('Todavía no hay cuentas bancarias cargadas.') }}
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforelse
+            </flux:table.rows>
+        </flux:table>
+    </div>
+
+    <div class="grid gap-3 md:hidden">
+        @forelse ($this->cuentas as $cuenta)
+            <div class="rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/50 dark:bg-violet-950/30" wire:key="cuenta-mobile-{{ $cuenta->id }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="font-medium text-violet-900 dark:text-violet-100">{{ $cuenta->banco }}</div>
+                        <div class="mt-1 text-sm text-violet-900/70 dark:text-violet-300">{{ $cuenta->numero_cuenta ?: '—' }}</div>
+                    </div>
+                    <div class="flex shrink-0 gap-1">
                         <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cuenta->id }})" />
                         <flux:button
                             size="sm"
@@ -104,17 +135,16 @@ new #[Title('Cuentas bancarias')] class extends Component {
                             wire:click="eliminar({{ $cuenta->id }})"
                             wire:confirm="{{ __('¿Eliminar esta cuenta bancaria?') }}"
                         />
-                    </flux:table.cell>
-                </flux:table.row>
-            @empty
-                <flux:table.row>
-                    <flux:table.cell colspan="5" class="text-center text-zinc-500">
-                        {{ __('Todavía no hay cuentas bancarias cargadas.') }}
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforelse
-        </flux:table.rows>
-    </flux:table>
+                    </div>
+                </div>
+                <div class="mt-3 font-mono text-lg text-violet-900 dark:text-violet-100">$ {{ number_format((float) $cuenta->saldo, 2, ',', '.') }}</div>
+            </div>
+        @empty
+            <div class="rounded-xl border border-zinc-200 p-4 text-center text-zinc-500 dark:border-white/10">
+                {{ __('Todavía no hay cuentas bancarias cargadas.') }}
+            </div>
+        @endforelse
+    </div>
 
     <flux:modal name="cuenta-bancaria-form" class="max-w-lg" @close="$set('editingId', null)">
         <form wire:submit="guardar" class="space-y-6">

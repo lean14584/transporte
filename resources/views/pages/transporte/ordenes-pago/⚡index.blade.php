@@ -134,44 +134,74 @@ new #[Title('Órdenes de pago')] class extends Component {
         </flux:modal.trigger>
     </div>
 
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column>{{ __('Folio') }}</flux:table.column>
-            <flux:table.column>{{ __('Fecha') }}</flux:table.column>
-            <flux:table.column>{{ __('Transporte') }}</flux:table.column>
-            <flux:table.column>{{ __('Concepto') }}</flux:table.column>
-            <flux:table.column>{{ __('Medio de pago') }}</flux:table.column>
-            <flux:table.column align="end">{{ __('Monto') }}</flux:table.column>
-            <flux:table.column></flux:table.column>
-        </flux:table.columns>
+    <div class="hidden overflow-x-auto md:block">
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>{{ __('Folio') }}</flux:table.column>
+                <flux:table.column>{{ __('Fecha') }}</flux:table.column>
+                <flux:table.column>{{ __('Transporte') }}</flux:table.column>
+                <flux:table.column>{{ __('Concepto') }}</flux:table.column>
+                <flux:table.column>{{ __('Medio de pago') }}</flux:table.column>
+                <flux:table.column align="end">{{ __('Monto') }}</flux:table.column>
+                <flux:table.column></flux:table.column>
+            </flux:table.columns>
 
-        <flux:table.rows>
-            @forelse ($this->ordenesPago as $orden)
-                <flux:table.row wire:key="orden-{{ $orden->id }}">
-                    <flux:table.cell class="font-mono">{{ $orden->folio() }}</flux:table.cell>
-                    <flux:table.cell>{{ $orden->fecha->format('d/m/Y') }}</flux:table.cell>
-                    <flux:table.cell class="font-medium">{{ $orden->transporte->nombre }}</flux:table.cell>
-                    <flux:table.cell>{{ $orden->concepto ?: '—' }}</flux:table.cell>
-                    <flux:table.cell>
-                        {{ ucfirst($orden->medio_pago) }}
-                        @if ($orden->cheque)
-                            <flux:badge size="sm">{{ __('Cheque :n', ['n' => $orden->cheque->numero]) }}</flux:badge>
-                        @endif
-                    </flux:table.cell>
-                    <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $orden->monto, 2, ',', '.') }}</flux:table.cell>
-                    <flux:table.cell align="end">
-                        <flux:button size="sm" variant="ghost" icon="printer" :href="route('ordenes-pago.pdf', $orden)" target="_blank" />
-                    </flux:table.cell>
-                </flux:table.row>
-            @empty
-                <flux:table.row>
-                    <flux:table.cell colspan="7" class="text-center text-zinc-500">
-                        {{ __('Todavía no hay órdenes de pago.') }}
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforelse
-        </flux:table.rows>
-    </flux:table>
+            <flux:table.rows>
+                @forelse ($this->ordenesPago as $orden)
+                    <flux:table.row wire:key="orden-{{ $orden->id }}">
+                        <flux:table.cell class="font-mono">{{ $orden->folio() }}</flux:table.cell>
+                        <flux:table.cell>{{ $orden->fecha->format('d/m/Y') }}</flux:table.cell>
+                        <flux:table.cell class="font-medium">{{ $orden->transporte->nombre }}</flux:table.cell>
+                        <flux:table.cell>{{ $orden->concepto ?: '—' }}</flux:table.cell>
+                        <flux:table.cell>
+                            {{ ucfirst($orden->medio_pago) }}
+                            @if ($orden->cheque)
+                                <flux:badge size="sm">{{ __('Cheque :n', ['n' => $orden->cheque->numero]) }}</flux:badge>
+                            @endif
+                        </flux:table.cell>
+                        <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $orden->monto, 2, ',', '.') }}</flux:table.cell>
+                        <flux:table.cell align="end">
+                            <flux:button size="sm" variant="ghost" icon="printer" :href="route('ordenes-pago.pdf', $orden)" target="_blank" />
+                        </flux:table.cell>
+                    </flux:table.row>
+                @empty
+                    <flux:table.row>
+                        <flux:table.cell colspan="7" class="text-center text-zinc-500">
+                            {{ __('Todavía no hay órdenes de pago.') }}
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforelse
+            </flux:table.rows>
+        </flux:table>
+    </div>
+
+    <div class="grid gap-3 md:hidden">
+        @forelse ($this->ordenesPago as $orden)
+            <div class="rounded-xl border border-zinc-200 p-4 dark:border-white/10" wire:key="orden-mobile-{{ $orden->id }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="font-mono text-sm text-zinc-500">{{ $orden->folio() }}</div>
+                        <div class="font-medium">{{ $orden->transporte->nombre }}</div>
+                    </div>
+                    <flux:button size="sm" variant="ghost" icon="printer" :href="route('ordenes-pago.pdf', $orden)" target="_blank" />
+                </div>
+                <div class="mt-2 text-sm text-zinc-500">
+                    {{ $orden->fecha->format('d/m/Y') }} · {{ ucfirst($orden->medio_pago) }}
+                    @if ($orden->cheque)
+                        <flux:badge size="sm">{{ __('Cheque :n', ['n' => $orden->cheque->numero]) }}</flux:badge>
+                    @endif
+                </div>
+                <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-white/5">
+                    <span class="text-sm text-zinc-500">{{ $orden->concepto ?: '—' }}</span>
+                    <span class="font-mono">$ {{ number_format((float) $orden->monto, 2, ',', '.') }}</span>
+                </div>
+            </div>
+        @empty
+            <div class="rounded-xl border border-zinc-200 p-4 text-center text-zinc-500 dark:border-white/10">
+                {{ __('Todavía no hay órdenes de pago.') }}
+            </div>
+        @endforelse
+    </div>
 
     {{ $this->ordenesPago->links() }}
 

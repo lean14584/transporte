@@ -93,23 +93,54 @@ new #[Title('Transportes')] class extends Component {
 
     <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Buscar por nombre...') }}" class="max-w-sm" />
 
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column>{{ __('Nombre') }}</flux:table.column>
-            <flux:table.column>{{ __('Dirección') }}</flux:table.column>
-            <flux:table.column>{{ __('Teléfono') }}</flux:table.column>
-            <flux:table.column>{{ __('Dueño') }}</flux:table.column>
-            <flux:table.column></flux:table.column>
-        </flux:table.columns>
+    <div class="hidden overflow-x-auto md:block">
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>{{ __('Nombre') }}</flux:table.column>
+                <flux:table.column>{{ __('Dirección') }}</flux:table.column>
+                <flux:table.column>{{ __('Teléfono') }}</flux:table.column>
+                <flux:table.column>{{ __('Dueño') }}</flux:table.column>
+                <flux:table.column></flux:table.column>
+            </flux:table.columns>
 
-        <flux:table.rows>
-            @forelse ($this->transportes as $transporte)
-                <flux:table.row wire:key="transporte-{{ $transporte->id }}">
-                    <flux:table.cell class="font-medium">{{ $transporte->nombre }}</flux:table.cell>
-                    <flux:table.cell>{{ $transporte->direccion ?: '—' }}</flux:table.cell>
-                    <flux:table.cell>{{ $transporte->telefono ?: '—' }}</flux:table.cell>
-                    <flux:table.cell>{{ $transporte->dueno ?: '—' }}</flux:table.cell>
-                    <flux:table.cell align="end">
+            <flux:table.rows>
+                @forelse ($this->transportes as $transporte)
+                    <flux:table.row wire:key="transporte-{{ $transporte->id }}">
+                        <flux:table.cell class="font-medium">{{ $transporte->nombre }}</flux:table.cell>
+                        <flux:table.cell>{{ $transporte->direccion ?: '—' }}</flux:table.cell>
+                        <flux:table.cell>{{ $transporte->telefono ?: '—' }}</flux:table.cell>
+                        <flux:table.cell>{{ $transporte->dueno ?: '—' }}</flux:table.cell>
+                        <flux:table.cell align="end">
+                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $transporte->id }})" />
+                            <flux:button
+                                size="sm"
+                                variant="ghost"
+                                icon="trash"
+                                wire:click="eliminar({{ $transporte->id }})"
+                                wire:confirm="{{ __('¿Eliminar este transporte?') }}"
+                            />
+                        </flux:table.cell>
+                    </flux:table.row>
+                @empty
+                    <flux:table.row>
+                        <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                            {{ __('Todavía no hay transportes cargados.') }}
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforelse
+            </flux:table.rows>
+        </flux:table>
+    </div>
+
+    <div class="grid gap-3 md:hidden">
+        @forelse ($this->transportes as $transporte)
+            <div class="rounded-xl border border-zinc-200 p-4 dark:border-white/10" wire:key="transporte-mobile-{{ $transporte->id }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="font-medium">{{ $transporte->nombre }}</div>
+                        <div class="mt-1 text-sm text-zinc-500">{{ $transporte->direccion ?: __('Sin dirección') }}</div>
+                    </div>
+                    <div class="flex shrink-0 gap-1">
                         <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $transporte->id }})" />
                         <flux:button
                             size="sm"
@@ -118,17 +149,19 @@ new #[Title('Transportes')] class extends Component {
                             wire:click="eliminar({{ $transporte->id }})"
                             wire:confirm="{{ __('¿Eliminar este transporte?') }}"
                         />
-                    </flux:table.cell>
-                </flux:table.row>
-            @empty
-                <flux:table.row>
-                    <flux:table.cell colspan="5" class="text-center text-zinc-500">
-                        {{ __('Todavía no hay transportes cargados.') }}
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforelse
-        </flux:table.rows>
-    </flux:table>
+                    </div>
+                </div>
+                <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-500">
+                    <span>{{ __('Tel.') }} {{ $transporte->telefono ?: '—' }}</span>
+                    <span>{{ __('Dueño') }} {{ $transporte->dueno ?: '—' }}</span>
+                </div>
+            </div>
+        @empty
+            <div class="rounded-xl border border-zinc-200 p-4 text-center text-zinc-500 dark:border-white/10">
+                {{ __('Todavía no hay transportes cargados.') }}
+            </div>
+        @endforelse
+    </div>
 
     {{ $this->transportes->links() }}
 

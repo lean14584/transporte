@@ -92,40 +92,70 @@ new #[Title('Usuarios')] class extends Component {
         </flux:button>
     </div>
 
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column>{{ __('Nombre') }}</flux:table.column>
-            <flux:table.column>{{ __('Email') }}</flux:table.column>
-            <flux:table.column>{{ __('Rol') }}</flux:table.column>
-            <flux:table.column></flux:table.column>
-        </flux:table.columns>
+    <div class="hidden overflow-x-auto md:block">
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>{{ __('Nombre') }}</flux:table.column>
+                <flux:table.column>{{ __('Email') }}</flux:table.column>
+                <flux:table.column>{{ __('Rol') }}</flux:table.column>
+                <flux:table.column></flux:table.column>
+            </flux:table.columns>
 
-        <flux:table.rows>
-            @foreach ($this->usuarios as $usuario)
-                <flux:table.row wire:key="usuario-{{ $usuario->id }}">
-                    <flux:table.cell class="font-medium">{{ $usuario->name }}</flux:table.cell>
-                    <flux:table.cell>{{ $usuario->email }}</flux:table.cell>
-                    <flux:table.cell>
-                        <flux:badge size="sm" :color="$usuario->role === 'administrador' ? 'blue' : 'zinc'">
-                            {{ ucfirst($usuario->role) }}
-                        </flux:badge>
-                    </flux:table.cell>
-                    <flux:table.cell align="end">
-                        <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $usuario->id }})" />
-                        @if ($usuario->id !== auth()->id())
-                            <flux:button
-                                size="sm"
-                                variant="ghost"
-                                icon="trash"
-                                wire:click="eliminar({{ $usuario->id }})"
-                                wire:confirm="{{ __('¿Eliminar este usuario?') }}"
-                            />
-                        @endif
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforeach
-        </flux:table.rows>
-    </flux:table>
+            <flux:table.rows>
+                @foreach ($this->usuarios as $usuario)
+                    <flux:table.row wire:key="usuario-{{ $usuario->id }}">
+                        <flux:table.cell class="font-medium">{{ $usuario->name }}</flux:table.cell>
+                        <flux:table.cell>{{ $usuario->email }}</flux:table.cell>
+                        <flux:table.cell>
+                            <flux:badge size="sm" :color="$usuario->role === 'administrador' ? 'blue' : 'zinc'">
+                                {{ ucfirst($usuario->role) }}
+                            </flux:badge>
+                        </flux:table.cell>
+                        <flux:table.cell align="end">
+                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $usuario->id }})" />
+                            @if ($usuario->id !== auth()->id())
+                                <flux:button
+                                    size="sm"
+                                    variant="ghost"
+                                    icon="trash"
+                                    wire:click="eliminar({{ $usuario->id }})"
+                                    wire:confirm="{{ __('¿Eliminar este usuario?') }}"
+                                />
+                            @endif
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+            </flux:table.rows>
+        </flux:table>
+    </div>
+
+    <div class="grid gap-3 md:hidden">
+        @foreach ($this->usuarios as $usuario)
+            <div class="rounded-xl border border-zinc-200 p-4 dark:border-white/10" wire:key="usuario-mobile-{{ $usuario->id }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="font-medium">{{ $usuario->name }}</div>
+                        <div class="mt-1 text-sm text-zinc-500">{{ $usuario->email }}</div>
+                    </div>
+                    <flux:badge size="sm" :color="$usuario->role === 'administrador' ? 'blue' : 'zinc'">
+                        {{ ucfirst($usuario->role) }}
+                    </flux:badge>
+                </div>
+                <div class="mt-3 flex justify-end gap-1 border-t border-zinc-100 pt-3 dark:border-white/5">
+                    <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $usuario->id }})" />
+                    @if ($usuario->id !== auth()->id())
+                        <flux:button
+                            size="sm"
+                            variant="ghost"
+                            icon="trash"
+                            wire:click="eliminar({{ $usuario->id }})"
+                            wire:confirm="{{ __('¿Eliminar este usuario?') }}"
+                        />
+                    @endif
+                </div>
+            </div>
+        @endforeach
+    </div>
 
     <flux:modal name="usuario-form" class="max-w-lg" @close="$set('editingId', null)">
         <form wire:submit="guardar" class="space-y-6">

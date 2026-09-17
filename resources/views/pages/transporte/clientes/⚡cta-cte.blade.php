@@ -56,57 +56,87 @@ new #[Title('Cuenta corriente')] class extends Component {
             <flux:subheading>{{ __('Cuenta corriente') }}</flux:subheading>
         </div>
 
-        <div class="flex items-center gap-4">
-            <div class="text-end">
-                <flux:text size="sm">{{ __('Saldo') }}</flux:text>
-                <flux:heading size="lg" class="{{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}">
-                    $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
-                </flux:heading>
-            </div>
-
-            <flux:modal.trigger name="cobrar-form">
-                <flux:button variant="primary" icon="banknotes">
-                    {{ __('Registrar cobro') }}
-                </flux:button>
-            </flux:modal.trigger>
-        </div>
+        <flux:modal.trigger name="cobrar-form">
+            <flux:button variant="primary" icon="banknotes">
+                {{ __('Registrar cobro') }}
+            </flux:button>
+        </flux:modal.trigger>
     </div>
 
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column>{{ __('Fecha') }}</flux:table.column>
-            <flux:table.column>{{ __('Concepto') }}</flux:table.column>
-            <flux:table.column>{{ __('Tipo') }}</flux:table.column>
-            <flux:table.column align="end">{{ __('Monto') }}</flux:table.column>
-            <flux:table.column align="end">{{ __('Saldo') }}</flux:table.column>
-        </flux:table.columns>
+    @php
+        $saldoPositivo = $cliente->saldo_cta_cte > 0;
+        $saldoNegativo = $cliente->saldo_cta_cte < 0;
+    @endphp
+    <div class="rounded-xl border p-4 {{ $saldoPositivo ? 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30' : ($saldoNegativo ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/30' : 'border-zinc-200 dark:border-white/10') }}">
+        <flux:text size="sm" class="{{ $saldoPositivo ? 'text-red-900/70 dark:text-red-300' : ($saldoNegativo ? 'text-emerald-900/70 dark:text-emerald-300' : '') }}">
+            {{ __('Saldo actual') }}
+        </flux:text>
+        <flux:heading size="xl" class="mt-1 font-mono {{ $saldoPositivo ? 'text-red-900 dark:text-red-100' : ($saldoNegativo ? 'text-emerald-900 dark:text-emerald-100' : '') }}">
+            $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
+        </flux:heading>
+    </div>
 
-        <flux:table.rows>
-            @forelse ($this->movimientos as $movimiento)
-                <flux:table.row wire:key="movimiento-{{ $movimiento->id }}">
-                    <flux:table.cell>{{ $movimiento->fecha->format('d/m/Y') }}</flux:table.cell>
-                    <flux:table.cell>{{ $movimiento->concepto }}</flux:table.cell>
-                    <flux:table.cell>
-                        <flux:badge size="sm" :color="$movimiento->tipo === 'cargo' ? 'red' : 'green'">
-                            {{ $movimiento->tipo === 'cargo' ? __('Cargo') : __('Pago') }}
-                        </flux:badge>
-                    </flux:table.cell>
-                    <flux:table.cell align="end" class="font-mono">
-                        $ {{ number_format((float) $movimiento->monto, 2, ',', '.') }}
-                    </flux:table.cell>
-                    <flux:table.cell align="end" class="font-mono">
-                        $ {{ number_format((float) $movimiento->saldo, 2, ',', '.') }}
-                    </flux:table.cell>
-                </flux:table.row>
-            @empty
-                <flux:table.row>
-                    <flux:table.cell colspan="5" class="text-center text-zinc-500">
-                        {{ __('Todavía no hay movimientos.') }}
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforelse
-        </flux:table.rows>
-    </flux:table>
+    <div class="hidden overflow-x-auto md:block">
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>{{ __('Fecha') }}</flux:table.column>
+                <flux:table.column>{{ __('Concepto') }}</flux:table.column>
+                <flux:table.column>{{ __('Tipo') }}</flux:table.column>
+                <flux:table.column align="end">{{ __('Monto') }}</flux:table.column>
+                <flux:table.column align="end">{{ __('Saldo') }}</flux:table.column>
+            </flux:table.columns>
+
+            <flux:table.rows>
+                @forelse ($this->movimientos as $movimiento)
+                    <flux:table.row wire:key="movimiento-{{ $movimiento->id }}">
+                        <flux:table.cell>{{ $movimiento->fecha->format('d/m/Y') }}</flux:table.cell>
+                        <flux:table.cell>{{ $movimiento->concepto }}</flux:table.cell>
+                        <flux:table.cell>
+                            <flux:badge size="sm" :color="$movimiento->tipo === 'cargo' ? 'red' : 'green'">
+                                {{ $movimiento->tipo === 'cargo' ? __('Cargo') : __('Pago') }}
+                            </flux:badge>
+                        </flux:table.cell>
+                        <flux:table.cell align="end" class="font-mono">
+                            $ {{ number_format((float) $movimiento->monto, 2, ',', '.') }}
+                        </flux:table.cell>
+                        <flux:table.cell align="end" class="font-mono">
+                            $ {{ number_format((float) $movimiento->saldo, 2, ',', '.') }}
+                        </flux:table.cell>
+                    </flux:table.row>
+                @empty
+                    <flux:table.row>
+                        <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                            {{ __('Todavía no hay movimientos.') }}
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforelse
+            </flux:table.rows>
+        </flux:table>
+    </div>
+
+    <div class="grid gap-3 md:hidden">
+        @forelse ($this->movimientos as $movimiento)
+            <div class="rounded-xl border border-zinc-200 p-4 dark:border-white/10" wire:key="movimiento-mobile-{{ $movimiento->id }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-sm text-zinc-500">{{ $movimiento->fecha->format('d/m/Y') }}</div>
+                        <div class="font-medium">{{ $movimiento->concepto }}</div>
+                    </div>
+                    <flux:badge size="sm" :color="$movimiento->tipo === 'cargo' ? 'red' : 'green'">
+                        {{ $movimiento->tipo === 'cargo' ? __('Cargo') : __('Pago') }}
+                    </flux:badge>
+                </div>
+                <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 text-sm dark:border-white/5">
+                    <span class="font-mono">$ {{ number_format((float) $movimiento->monto, 2, ',', '.') }}</span>
+                    <span class="font-mono text-zinc-500">{{ __('Saldo') }}: $ {{ number_format((float) $movimiento->saldo, 2, ',', '.') }}</span>
+                </div>
+            </div>
+        @empty
+            <div class="rounded-xl border border-zinc-200 p-4 text-center text-zinc-500 dark:border-white/10">
+                {{ __('Todavía no hay movimientos.') }}
+            </div>
+        @endforelse
+    </div>
 
     {{ $this->movimientos->links() }}
 

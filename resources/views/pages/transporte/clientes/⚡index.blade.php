@@ -98,27 +98,67 @@ new #[Title('Clientes')] class extends Component {
 
     <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Buscar por nombre o DNI...') }}" class="max-w-sm" />
 
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column>{{ __('Nombre') }}</flux:table.column>
-            <flux:table.column>{{ __('DNI') }}</flux:table.column>
-            <flux:table.column>{{ __('Condición IVA') }}</flux:table.column>
-            <flux:table.column align="end">{{ __('Saldo cta cte') }}</flux:table.column>
-            <flux:table.column></flux:table.column>
-        </flux:table.columns>
+    <div class="hidden overflow-x-auto md:block">
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>{{ __('Nombre') }}</flux:table.column>
+                <flux:table.column>{{ __('DNI') }}</flux:table.column>
+                <flux:table.column>{{ __('Condición IVA') }}</flux:table.column>
+                <flux:table.column align="end">{{ __('Saldo cta cte') }}</flux:table.column>
+                <flux:table.column></flux:table.column>
+            </flux:table.columns>
 
-        <flux:table.rows>
-            @forelse ($this->clientes as $cliente)
-                <flux:table.row wire:key="cliente-{{ $cliente->id }}">
-                    <flux:table.cell class="font-medium">{{ $cliente->nombre }}</flux:table.cell>
-                    <flux:table.cell>{{ $cliente->dni ?: '—' }}</flux:table.cell>
-                    <flux:table.cell>
-                        <flux:badge size="sm">{{ str($cliente->condicion_iva)->headline() }}</flux:badge>
-                    </flux:table.cell>
-                    <flux:table.cell align="end" class="font-mono {{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}">
+            <flux:table.rows>
+                @forelse ($this->clientes as $cliente)
+                    <flux:table.row wire:key="cliente-{{ $cliente->id }}">
+                        <flux:table.cell class="font-medium">{{ $cliente->nombre }}</flux:table.cell>
+                        <flux:table.cell>{{ $cliente->dni ?: '—' }}</flux:table.cell>
+                        <flux:table.cell>
+                            <flux:badge size="sm">{{ str($cliente->condicion_iva)->headline() }}</flux:badge>
+                        </flux:table.cell>
+                        <flux:table.cell align="end" class="font-mono {{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}">
+                            $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
+                        </flux:table.cell>
+                        <flux:table.cell align="end">
+                            <flux:button size="sm" variant="ghost" icon="banknotes" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
+                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cliente->id }})" />
+                            <flux:button
+                                size="sm"
+                                variant="ghost"
+                                icon="trash"
+                                wire:click="eliminar({{ $cliente->id }})"
+                                wire:confirm="{{ __('¿Eliminar este cliente?') }}"
+                            />
+                        </flux:table.cell>
+                    </flux:table.row>
+                @empty
+                    <flux:table.row>
+                        <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                            {{ __('Todavía no hay clientes cargados.') }}
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforelse
+            </flux:table.rows>
+        </flux:table>
+    </div>
+
+    <div class="grid gap-3 md:hidden">
+        @forelse ($this->clientes as $cliente)
+            <div class="rounded-xl border border-zinc-200 p-4 dark:border-white/10" wire:key="cliente-mobile-{{ $cliente->id }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="font-medium">{{ $cliente->nombre }}</div>
+                        <div class="mt-1 text-sm text-zinc-500">{{ __('DNI') }} {{ $cliente->dni ?: '—' }}</div>
+                    </div>
+                    <flux:badge size="sm">{{ str($cliente->condicion_iva)->headline() }}</flux:badge>
+                </div>
+                <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-white/5">
+                    <span
+                        class="font-mono text-sm {{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}"
+                    >
                         $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
-                    </flux:table.cell>
-                    <flux:table.cell align="end">
+                    </span>
+                    <div class="flex shrink-0 gap-1">
                         <flux:button size="sm" variant="ghost" icon="banknotes" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
                         <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cliente->id }})" />
                         <flux:button
@@ -128,17 +168,15 @@ new #[Title('Clientes')] class extends Component {
                             wire:click="eliminar({{ $cliente->id }})"
                             wire:confirm="{{ __('¿Eliminar este cliente?') }}"
                         />
-                    </flux:table.cell>
-                </flux:table.row>
-            @empty
-                <flux:table.row>
-                    <flux:table.cell colspan="5" class="text-center text-zinc-500">
-                        {{ __('Todavía no hay clientes cargados.') }}
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforelse
-        </flux:table.rows>
-    </flux:table>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="rounded-xl border border-zinc-200 p-4 text-center text-zinc-500 dark:border-white/10">
+                {{ __('Todavía no hay clientes cargados.') }}
+            </div>
+        @endforelse
+    </div>
 
     {{ $this->clientes->links() }}
 
