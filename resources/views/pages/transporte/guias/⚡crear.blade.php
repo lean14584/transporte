@@ -108,94 +108,126 @@ new #[Title('Cargar guía')] class extends Component {
     }
 }; ?>
 
-<div class="flex max-w-2xl flex-col gap-6">
+<div class="flex max-w-3xl flex-col gap-6">
     <div>
         <flux:heading size="xl">{{ __('Cargar guía') }}</flux:heading>
         <flux:subheading>{{ __('Datos de la carga: transporte, cliente, camión y mercadería.') }}</flux:subheading>
     </div>
 
-    <form wire:submit="guardar" class="space-y-6">
-        <div class="relative">
-            <flux:label>{{ __('Transporte') }}</flux:label>
+    <form wire:submit="guardar">
+        <div class="overflow-hidden rounded-2xl border border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-indigo-50 shadow-sm dark:border-blue-900/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-indigo-950/40">
+            <div class="space-y-6 p-6">
+                <div>
+                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                        {{ __('Transporte y cliente') }}
+                    </flux:heading>
 
-            @if ($transporte_id)
-                <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 dark:border-white/10">
-                    <span>{{ $transporteSeleccionado }}</span>
-                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarTransporte" />
-                </div>
-            @else
-                <flux:input wire:model.live.debounce.200ms="buscarTransporte" icon="magnifying-glass" placeholder="{{ __('Buscar transporte...') }}" />
+                    <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div class="relative">
+                            <flux:label>{{ __('Transporte') }}</flux:label>
 
-                @if ($this->transportesSugeridos->isNotEmpty())
-                    <div class="absolute z-10 mt-1 w-full rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-zinc-800">
-                        @foreach ($this->transportesSugeridos as $sugerido)
-                            <button
-                                type="button"
-                                wire:click="seleccionarTransporte({{ $sugerido->id }})"
-                                class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
-                            >
-                                {{ $sugerido->nombre }}
-                            </button>
-                        @endforeach
+                            @if ($transporte_id)
+                                <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                                    <span>{{ $transporteSeleccionado }}</span>
+                                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarTransporte" />
+                                </div>
+                            @else
+                                <flux:input wire:model.live.debounce.200ms="buscarTransporte" icon="magnifying-glass" placeholder="{{ __('Buscar transporte...') }}" />
+
+                                @if ($this->transportesSugeridos->isNotEmpty())
+                                    <div class="absolute z-10 mt-1 w-full rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-zinc-800">
+                                        @foreach ($this->transportesSugeridos as $sugerido)
+                                            <button
+                                                type="button"
+                                                wire:click="seleccionarTransporte({{ $sugerido->id }})"
+                                                class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
+                                            >
+                                                {{ $sugerido->nombre }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @endif
+                            @error('transporte_id') <flux:error>{{ $message }}</flux:error> @enderror
+                        </div>
+
+                        <div class="relative">
+                            <flux:label>{{ __('Cliente') }}</flux:label>
+
+                            @if ($cliente_id)
+                                <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                                    <span>{{ $clienteSeleccionado }}</span>
+                                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarCliente" />
+                                </div>
+                            @else
+                                <flux:input wire:model.live.debounce.200ms="buscarCliente" icon="magnifying-glass" placeholder="{{ __('Buscar cliente...') }}" />
+
+                                @if ($this->clientesSugeridos->isNotEmpty())
+                                    <div class="absolute z-10 mt-1 w-full rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-zinc-800">
+                                        @foreach ($this->clientesSugeridos as $sugerido)
+                                            <button
+                                                type="button"
+                                                wire:click="seleccionarCliente({{ $sugerido->id }})"
+                                                class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
+                                            >
+                                                {{ $sugerido->nombre }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @endif
+                            @error('cliente_id') <flux:error>{{ $message }}</flux:error> @enderror
+                        </div>
                     </div>
-                @endif
-            @endif
-            @error('transporte_id') <flux:error>{{ $message }}</flux:error> @enderror
-        </div>
-
-        <div class="relative">
-            <flux:label>{{ __('Cliente') }}</flux:label>
-
-            @if ($cliente_id)
-                <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 dark:border-white/10">
-                    <span>{{ $clienteSeleccionado }}</span>
-                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarCliente" />
                 </div>
-            @else
-                <flux:input wire:model.live.debounce.200ms="buscarCliente" icon="magnifying-glass" placeholder="{{ __('Buscar cliente...') }}" />
 
-                @if ($this->clientesSugeridos->isNotEmpty())
-                    <div class="absolute z-10 mt-1 w-full rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-zinc-800">
-                        @foreach ($this->clientesSugeridos as $sugerido)
-                            <button
-                                type="button"
-                                wire:click="seleccionarCliente({{ $sugerido->id }})"
-                                class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
-                            >
-                                {{ $sugerido->nombre }}
-                            </button>
-                        @endforeach
+                <flux:separator />
+
+                <div>
+                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                        {{ __('Transportista y camión') }}
+                    </flux:heading>
+
+                    <div class="mt-3 space-y-4">
+                        <flux:input wire:model="transportista" :label="__('Transportista')" placeholder="{{ __('Nombre de quien maneja el camión') }}" required />
+
+                        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                            <flux:input wire:model="camion_marca" :label="__('Marca')" />
+                            <flux:input wire:model="camion_modelo" :label="__('Modelo')" />
+                            <flux:input wire:model="camion_patente" :label="__('Patente')" />
+                            <flux:input wire:model="camion_color" :label="__('Color')" />
+                        </div>
                     </div>
-                @endif
-            @endif
-            @error('cliente_id') <flux:error>{{ $message }}</flux:error> @enderror
-        </div>
+                </div>
 
-        <flux:input wire:model="transportista" :label="__('Transportista')" placeholder="{{ __('Nombre de quien maneja el camión') }}" required />
+                <flux:separator />
 
-        <div class="grid grid-cols-2 gap-4">
-            <flux:input wire:model="camion_marca" :label="__('Marca del camión')" />
-            <flux:input wire:model="camion_modelo" :label="__('Modelo')" />
-            <flux:input wire:model="camion_patente" :label="__('Patente')" />
-            <flux:input wire:model="camion_color" :label="__('Color')" />
-        </div>
+                <div>
+                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                        {{ __('Mercadería') }}
+                    </flux:heading>
 
-        <flux:input wire:model="mercaderia" :label="__('Mercadería a transportar')" required />
+                    <div class="mt-3 space-y-4">
+                        <flux:input wire:model="mercaderia" :label="__('Mercadería a transportar')" required />
 
-        <div class="grid grid-cols-2 gap-4">
-            <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />
+                        <div class="grid grid-cols-2 gap-4">
+                            <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />
 
-            <flux:select wire:model="unidad" :label="__('Unidad')">
-                <flux:select.option value="kilos">{{ __('Kilos') }}</flux:select.option>
-                <flux:select.option value="unidades">{{ __('Unidades') }}</flux:select.option>
-            </flux:select>
-        </div>
+                            <flux:select wire:model="unidad" :label="__('Unidad')">
+                                <flux:select.option value="kilos">{{ __('Kilos') }}</flux:select.option>
+                                <flux:select.option value="unidades">{{ __('Unidades') }}</flux:select.option>
+                            </flux:select>
+                        </div>
 
-        <flux:input wire:model="fecha_carga" :label="__('Fecha de carga')" type="date" required />
+                        <flux:input wire:model="fecha_carga" :label="__('Fecha de carga')" type="date" required />
+                    </div>
+                </div>
+            </div>
 
-        <div class="flex justify-end gap-2">
-            <flux:button variant="filled" :href="route('guias.index')" wire:navigate>{{ __('Cancelar') }}</flux:button>
-            <flux:button type="submit" variant="primary">{{ __('Cargar guía') }}</flux:button>
+            <div class="flex justify-end gap-2 border-t border-blue-200/70 bg-white/50 px-6 py-4 dark:border-blue-900/40 dark:bg-black/10">
+                <flux:button variant="filled" :href="route('guias.index')" wire:navigate>{{ __('Cancelar') }}</flux:button>
+                <flux:button type="submit" variant="primary">{{ __('Cargar guía') }}</flux:button>
+            </div>
         </div>
     </form>
 </div>
