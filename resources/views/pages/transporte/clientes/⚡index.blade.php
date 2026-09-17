@@ -1,0 +1,172 @@
+<?php
+
+use App\Models\Cliente;
+use Flux\Flux;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Title;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+new #[Title('Clientes')] class extends Component {
+    use WithPagination;
+
+    public string $search = '';
+
+    public ?int $editingId = null;
+
+    public string $nombre = '';
+    public string $direccion = '';
+    public string $telefono = '';
+    public string $dni = '';
+    public string $condicion_iva = 'consumidor_final';
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    #[Computed]
+    public function clientes()
+    {
+        return Cliente::query()
+            ->when($this->search, fn ($query) => $query->where('nombre', 'like', "%{$this->search}%")
+                ->orWhere('dni', 'like', "%{$this->search}%"))
+            ->orderBy('nombre')
+            ->paginate(10);
+    }
+
+    public function crear(): void
+    {
+        $this->reset(['editingId', 'nombre', 'direccion', 'telefono', 'dni']);
+        $this->condicion_iva = 'consumidor_final';
+        Flux::modal('cliente-form')->show();
+    }
+
+    public function editar(int $id): void
+    {
+        $cliente = Cliente::findOrFail($id);
+
+        $this->editingId = $cliente->id;
+        $this->nombre = $cliente->nombre;
+        $this->direccion = (string) $cliente->direccion;
+        $this->telefono = (string) $cliente->telefono;
+        $this->dni = (string) $cliente->dni;
+        $this->condicion_iva = $cliente->condicion_iva;
+
+        Flux::modal('cliente-form')->show();
+    }
+
+    public function guardar(): void
+    {
+        $validated = $this->validate([
+            'nombre' => ['required', 'string', 'max:255'],
+            'direccion' => ['nullable', 'string', 'max:255'],
+            'telefono' => ['nullable', 'string', 'max:255'],
+            'dni' => ['nullable', 'string', 'max:255'],
+            'condicion_iva' => ['required', 'in:responsable_inscripto,monotributista,exento,consumidor_final'],
+        ]);
+
+        Cliente::updateOrCreate(['id' => $this->editingId], $validated);
+
+        Flux::modal('cliente-form')->close();
+        unset($this->clientes);
+
+        Flux::toast(variant: 'success', text: __('Cliente guardado.'));
+    }
+
+    public function eliminar(int $id): void
+    {
+        Cliente::whereKey($id)->delete();
+
+        unset($this->clientes);
+
+        Flux::toast(variant: 'success', text: __('Cliente eliminado.'));
+    }
+}; ?>
+
+<div class="flex flex-col gap-6">
+    <div class="flex items-center justify-between gap-4">
+        <div>
+            <flux:heading size="xl">{{ __('Clientes') }}</flux:heading>
+            <flux:subheading>{{ __('Clientes que contratan el flete, con su cuenta corriente.') }}</flux:subheading>
+        </div>
+
+        <flux:button variant="primary" icon="plus" wire:click="crear">
+            {{ __('Nuevo cliente') }}
+        </flux:button>
+    </div>
+
+    <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Buscar por nombre o DNI...') }}" class="max-w-sm" />
+
+    <flux:table>
+        <flux:table.columns>
+            <flux:table.column>{{ __('Nombre') }}</flux:table.column>
+            <flux:table.column>{{ __('DNI') }}</flux:table.column>
+            <flux:table.column>{{ __('Condición IVA') }}</flux:table.column>
+            <flux:table.column align="end">{{ __('Saldo cta cte') }}</flux:table.column>
+            <flux:table.column></flux:table.column>
+        </flux:table.columns>
+
+        <flux:table.rows>
+            @forelse ($this->clientes as $cliente)
+                <flux:table.row wire:key="cliente-{{ $cliente->id }}">
+                    <flux:table.cell class="font-medium">{{ $cliente->nombre }}</flux:table.cell>
+                    <flux:table.cell>{{ $cliente->dni ?: '—' }}</flux:table.cell>
+                    <flux:table.cell>
+                        <flux:badge size="sm">{{ str($cliente->condicion_iva)->headline() }}</flux:badge>
+                    </flux:table.cell>
+                    <flux:table.cell align="end" class="font-mono {{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}">
+                        $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
+                    </flux:table.cell>
+                    <flux:table.cell align="end">
+                        <flux:button size="sm" variant="ghost" icon="banknotes" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
+                        <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cliente->id }})" />
+                        <flux:button
+                            size="sm"
+                            variant="ghost"
+                            icon="trash"
+                            wire:click="eliminar({{ $cliente->id }})"
+                            wire:confirm="{{ __('¿Eliminar este cliente?') }}"
+                        />
+                    </flux:table.cell>
+                </flux:table.row>
+            @empty
+                <flux:table.row>
+                    <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                        {{ __('Todavía no hay clientes cargados.') }}
+                    </flux:table.cell>
+                </flux:table.row>
+            @endforelse
+        </flux:table.rows>
+    </flux:table>
+
+    {{ $this->clientes->links() }}
+
+    <flux:modal name="cliente-form" class="max-w-lg" @close="$set('editingId', null)">
+        <form wire:submit="guardar" class="space-y-6">
+            <flux:heading size="lg">
+                {{ $editingId ? __('Editar cliente') : __('Nuevo cliente') }}
+            </flux:heading>
+
+            <flux:input wire:model="nombre" :label="__('Nombre')" required autofocus />
+            <flux:input wire:model="direccion" :label="__('Dirección')" />
+            <flux:input wire:model="telefono" :label="__('Teléfono')" />
+            <flux:input wire:model="dni" :label="__('DNI')" />
+
+            <flux:select wire:model="condicion_iva" :label="__('Condición IVA')">
+                <flux:select.option value="responsable_inscripto">{{ __('Responsable Inscripto') }}</flux:select.option>
+                <flux:select.option value="monotributista">{{ __('Monotributista') }}</flux:select.option>
+                <flux:select.option value="exento">{{ __('Exento') }}</flux:select.option>
+                <flux:select.option value="consumidor_final">{{ __('Consumidor Final') }}</flux:select.option>
+            </flux:select>
+
+            <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
+                </flux:modal.close>
+
+                <flux:button type="submit" variant="primary">{{ __('Guardar') }}</flux:button>
+            </div>
+        </form>
+    </flux:modal>
+</div>

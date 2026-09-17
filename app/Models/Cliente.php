@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Cliente extends Model
+{
+    /** @use HasFactory<\Database\Factories\ClienteFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'nombre',
+        'direccion',
+        'telefono',
+        'dni',
+        'condicion_iva',
+        'saldo_cta_cte',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'saldo_cta_cte' => 'decimal:2',
+        ];
+    }
+
+    public function guias()
+    {
+        return $this->hasMany(Guia::class);
+    }
+
+    public function recibos()
+    {
+        return $this->hasMany(Recibo::class);
+    }
+
+    public function movimientosCtaCte()
+    {
+        return $this->hasMany(CuentaCorrienteMovimiento::class);
+    }
+}

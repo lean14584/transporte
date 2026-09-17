@@ -1,0 +1,139 @@
+<?php
+
+use App\Models\CuentaBancaria;
+use Flux\Flux;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Title;
+use Livewire\Component;
+
+new #[Title('Cuentas bancarias')] class extends Component {
+    public ?int $editingId = null;
+
+    public string $banco = '';
+    public string $numero_cuenta = '';
+    public string $alias_cbu = '';
+    public string $saldo = '0';
+
+    #[Computed]
+    public function cuentas()
+    {
+        return CuentaBancaria::orderBy('banco')->get();
+    }
+
+    public function crear(): void
+    {
+        $this->reset(['editingId', 'banco', 'numero_cuenta', 'alias_cbu']);
+        $this->saldo = '0';
+        Flux::modal('cuenta-bancaria-form')->show();
+    }
+
+    public function editar(int $id): void
+    {
+        $cuenta = CuentaBancaria::findOrFail($id);
+
+        $this->editingId = $cuenta->id;
+        $this->banco = $cuenta->banco;
+        $this->numero_cuenta = (string) $cuenta->numero_cuenta;
+        $this->alias_cbu = (string) $cuenta->alias_cbu;
+        $this->saldo = (string) $cuenta->saldo;
+
+        Flux::modal('cuenta-bancaria-form')->show();
+    }
+
+    public function guardar(): void
+    {
+        $validated = $this->validate([
+            'banco' => ['required', 'string', 'max:255'],
+            'numero_cuenta' => ['nullable', 'string', 'max:255'],
+            'alias_cbu' => ['nullable', 'string', 'max:255'],
+            'saldo' => ['required', 'numeric'],
+        ]);
+
+        CuentaBancaria::updateOrCreate(['id' => $this->editingId], $validated);
+
+        Flux::modal('cuenta-bancaria-form')->close();
+        unset($this->cuentas);
+
+        Flux::toast(variant: 'success', text: __('Cuenta bancaria guardada.'));
+    }
+
+    public function eliminar(int $id): void
+    {
+        CuentaBancaria::whereKey($id)->delete();
+
+        unset($this->cuentas);
+
+        Flux::toast(variant: 'success', text: __('Cuenta bancaria eliminada.'));
+    }
+}; ?>
+
+<div class="flex flex-col gap-6">
+    <div class="flex items-center justify-between gap-4">
+        <div>
+            <flux:heading size="xl">{{ __('Cuentas bancarias') }}</flux:heading>
+            <flux:subheading>{{ __('Cuentas contra las que se emiten los cheques.') }}</flux:subheading>
+        </div>
+
+        <flux:button variant="primary" icon="plus" wire:click="crear">
+            {{ __('Nueva cuenta') }}
+        </flux:button>
+    </div>
+
+    <flux:table>
+        <flux:table.columns>
+            <flux:table.column>{{ __('Banco') }}</flux:table.column>
+            <flux:table.column>{{ __('Número de cuenta') }}</flux:table.column>
+            <flux:table.column>{{ __('Alias / CBU') }}</flux:table.column>
+            <flux:table.column align="end">{{ __('Saldo') }}</flux:table.column>
+            <flux:table.column></flux:table.column>
+        </flux:table.columns>
+
+        <flux:table.rows>
+            @forelse ($this->cuentas as $cuenta)
+                <flux:table.row wire:key="cuenta-{{ $cuenta->id }}">
+                    <flux:table.cell class="font-medium">{{ $cuenta->banco }}</flux:table.cell>
+                    <flux:table.cell>{{ $cuenta->numero_cuenta ?: '—' }}</flux:table.cell>
+                    <flux:table.cell>{{ $cuenta->alias_cbu ?: '—' }}</flux:table.cell>
+                    <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $cuenta->saldo, 2, ',', '.') }}</flux:table.cell>
+                    <flux:table.cell align="end">
+                        <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cuenta->id }})" />
+                        <flux:button
+                            size="sm"
+                            variant="ghost"
+                            icon="trash"
+                            wire:click="eliminar({{ $cuenta->id }})"
+                            wire:confirm="{{ __('¿Eliminar esta cuenta bancaria?') }}"
+                        />
+                    </flux:table.cell>
+                </flux:table.row>
+            @empty
+                <flux:table.row>
+                    <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                        {{ __('Todavía no hay cuentas bancarias cargadas.') }}
+                    </flux:table.cell>
+                </flux:table.row>
+            @endforelse
+        </flux:table.rows>
+    </flux:table>
+
+    <flux:modal name="cuenta-bancaria-form" class="max-w-lg" @close="$set('editingId', null)">
+        <form wire:submit="guardar" class="space-y-6">
+            <flux:heading size="lg">
+                {{ $editingId ? __('Editar cuenta bancaria') : __('Nueva cuenta bancaria') }}
+            </flux:heading>
+
+            <flux:input wire:model="banco" :label="__('Banco')" required autofocus />
+            <flux:input wire:model="numero_cuenta" :label="__('Número de cuenta')" />
+            <flux:input wire:model="alias_cbu" :label="__('Alias / CBU')" />
+            <flux:input wire:model="saldo" :label="__('Saldo inicial')" type="number" step="0.01" />
+
+            <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
+                </flux:modal.close>
+
+                <flux:button type="submit" variant="primary">{{ __('Guardar') }}</flux:button>
+            </div>
+        </form>
+    </flux:modal>
+</div>

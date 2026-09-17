@@ -16,6 +16,38 @@
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Operación')" class="grid">
+                    <flux:sidebar.item icon="document-text" :href="route('guias.index')" :current="request()->routeIs('guias.*')" wire:navigate>
+                        {{ __('Guías') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="truck" :href="route('transportes.index')" :current="request()->routeIs('transportes.*')" wire:navigate>
+                        {{ __('Transportes') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="user-group" :href="route('clientes.index')" :current="request()->routeIs('clientes.*')" wire:navigate>
+                        {{ __('Clientes') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Administración')" class="grid">
+                    <flux:sidebar.item icon="banknotes" :href="route('cobranzas.index')" :current="request()->routeIs('cobranzas.*')" wire:navigate>
+                        {{ __('Cobranzas') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-check" :href="route('ordenes-pago.index')" :current="request()->routeIs('ordenes-pago.*')" wire:navigate>
+                        {{ __('Órdenes de pago') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="rectangle-stack" :href="route('cheques.index')" :current="request()->routeIs('cheques.*')" wire:navigate>
+                        {{ __('Cheques') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="building-library" :href="route('cuentas-bancarias.index')" :current="request()->routeIs('cuentas-bancarias.*')" wire:navigate>
+                        {{ __('Cuentas bancarias') }}
+                    </flux:sidebar.item>
+                    @if (auth()->user()->isAdministrador())
+                        <flux:sidebar.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.*')" wire:navigate>
+                            {{ __('Usuarios') }}
+                        </flux:sidebar.item>
+                    @endif
+                </flux:sidebar.group>
             </flux:sidebar.nav>
 
             <flux:spacer />
