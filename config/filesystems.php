@@ -33,6 +33,12 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
+            // URL explícita y distinta a la del disco 'public' (que también
+            // tiene 'serve' => true acá abajo): sin esto, los dos discos
+            // caen al mismo default "/storage" y Laravel tira
+            // "disk conflicts with disk at [/storage]" al bootear. Nada
+            // apunta a esta URL en la práctica (este disco es privado).
+            'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/local-storage',
             'serve' => true,
             'throw' => false,
             'report' => false,
@@ -45,6 +51,13 @@ return [
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
+            // En hostings donde el symlink public/storage no lo resuelve el
+            // webserver (LiteSpeed/CageFS en algunas cuentas), Laravel sirve
+            // el archivo vía esta ruta de fallback. Sin costo donde el
+            // symlink SÍ anda: el webserver sirve el estático antes de que
+            // se llegue a usar. Mismo fix aplicado en demo-claudecode-laravel
+            // para DECO-HOGAR.
+            'serve' => true,
         ],
 
         's3' => [
