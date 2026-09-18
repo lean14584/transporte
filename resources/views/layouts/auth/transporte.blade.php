@@ -53,31 +53,38 @@
                     {{ $nombreMarca }}
                 </a>
 
-                <div class="relative z-10 flex flex-1 items-center justify-center py-10">
-                    <svg viewBox="0 0 400 320" class="w-full max-w-sm" role="img" aria-hidden="true">
-                        <path d="M20,270 C90,230 70,170 140,150 C210,130 220,80 300,55"
-                              fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3"
-                              stroke-linecap="round" stroke-dasharray="2 14" />
+                <div class="relative z-10 flex flex-1 items-center justify-center py-6">
+                    <svg viewBox="0 0 400 320" class="w-full max-w-md" role="img" aria-hidden="true">
+                        <defs>
+                            <filter id="transporte-truck-shadow" x="-60%" y="-60%" width="220%" height="220%">
+                                <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#020617" flood-opacity=".45" />
+                            </filter>
+                        </defs>
 
-                        <circle cx="20" cy="270" r="5" fill="rgba(103,232,249,.9)" />
+                        <path d="M20,270 C90,230 70,170 140,150 C210,130 220,80 300,55"
+                              fill="none" stroke="rgba(255,255,255,.35)" stroke-width="4"
+                              stroke-linecap="round" stroke-dasharray="2 16" />
+
+                        <circle cx="20" cy="270" r="6" fill="rgba(103,232,249,.9)" />
 
                         <g>
-                            <circle cx="300" cy="55" r="5" fill="#22d3ee" />
-                            <circle cx="300" cy="55" r="5" fill="#22d3ee" opacity="0">
-                                <animate attributeName="r" values="5;22;22" dur="2.4s" repeatCount="indefinite" />
+                            <circle cx="300" cy="55" r="6" fill="#22d3ee" />
+                            <circle cx="300" cy="55" r="6" fill="#22d3ee" opacity="0">
+                                <animate attributeName="r" values="6;26;26" dur="2.4s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" values=".8;0;0" dur="2.4s" repeatCount="indefinite" />
                             </circle>
                         </g>
 
-                        <g>
-                            <g transform="translate(-24,-14)">
-                                <rect x="0" y="14" width="34" height="16" rx="3" fill="#e2e8f0" />
-                                <path d="M34 18h13l8 8v4H34z" fill="#67e8f9" />
-                                <rect x="42" y="20" width="8" height="6" fill="#0e7490" opacity=".6" />
-                                <circle cx="12" cy="32" r="5" fill="#0f172a" />
-                                <circle cx="12" cy="32" r="2" fill="#94a3b8" />
-                                <circle cx="45" cy="32" r="5" fill="#0f172a" />
-                                <circle cx="45" cy="32" r="2" fill="#94a3b8" />
+                        <g filter="url(#transporte-truck-shadow)">
+                            <g transform="translate(-64,-56) scale(2.5)">
+                                <rect x="0" y="14" width="34" height="16" rx="3" fill="#f8fafc" />
+                                <path d="M34 18h13l8 8v4H34z" fill="#22d3ee" />
+                                <rect x="42" y="20" width="8" height="6" rx="1" fill="#0e7490" />
+                                <circle cx="12" cy="32" r="5.5" fill="#0f172a" />
+                                <circle cx="12" cy="32" r="2.3" fill="#cbd5e1" />
+                                <circle cx="45" cy="32" r="5.5" fill="#0f172a" />
+                                <circle cx="45" cy="32" r="2.3" fill="#cbd5e1" />
+                                <circle cx="53.5" cy="21.5" r="1.6" fill="#fef08a" />
                                 <animateMotion dur="9s" repeatCount="indefinite" rotate="auto"
                                     path="M20,270 C90,230 70,170 140,150 C210,130 220,80 300,55" />
                             </g>
