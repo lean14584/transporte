@@ -7,7 +7,7 @@ use App\Models\User;
 use Livewire\Livewire;
 
 test('emitir una orden de pago en efectivo no toca ninguna cuenta bancaria', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => 'administrador']);
     $transporte = Transporte::factory()->create(['nombre' => 'Flete Norte']);
 
     Livewire::actingAs($user)
@@ -27,7 +27,7 @@ test('emitir una orden de pago en efectivo no toca ninguna cuenta bancaria', fun
 });
 
 test('emitir una orden de pago con cheque descuenta el saldo de la cuenta bancaria', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => 'administrador']);
     $transporte = Transporte::factory()->create();
     $cuenta = CuentaBancaria::factory()->create(['saldo' => 100000]);
 
