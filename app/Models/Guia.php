@@ -64,6 +64,16 @@ class Guia extends Model
         return $this->hasOne(CuentaCorrienteMovimiento::class);
     }
 
+    public function usuarioCarga()
+    {
+        return $this->belongsTo(User::class, 'usuario_carga_id');
+    }
+
+    public function usuarioRecepcion()
+    {
+        return $this->belongsTo(User::class, 'usuario_recepcion_id');
+    }
+
     public function folio(): string
     {
         return 'G-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
@@ -75,6 +85,10 @@ class Guia extends Model
      */
     public function recepcionar(float $pesajeBruto, float $tara, float $porcentajeGanancia): void
     {
+        if ($pesajeBruto <= $tara) {
+            throw new \InvalidArgumentException('El peso bruto debe ser mayor que la tara.');
+        }
+
         $this->finalizarRecepcion(
             neto: $pesajeBruto - $tara,
             porcentajeGanancia: $porcentajeGanancia,
@@ -98,9 +112,15 @@ class Guia extends Model
     private function finalizarRecepcion(float $neto, float $porcentajeGanancia, ?float $pesajeBruto = null, ?float $tara = null): void
     {
         DB::transaction(function () use ($neto, $porcentajeGanancia, $pesajeBruto, $tara) {
+            $guiaBloqueada = self::whereKey($this->id)->lockForUpdate()->first();
+
+            if ($guiaBloqueada->estado === 'recibida') {
+                throw new \RuntimeException('Esta guía ya fue recepcionada.');
+            }
+
             $montoGanancia = round($neto * $porcentajeGanancia / 100, 2);
 
-            $this->update([
+            $guiaBloqueada->update([
                 'pesaje_bruto' => $pesajeBruto,
                 'tara' => $tara,
                 'neto' => $neto,
@@ -112,12 +132,14 @@ class Guia extends Model
             ]);
 
             CuentaCorrienteMovimiento::registrar(
-                $this->cliente,
+                $guiaBloqueada->cliente,
                 'cargo',
-                "Guía {$this->folio()} - flete {$this->mercaderia}",
+                "Guía {$guiaBloqueada->folio()} - flete {$guiaBloqueada->mercaderia}",
                 $montoGanancia,
-                ['guia_id' => $this->id],
+                ['guia_id' => $guiaBloqueada->id],
             );
         });
+
+        $this->refresh();
     }
 }

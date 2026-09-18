@@ -5,7 +5,7 @@ use App\Models\User;
 use Livewire\Livewire;
 
 test('un usuario autenticado puede ver, crear, editar y borrar transportes', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => 'administrador']);
     Transporte::factory()->create(['nombre' => 'Flete del Sur']);
 
     $this->actingAs($user)

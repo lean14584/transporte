@@ -2,6 +2,7 @@
 
 use App\Models\Cheque;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -11,6 +12,11 @@ new #[Title('Cheques')] class extends Component {
     use WithPagination;
 
     public string $estado = '';
+
+    public function mount(): void
+    {
+        abort_unless(Auth::user()->isAdministrador(), 403);
+    }
 
     public function updatingEstado(): void
     {
@@ -24,21 +30,36 @@ new #[Title('Cheques')] class extends Component {
             ->with('cuentaBancaria')
             ->when($this->estado, fn ($query) => $query->where('estado', $this->estado))
             ->orderBy('fecha_pago')
+            ->orderBy('id')
             ->paginate(10);
     }
 
     public function marcarCobrado(int $id): void
     {
-        Cheque::whereKey($id)->update(['estado' => 'cobrado']);
+        try {
+            Cheque::cobrar(Cheque::findOrFail($id));
+        } catch (\RuntimeException $e) {
+            Flux::toast(variant: 'danger', text: $e->getMessage());
+
+            return;
+        }
+
         unset($this->cheques);
         Flux::toast(variant: 'success', text: __('Cheque marcado como cobrado.'));
     }
 
     public function marcarRechazado(int $id): void
     {
-        Cheque::whereKey($id)->update(['estado' => 'rechazado']);
+        try {
+            Cheque::rechazar(Cheque::findOrFail($id));
+        } catch (\RuntimeException $e) {
+            Flux::toast(variant: 'danger', text: $e->getMessage());
+
+            return;
+        }
+
         unset($this->cheques);
-        Flux::toast(variant: 'success', text: __('Cheque marcado como rechazado.'));
+        Flux::toast(variant: 'success', text: __('Cheque marcado como rechazado; el saldo vuelve a la cuenta bancaria.'));
     }
 }; ?>
 

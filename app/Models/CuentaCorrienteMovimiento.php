@@ -48,6 +48,11 @@ class CuentaCorrienteMovimiento extends Model
         return $this->belongsTo(Recibo::class);
     }
 
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'usuario_id');
+    }
+
     /**
      * Registra un movimiento de cta cte y actualiza el saldo del cliente,
      * bloqueando la fila del cliente para evitar carreras entre movimientos concurrentes.
@@ -72,7 +77,7 @@ class CuentaCorrienteMovimiento extends Model
                 'usuario_id' => Auth::id(),
             ]);
 
-            $clienteBloqueado->update(['saldo_cta_cte' => $nuevoSaldo]);
+            $clienteBloqueado->forceFill(['saldo_cta_cte' => $nuevoSaldo])->save();
 
             return $movimiento;
         });

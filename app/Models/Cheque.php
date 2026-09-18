@@ -49,6 +49,12 @@ class Cheque extends Model
         return DB::transaction(function () use ($cuentaBancaria, $datos) {
             $cuentaBloqueada = CuentaBancaria::whereKey($cuentaBancaria->id)->lockForUpdate()->first();
 
+            $nuevoSaldo = $cuentaBloqueada->saldo - $datos['monto'];
+
+            if ($nuevoSaldo < 0) {
+                throw new \RuntimeException('Saldo insuficiente en la cuenta bancaria para emitir este cheque.');
+            }
+
             $cheque = self::create([
                 'cuenta_bancaria_id' => $cuentaBloqueada->id,
                 'numero' => $datos['numero'],
@@ -60,11 +66,50 @@ class Cheque extends Model
                 'estado' => 'emitido',
             ]);
 
-            $cuentaBloqueada->update([
-                'saldo' => $cuentaBloqueada->saldo - $datos['monto'],
-            ]);
+            $cuentaBloqueada->forceFill(['saldo' => $nuevoSaldo])->save();
 
             return $cheque;
+        });
+    }
+
+    /**
+     * Marca el cheque como cobrado. Solo válido desde el estado "emitido"
+     * (evita transiciones repetidas por doble clic o llamadas directas).
+     */
+    public static function cobrar(self $cheque): self
+    {
+        return DB::transaction(function () use ($cheque) {
+            $chequeBloqueado = self::whereKey($cheque->id)->lockForUpdate()->first();
+
+            if ($chequeBloqueado->estado !== 'emitido') {
+                throw new \RuntimeException('Solo se puede marcar como cobrado un cheque emitido.');
+            }
+
+            $chequeBloqueado->update(['estado' => 'cobrado']);
+
+            return $chequeBloqueado;
+        });
+    }
+
+    /**
+     * Marca el cheque como rechazado y devuelve el monto a la cuenta bancaria
+     * (el débito de emitir() nunca se hizo efectivo en el banco).
+     */
+    public static function rechazar(self $cheque): self
+    {
+        return DB::transaction(function () use ($cheque) {
+            $chequeBloqueado = self::whereKey($cheque->id)->lockForUpdate()->first();
+
+            if ($chequeBloqueado->estado !== 'emitido') {
+                throw new \RuntimeException('Solo se puede rechazar un cheque emitido.');
+            }
+
+            $chequeBloqueado->update(['estado' => 'rechazado']);
+
+            $cuentaBloqueada = CuentaBancaria::whereKey($chequeBloqueado->cuenta_bancaria_id)->lockForUpdate()->first();
+            $cuentaBloqueada->forceFill(['saldo' => $cuentaBloqueada->saldo + $chequeBloqueado->monto])->save();
+
+            return $chequeBloqueado;
         });
     }
 }

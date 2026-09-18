@@ -16,7 +16,6 @@ class Cliente extends Model
         'telefono',
         'dni',
         'condicion_iva',
-        'saldo_cta_cte',
     ];
 
     protected function casts(): array

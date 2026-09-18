@@ -2,6 +2,7 @@
 
 use App\Models\Cliente;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -32,6 +33,7 @@ new #[Title('Clientes')] class extends Component {
             ->when($this->search, fn ($query) => $query->where('nombre', 'like', "%{$this->search}%")
                 ->orWhere('dni', 'like', "%{$this->search}%"))
             ->orderBy('nombre')
+            ->orderBy('id')
             ->paginate(10);
     }
 
@@ -76,7 +78,15 @@ new #[Title('Clientes')] class extends Component {
 
     public function eliminar(int $id): void
     {
-        Cliente::whereKey($id)->delete();
+        abort_unless(Auth::user()->isAdministrador(), 403);
+
+        try {
+            Cliente::whereKey($id)->delete();
+        } catch (\Illuminate\Database\QueryException) {
+            Flux::toast(variant: 'danger', text: __('No se puede eliminar: el cliente tiene guías o movimientos asociados.'));
+
+            return;
+        }
 
         unset($this->clientes);
 
@@ -122,13 +132,15 @@ new #[Title('Clientes')] class extends Component {
                         <flux:table.cell align="end">
                             <flux:button size="sm" variant="ghost" icon="banknotes" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
                             <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cliente->id }})" />
-                            <flux:button
-                                size="sm"
-                                variant="ghost"
-                                icon="trash"
-                                wire:click="eliminar({{ $cliente->id }})"
-                                wire:confirm="{{ __('¿Eliminar este cliente?') }}"
-                            />
+                            @if (auth()->user()->isAdministrador())
+                                <flux:button
+                                    size="sm"
+                                    variant="ghost"
+                                    icon="trash"
+                                    wire:click="eliminar({{ $cliente->id }})"
+                                    wire:confirm="{{ __('¿Eliminar este cliente?') }}"
+                                />
+                            @endif
                         </flux:table.cell>
                     </flux:table.row>
                 @empty
@@ -161,13 +173,15 @@ new #[Title('Clientes')] class extends Component {
                     <div class="flex shrink-0 gap-1">
                         <flux:button size="sm" variant="ghost" icon="banknotes" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
                         <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cliente->id }})" />
-                        <flux:button
-                            size="sm"
-                            variant="ghost"
-                            icon="trash"
-                            wire:click="eliminar({{ $cliente->id }})"
-                            wire:confirm="{{ __('¿Eliminar este cliente?') }}"
-                        />
+                        @if (auth()->user()->isAdministrador())
+                            <flux:button
+                                size="sm"
+                                variant="ghost"
+                                icon="trash"
+                                wire:click="eliminar({{ $cliente->id }})"
+                                wire:confirm="{{ __('¿Eliminar este cliente?') }}"
+                            />
+                        @endif
                     </div>
                 </div>
             </div>
