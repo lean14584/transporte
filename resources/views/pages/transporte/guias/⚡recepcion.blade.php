@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Configuracion;
 use App\Models\Guia;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
@@ -12,7 +13,7 @@ new #[Title('Recepción de guía')] class extends Component {
     public string $pesaje_bruto = '';
     public string $tara = '';
     public string $cantidad_recibida = '';
-    public string $porcentaje_ganancia = '10';
+    public string $porcentaje_ganancia = '';
 
     public function mount(Guia $guia): void
     {
@@ -20,6 +21,11 @@ new #[Title('Recepción de guía')] class extends Component {
 
         $this->guia = $guia;
         $this->cantidad_recibida = (string) round((float) $guia->cantidad, 2);
+
+        $configuracion = Configuracion::actual();
+        $this->porcentaje_ganancia = (string) ($guia->unidad === 'kilos'
+            ? $configuracion->porcentaje_ganancia_kilo
+            : $configuracion->porcentaje_ganancia_unidad);
     }
 
     #[Computed]

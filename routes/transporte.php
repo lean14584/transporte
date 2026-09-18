@@ -24,4 +24,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('recibos/{recibo}/pdf', [PdfController::class, 'recibo'])->name('recibos.pdf');
 
     Route::livewire('usuarios', 'pages::transporte.usuarios.index')->name('usuarios.index');
+
+    Route::livewire('configuracion', 'pages::transporte.configuracion.editar')->name('configuracion.edit');
 });
