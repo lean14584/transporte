@@ -2,6 +2,7 @@
 
 use App\Models\CuentaBancaria;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -13,6 +14,11 @@ new #[Title('Cuentas bancarias')] class extends Component {
     public string $numero_cuenta = '';
     public string $alias_cbu = '';
     public string $saldo = '0';
+
+    public function mount(): void
+    {
+        abort_unless(Auth::user()->isAdministrador(), 403);
+    }
 
     #[Computed]
     public function cuentas()
@@ -42,14 +48,23 @@ new #[Title('Cuentas bancarias')] class extends Component {
 
     public function guardar(): void
     {
-        $validated = $this->validate([
+        $rules = [
             'banco' => ['required', 'string', 'max:255'],
             'numero_cuenta' => ['nullable', 'string', 'max:255'],
             'alias_cbu' => ['nullable', 'string', 'max:255'],
-            'saldo' => ['required', 'numeric'],
-        ]);
+        ];
 
-        CuentaBancaria::updateOrCreate(['id' => $this->editingId], $validated);
+        if (! $this->editingId) {
+            $rules['saldo'] = ['required', 'numeric'];
+        }
+
+        $validated = $this->validate($rules);
+
+        if ($this->editingId) {
+            CuentaBancaria::findOrFail($this->editingId)->actualizarDatos($validated);
+        } else {
+            CuentaBancaria::abrir($validated);
+        }
 
         Flux::modal('cuenta-bancaria-form')->close();
         unset($this->cuentas);
@@ -59,7 +74,13 @@ new #[Title('Cuentas bancarias')] class extends Component {
 
     public function eliminar(int $id): void
     {
-        CuentaBancaria::whereKey($id)->delete();
+        try {
+            CuentaBancaria::whereKey($id)->delete();
+        } catch (\Illuminate\Database\QueryException) {
+            Flux::toast(variant: 'danger', text: __('No se puede eliminar: la cuenta tiene cheques asociados.'));
+
+            return;
+        }
 
         unset($this->cuentas);
 
@@ -155,7 +176,17 @@ new #[Title('Cuentas bancarias')] class extends Component {
             <flux:input wire:model="banco" :label="__('Banco')" required autofocus />
             <flux:input wire:model="numero_cuenta" :label="__('Número de cuenta')" />
             <flux:input wire:model="alias_cbu" :label="__('Alias / CBU')" />
-            <flux:input wire:model="saldo" :label="__('Saldo inicial')" type="number" step="0.01" />
+
+            @if ($editingId)
+                <flux:input
+                    value="{{ number_format((float) $saldo, 2, ',', '.') }}"
+                    :label="__('Saldo actual')"
+                    disabled
+                    :description="__('El saldo solo cambia al emitir o rechazar cheques.')"
+                />
+            @else
+                <flux:input wire:model="saldo" :label="__('Saldo inicial')" type="number" step="0.01" />
+            @endif
 
             <div class="flex justify-end gap-2">
                 <flux:modal.close>

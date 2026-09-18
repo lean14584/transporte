@@ -226,7 +226,7 @@ new #[Title('Cargar guía')] class extends Component {
 
             <div class="flex justify-end gap-2 border-t border-blue-200/70 bg-white/50 px-6 py-4 dark:border-blue-900/40 dark:bg-black/10">
                 <flux:button variant="filled" :href="route('guias.index')" wire:navigate>{{ __('Cancelar') }}</flux:button>
-                <flux:button type="submit" variant="primary">{{ __('Cargar guía') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar">{{ __('Cargar guía') }}</flux:button>
             </div>
         </div>
     </form>

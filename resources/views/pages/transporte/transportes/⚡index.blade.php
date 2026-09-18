@@ -2,6 +2,7 @@
 
 use App\Models\Transporte;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -30,6 +31,7 @@ new #[Title('Transportes')] class extends Component {
         return Transporte::query()
             ->when($this->search, fn ($query) => $query->where('nombre', 'like', "%{$this->search}%"))
             ->orderBy('nombre')
+            ->orderBy('id')
             ->paginate(10);
     }
 
@@ -71,7 +73,15 @@ new #[Title('Transportes')] class extends Component {
 
     public function eliminar(int $id): void
     {
-        Transporte::whereKey($id)->delete();
+        abort_unless(Auth::user()->isAdministrador(), 403);
+
+        try {
+            Transporte::whereKey($id)->delete();
+        } catch (\Illuminate\Database\QueryException) {
+            Flux::toast(variant: 'danger', text: __('No se puede eliminar: el transporte tiene guías u órdenes de pago asociadas.'));
+
+            return;
+        }
 
         unset($this->transportes);
 
@@ -112,13 +122,15 @@ new #[Title('Transportes')] class extends Component {
                         <flux:table.cell>{{ $transporte->dueno ?: '—' }}</flux:table.cell>
                         <flux:table.cell align="end">
                             <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $transporte->id }})" />
-                            <flux:button
-                                size="sm"
-                                variant="ghost"
-                                icon="trash"
-                                wire:click="eliminar({{ $transporte->id }})"
-                                wire:confirm="{{ __('¿Eliminar este transporte?') }}"
-                            />
+                            @if (auth()->user()->isAdministrador())
+                                <flux:button
+                                    size="sm"
+                                    variant="ghost"
+                                    icon="trash"
+                                    wire:click="eliminar({{ $transporte->id }})"
+                                    wire:confirm="{{ __('¿Eliminar este transporte?') }}"
+                                />
+                            @endif
                         </flux:table.cell>
                     </flux:table.row>
                 @empty
@@ -142,13 +154,15 @@ new #[Title('Transportes')] class extends Component {
                     </div>
                     <div class="flex shrink-0 gap-1">
                         <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $transporte->id }})" />
-                        <flux:button
-                            size="sm"
-                            variant="ghost"
-                            icon="trash"
-                            wire:click="eliminar({{ $transporte->id }})"
-                            wire:confirm="{{ __('¿Eliminar este transporte?') }}"
-                        />
+                        @if (auth()->user()->isAdministrador())
+                            <flux:button
+                                size="sm"
+                                variant="ghost"
+                                icon="trash"
+                                wire:click="eliminar({{ $transporte->id }})"
+                                wire:confirm="{{ __('¿Eliminar este transporte?') }}"
+                            />
+                        @endif
                     </div>
                 </div>
                 <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-500">

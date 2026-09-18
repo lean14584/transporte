@@ -14,7 +14,6 @@ class CuentaBancaria extends Model
         'banco',
         'numero_cuenta',
         'alias_cbu',
-        'saldo',
     ];
 
     protected function casts(): array
@@ -27,5 +26,31 @@ class CuentaBancaria extends Model
     public function cheques()
     {
         return $this->hasMany(Cheque::class);
+    }
+
+    /**
+     * Crea una cuenta bancaria con su saldo inicial. El saldo queda fuera de
+     * $fillable a propósito: después de abierta, solo Cheque::emitir()/
+     * rechazar() pueden moverlo, nunca un update() directo desde un form.
+     */
+    public static function abrir(array $datos): self
+    {
+        $cuenta = new self($datos);
+        $cuenta->saldo = $datos['saldo'] ?? 0;
+        $cuenta->save();
+
+        return $cuenta;
+    }
+
+    /**
+     * Actualiza los datos de la cuenta sin tocar el saldo (no es editable a mano).
+     */
+    public function actualizarDatos(array $datos): void
+    {
+        $this->update([
+            'banco' => $datos['banco'],
+            'numero_cuenta' => $datos['numero_cuenta'] ?? null,
+            'alias_cbu' => $datos['alias_cbu'] ?? null,
+        ]);
     }
 }

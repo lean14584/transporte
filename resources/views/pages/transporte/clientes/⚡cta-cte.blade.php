@@ -160,7 +160,7 @@ new #[Title('Cuenta corriente')] class extends Component {
                     <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
                 </flux:modal.close>
 
-                <flux:button type="submit" variant="primary">{{ __('Cobrar') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="cobrar">{{ __('Cobrar') }}</flux:button>
             </div>
         </form>
     </flux:modal>

@@ -61,21 +61,35 @@ new #[Title('Recepción de guía')] class extends Component {
                 'porcentaje_ganancia' => ['required', 'numeric', 'gte:0'],
             ]);
 
-            $this->guia->recepcionar(
-                pesajeBruto: (float) $validated['pesaje_bruto'],
-                tara: (float) $validated['tara'],
-                porcentajeGanancia: (float) $validated['porcentaje_ganancia'],
-            );
+            try {
+                $this->guia->recepcionar(
+                    pesajeBruto: (float) $validated['pesaje_bruto'],
+                    tara: (float) $validated['tara'],
+                    porcentajeGanancia: (float) $validated['porcentaje_ganancia'],
+                );
+            } catch (\RuntimeException $e) {
+                Flux::toast(variant: 'danger', text: $e->getMessage());
+                $this->redirect(route('guias.index'), navigate: true);
+
+                return;
+            }
         } else {
             $validated = $this->validate([
                 'cantidad_recibida' => ['required', 'numeric', 'gt:0'],
                 'porcentaje_ganancia' => ['required', 'numeric', 'gte:0'],
             ]);
 
-            $this->guia->recepcionarPorCantidad(
-                cantidadRecibida: (float) $validated['cantidad_recibida'],
-                porcentajeGanancia: (float) $validated['porcentaje_ganancia'],
-            );
+            try {
+                $this->guia->recepcionarPorCantidad(
+                    cantidadRecibida: (float) $validated['cantidad_recibida'],
+                    porcentajeGanancia: (float) $validated['porcentaje_ganancia'],
+                );
+            } catch (\RuntimeException $e) {
+                Flux::toast(variant: 'danger', text: $e->getMessage());
+                $this->redirect(route('guias.index'), navigate: true);
+
+                return;
+            }
         }
 
         Flux::toast(variant: 'success', text: __('Guía recepcionada.'));
@@ -187,7 +201,7 @@ new #[Title('Recepción de guía')] class extends Component {
 
             <div class="flex justify-end gap-2 border-t border-blue-200/70 bg-white/50 px-6 py-4 dark:border-blue-900/40 dark:bg-black/10">
                 <flux:button variant="filled" :href="route('guias.index')" wire:navigate>{{ __('Cancelar') }}</flux:button>
-                <flux:button type="submit" variant="primary">{{ __('Confirmar recepción') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="recepcionar">{{ __('Confirmar recepción') }}</flux:button>
             </div>
         </div>
     </form>

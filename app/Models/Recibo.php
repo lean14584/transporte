@@ -39,6 +39,11 @@ class Recibo extends Model
         return $this->hasOne(CuentaCorrienteMovimiento::class);
     }
 
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'usuario_id');
+    }
+
     public function folio(): string
     {
         return 'R-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);

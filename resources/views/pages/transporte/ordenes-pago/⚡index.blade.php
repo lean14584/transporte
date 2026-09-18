@@ -5,7 +5,9 @@ use App\Models\CuentaBancaria;
 use App\Models\OrdenPago;
 use App\Models\Transporte;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -13,6 +15,11 @@ use Livewire\WithPagination;
 
 new #[Title('Órdenes de pago')] class extends Component {
     use WithPagination;
+
+    public function mount(): void
+    {
+        abort_unless(Auth::user()->isAdministrador(), 403);
+    }
 
     public string $buscarTransporte = '';
     public ?int $transporte_id = null;
@@ -78,37 +85,48 @@ new #[Title('Órdenes de pago')] class extends Component {
 
         if ($this->medio_pago === 'cheque') {
             $rules['cuenta_bancaria_id'] = ['required', 'exists:cuenta_bancarias,id'];
-            $rules['numero_cheque'] = ['required', 'string', 'max:255'];
+            $rules['numero_cheque'] = [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('cheques', 'numero')->where(fn ($query) => $query->where('cuenta_bancaria_id', $this->cuenta_bancaria_id)),
+            ];
             $rules['banco_cheque'] = ['required', 'string', 'max:255'];
             $rules['fecha_pago_cheque'] = ['required', 'date'];
         }
 
         $validated = $this->validate($rules);
 
-        DB::transaction(function () use ($validated) {
-            $chequeId = null;
+        try {
+            DB::transaction(function () use ($validated) {
+                $chequeId = null;
 
-            if ($this->medio_pago === 'cheque') {
-                $cheque = Cheque::emitir(CuentaBancaria::findOrFail($validated['cuenta_bancaria_id']), [
-                    'numero' => $validated['numero_cheque'],
-                    'banco' => $validated['banco_cheque'],
-                    'beneficiario' => $this->transporteSeleccionado,
-                    'fecha_pago' => $validated['fecha_pago_cheque'],
+                if ($this->medio_pago === 'cheque') {
+                    $cheque = Cheque::emitir(CuentaBancaria::findOrFail($validated['cuenta_bancaria_id']), [
+                        'numero' => $validated['numero_cheque'],
+                        'banco' => $validated['banco_cheque'],
+                        'beneficiario' => $this->transporteSeleccionado,
+                        'fecha_pago' => $validated['fecha_pago_cheque'],
+                        'monto' => $validated['monto'],
+                    ]);
+
+                    $chequeId = $cheque->id;
+                }
+
+                OrdenPago::create([
+                    'transporte_id' => $validated['transporte_id'],
+                    'fecha' => now()->toDateString(),
                     'monto' => $validated['monto'],
+                    'concepto' => $validated['concepto'] ?: null,
+                    'medio_pago' => $validated['medio_pago'],
+                    'cheque_id' => $chequeId,
                 ]);
+            });
+        } catch (\RuntimeException $e) {
+            Flux::toast(variant: 'danger', text: $e->getMessage());
 
-                $chequeId = $cheque->id;
-            }
-
-            OrdenPago::create([
-                'transporte_id' => $validated['transporte_id'],
-                'fecha' => now()->toDateString(),
-                'monto' => $validated['monto'],
-                'concepto' => $validated['concepto'] ?: null,
-                'medio_pago' => $validated['medio_pago'],
-                'cheque_id' => $chequeId,
-            ]);
-        });
+            return;
+        }
 
         $this->reset(['transporte_id', 'transporteSeleccionado', 'monto', 'concepto', 'cuenta_bancaria_id', 'numero_cheque', 'banco_cheque', 'fecha_pago_cheque']);
         $this->medio_pago = 'efectivo';
@@ -265,7 +283,7 @@ new #[Title('Órdenes de pago')] class extends Component {
                     <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
                 </flux:modal.close>
 
-                <flux:button type="submit" variant="primary">{{ __('Emitir') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="emitir">{{ __('Emitir') }}</flux:button>
             </div>
         </form>
     </flux:modal>
