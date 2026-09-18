@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Cliente;
+use App\Models\Configuracion;
 use App\Models\Guia;
 use App\Models\OrdenPago;
 use App\Models\Recibo;
@@ -30,6 +31,19 @@ test('se pueden generar los pdf de guía, recibo y orden de pago', function () {
     $this->get(route('guias.pdf', $guia))->assertOk()->assertHeader('content-type', 'application/pdf');
     $this->get(route('recibos.pdf', $recibo))->assertOk()->assertHeader('content-type', 'application/pdf');
     $this->get(route('ordenes-pago.pdf', $orden))->assertOk()->assertHeader('content-type', 'application/pdf');
+});
+
+test('el pdf de guía renderiza sin errores con nombre de empresa configurado', function () {
+    Configuracion::actual()->update(['empresa_nombre' => 'Transportes del Sur SRL']);
+
+    $user = User::factory()->create();
+    $cliente = Cliente::factory()->create();
+    $transporte = Transporte::factory()->create();
+    $guia = Guia::factory()->for($cliente)->for($transporte)->create();
+
+    $this->actingAs($user);
+
+    $this->get(route('guias.pdf', $guia))->assertOk();
 });
 
 test('el folio de cada documento tiene el prefijo correcto', function () {

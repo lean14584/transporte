@@ -5,6 +5,12 @@
     <title>{{ $ordenPago->folio() }}</title>
     <style>
         body { font-family: 'Helvetica', sans-serif; font-size: 12px; color: #1f2937; margin: 0; padding: 24px; }
+        .empresa-header { display: table; width: 100%; margin-bottom: 10px; }
+        .empresa-header .logo-cell { display: table-cell; width: 56px; vertical-align: middle; }
+        .empresa-header .logo-cell img { max-width: 48px; max-height: 48px; }
+        .empresa-header .datos-cell { display: table-cell; vertical-align: middle; padding-left: 10px; }
+        .empresa-nombre { font-size: 14px; font-weight: bold; }
+        .empresa-direccion { font-size: 10px; color: #6b7280; }
         .header { display: table; width: 100%; margin-bottom: 16px; border-bottom: 2px solid #111827; padding-bottom: 12px; }
         .header .titulo { display: table-cell; }
         .header .folio { display: table-cell; text-align: right; vertical-align: top; }
@@ -31,6 +37,22 @@
     </style>
 </head>
 <body>
+    @if ($empresa->empresa_nombre || $empresa->logoDataUri())
+        <div class="empresa-header">
+            @if ($empresa->logoDataUri())
+                <div class="logo-cell"><img src="{{ $empresa->logoDataUri() }}" alt="Logo"></div>
+            @endif
+            <div class="datos-cell">
+                @if ($empresa->empresa_nombre)
+                    <div class="empresa-nombre">{{ $empresa->empresa_nombre }}</div>
+                @endif
+                @if ($empresa->empresa_direccion)
+                    <div class="empresa-direccion">{{ $empresa->empresa_direccion }}</div>
+                @endif
+            </div>
+        </div>
+    @endif
+
     <div class="header">
         <div class="titulo">
             <h1>Orden de pago</h1>

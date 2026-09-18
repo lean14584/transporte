@@ -161,7 +161,8 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Registro público desactivado a propósito: los usuarios los crea
+        // el Administrador desde la pantalla "Usuarios" del sistema.
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

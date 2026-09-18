@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Configuracion;
 use App\Models\Guia;
 use App\Models\OrdenPago;
 use App\Models\Recibo;
@@ -14,7 +15,7 @@ class PdfController extends Controller
     {
         $guia->load(['transporte', 'cliente']);
 
-        return Pdf::loadView('pdf.guia', ['guia' => $guia])
+        return Pdf::loadView('pdf.guia', ['guia' => $guia, 'empresa' => Configuracion::actual()])
             ->setPaper('a4')
             ->stream("{$guia->folio()}.pdf");
     }
@@ -23,7 +24,7 @@ class PdfController extends Controller
     {
         $recibo->load('cliente');
 
-        return Pdf::loadView('pdf.recibo', ['recibo' => $recibo])
+        return Pdf::loadView('pdf.recibo', ['recibo' => $recibo, 'empresa' => Configuracion::actual()])
             ->setPaper('a5', 'landscape')
             ->stream("{$recibo->folio()}.pdf");
     }
@@ -32,7 +33,7 @@ class PdfController extends Controller
     {
         $ordenPago->load(['transporte', 'cheque']);
 
-        return Pdf::loadView('pdf.orden-pago', ['ordenPago' => $ordenPago])
+        return Pdf::loadView('pdf.orden-pago', ['ordenPago' => $ordenPago, 'empresa' => Configuracion::actual()])
             ->setPaper('a4')
             ->stream("{$ordenPago->folio()}.pdf");
     }
