@@ -7,7 +7,7 @@
 
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <div class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/40 backdrop-blur">
+        <div class="transporte-login-form overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/40 backdrop-blur">
             <x-passkey-verify :separator="__('O continuá con tu usuario')" />
 
             <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-6">

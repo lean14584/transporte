@@ -24,6 +24,14 @@
                 background-image: radial-gradient(rgba(255,255,255,.16) 1px, transparent 1px);
                 background-size: 22px 22px;
             }
+            /* Los labels de Flux usan un selector :where() de especificidad
+               cero para el color oscuro, pensado para cards claras. Acá el
+               fondo del formulario es casi negro, así que se fuerza texto
+               claro sin depender de que el dark: de Tailwind gane esa pulseada. */
+            .transporte-login-form [data-flux-label],
+            .transporte-login-form [data-flux-description] {
+                color: #f4f4f5;
+            }
         </style>
     </head>
     <body class="min-h-screen bg-zinc-950 antialiased">
