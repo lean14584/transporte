@@ -11,15 +11,15 @@
                 0%, 100% { transform: translateY(0); }
                 50% { transform: translateY(-10px); }
             }
-            @keyframes transporte-pin-pulse {
-                0% { r: 5; opacity: .9; }
-                70% { r: 20; opacity: 0; }
-                100% { r: 20; opacity: 0; }
+            @keyframes transporte-truck-bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
             }
             .transporte-blob { animation: transporte-blob-drift 14s ease-in-out infinite; }
             .transporte-blob-delay { animation-delay: -6s; }
             .transporte-float { animation: transporte-float 5s ease-in-out infinite; }
             .transporte-float-delay { animation: transporte-float 5s ease-in-out infinite; animation-delay: -2.5s; }
+            .transporte-truck-bounce { animation: transporte-truck-bounce 3.2s ease-in-out infinite; }
             .transporte-dot-grid {
                 background-image: radial-gradient(rgba(255,255,255,.16) 1px, transparent 1px);
                 background-size: 22px 22px;
@@ -53,49 +53,36 @@
                     {{ $nombreMarca }}
                 </a>
 
-                <div class="relative z-10 flex flex-1 items-center justify-center py-6">
-                    <svg viewBox="0 0 400 320" class="w-full max-w-md" role="img" aria-hidden="true">
-                        <defs>
-                            <filter id="transporte-truck-shadow" x="-60%" y="-60%" width="220%" height="220%">
-                                <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#020617" flood-opacity=".45" />
-                            </filter>
-                        </defs>
+                <div class="relative z-10 flex flex-1 flex-col items-center justify-center gap-8 py-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 -z-10 scale-125 rounded-full bg-cyan-400/25 blur-3xl"></div>
 
-                        <path d="M20,270 C90,230 70,170 140,150 C210,130 220,80 300,55"
-                              fill="none" stroke="rgba(255,255,255,.35)" stroke-width="4"
-                              stroke-linecap="round" stroke-dasharray="2 16" />
+                        <div class="transporte-float absolute -left-10 -top-4 rounded-lg border border-white/25 bg-white/10 p-2 backdrop-blur">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-6 text-cyan-200"><path stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5M3.75 15h16.5M6.75 4.5v15m10.5-15v15" /></svg>
+                        </div>
+                        <div class="transporte-float-delay absolute -right-8 bottom-6 rounded-lg border border-white/25 bg-white/10 p-2 backdrop-blur">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-5 text-cyan-200"><path stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 2 3 6v6c0 5 4 9 9 10 5-1 9-5 9-10V6l-9-4Z" /></svg>
+                        </div>
 
-                        <circle cx="20" cy="270" r="6" fill="rgba(103,232,249,.9)" />
+                        <svg viewBox="0 0 200 120" class="transporte-truck-bounce h-52 w-80 drop-shadow-2xl" role="img" aria-hidden="true">
+                            <rect x="8" y="34" width="110" height="52" rx="7" fill="#f8fafc" />
+                            <rect x="8" y="34" width="110" height="13" rx="6" fill="#22d3ee" />
+                            <rect x="8" y="64" width="110" height="4" fill="#cbd5e1" />
 
-                        <g>
-                            <circle cx="300" cy="55" r="6" fill="#22d3ee" />
-                            <circle cx="300" cy="55" r="6" fill="#22d3ee" opacity="0">
-                                <animate attributeName="r" values="6;26;26" dur="2.4s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" values=".8;0;0" dur="2.4s" repeatCount="indefinite" />
-                            </circle>
-                        </g>
+                            <path d="M118 50 H162 L190 78 V86 H118 Z" fill="#0891b2" />
+                            <rect x="149" y="58" width="30" height="20" rx="3" fill="#083344" />
+                            <rect x="152" y="61" width="19" height="13" rx="2" fill="#a5f3fc" />
+                            <circle cx="192" cy="83" r="3.5" fill="#fef08a" />
 
-                        <g filter="url(#transporte-truck-shadow)">
-                            <g transform="translate(-64,-56) scale(2.5)">
-                                <rect x="0" y="14" width="34" height="16" rx="3" fill="#f8fafc" />
-                                <path d="M34 18h13l8 8v4H34z" fill="#22d3ee" />
-                                <rect x="42" y="20" width="8" height="6" rx="1" fill="#0e7490" />
-                                <circle cx="12" cy="32" r="5.5" fill="#0f172a" />
-                                <circle cx="12" cy="32" r="2.3" fill="#cbd5e1" />
-                                <circle cx="45" cy="32" r="5.5" fill="#0f172a" />
-                                <circle cx="45" cy="32" r="2.3" fill="#cbd5e1" />
-                                <circle cx="53.5" cy="21.5" r="1.6" fill="#fef08a" />
-                                <animateMotion dur="9s" repeatCount="indefinite" rotate="auto"
-                                    path="M20,270 C90,230 70,170 140,150 C210,130 220,80 300,55" />
-                            </g>
-                        </g>
+                            <circle cx="44" cy="90" r="15" fill="#0f172a" />
+                            <circle cx="44" cy="90" r="6.5" fill="#94a3b8" />
+                            <circle cx="152" cy="90" r="15" fill="#0f172a" />
+                            <circle cx="152" cy="90" r="6.5" fill="#94a3b8" />
+                        </svg>
+                    </div>
 
-                        <g class="transporte-float" opacity=".85">
-                            <rect x="330" y="150" width="26" height="26" rx="5" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.35)" />
-                        </g>
-                        <g class="transporte-float-delay" opacity=".85">
-                            <rect x="40" y="70" width="20" height="20" rx="5" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.35)" />
-                        </g>
+                    <svg viewBox="0 0 320 16" class="w-72 max-w-full opacity-70" aria-hidden="true">
+                        <line x1="0" y1="8" x2="320" y2="8" stroke="rgba(255,255,255,.4)" stroke-width="4" stroke-linecap="round" stroke-dasharray="4 20" />
                     </svg>
                 </div>
 
