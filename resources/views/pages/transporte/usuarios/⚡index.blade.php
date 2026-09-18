@@ -12,6 +12,7 @@ new #[Title('Usuarios')] class extends Component {
     public ?int $editingId = null;
 
     public string $name = '';
+    public string $username = '';
     public string $email = '';
     public string $password = '';
     public string $role = 'administrativo';
@@ -29,7 +30,7 @@ new #[Title('Usuarios')] class extends Component {
 
     public function crear(): void
     {
-        $this->reset(['editingId', 'name', 'email', 'password']);
+        $this->reset(['editingId', 'name', 'username', 'email', 'password']);
         $this->role = 'administrativo';
         Flux::modal('usuario-form')->show();
     }
@@ -40,6 +41,7 @@ new #[Title('Usuarios')] class extends Component {
 
         $this->editingId = $usuario->id;
         $this->name = $usuario->name;
+        $this->username = $usuario->username;
         $this->email = $usuario->email;
         $this->password = '';
         $this->role = $usuario->role;
@@ -51,6 +53,7 @@ new #[Title('Usuarios')] class extends Component {
     {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9._-]+$/', 'unique:users,username,'.$this->editingId],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$this->editingId],
             'password' => [$this->editingId ? 'nullable' : 'required', 'string', 'min:8'],
             'role' => ['required', 'in:administrador,administrativo'],
@@ -58,6 +61,7 @@ new #[Title('Usuarios')] class extends Component {
 
         $usuario = User::updateOrCreate(['id' => $this->editingId], [
             'name' => $validated['name'],
+            'username' => $validated['username'],
             'email' => $validated['email'],
             'role' => $validated['role'],
             ...($validated['password'] ? ['password' => Hash::make($validated['password'])] : []),
@@ -96,6 +100,7 @@ new #[Title('Usuarios')] class extends Component {
         <flux:table>
             <flux:table.columns>
                 <flux:table.column>{{ __('Nombre') }}</flux:table.column>
+                <flux:table.column>{{ __('Usuario') }}</flux:table.column>
                 <flux:table.column>{{ __('Email') }}</flux:table.column>
                 <flux:table.column>{{ __('Rol') }}</flux:table.column>
                 <flux:table.column></flux:table.column>
@@ -105,6 +110,7 @@ new #[Title('Usuarios')] class extends Component {
                 @foreach ($this->usuarios as $usuario)
                     <flux:table.row wire:key="usuario-{{ $usuario->id }}">
                         <flux:table.cell class="font-medium">{{ $usuario->name }}</flux:table.cell>
+                        <flux:table.cell class="font-mono text-sm">{{ $usuario->username }}</flux:table.cell>
                         <flux:table.cell>{{ $usuario->email }}</flux:table.cell>
                         <flux:table.cell>
                             <flux:badge size="sm" :color="$usuario->role === 'administrador' ? 'blue' : 'zinc'">
@@ -135,7 +141,7 @@ new #[Title('Usuarios')] class extends Component {
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <div class="font-medium">{{ $usuario->name }}</div>
-                        <div class="mt-1 text-sm text-zinc-500">{{ $usuario->email }}</div>
+                        <div class="mt-1 text-sm text-zinc-500">{{ $usuario->username }} · {{ $usuario->email }}</div>
                     </div>
                     <flux:badge size="sm" :color="$usuario->role === 'administrador' ? 'blue' : 'zinc'">
                         {{ ucfirst($usuario->role) }}
@@ -164,6 +170,7 @@ new #[Title('Usuarios')] class extends Component {
             </flux:heading>
 
             <flux:input wire:model="name" :label="__('Nombre')" required autofocus />
+            <flux:input wire:model="username" :label="__('Usuario')" :description="__('Con esto entra al sistema, sin espacios ni acentos.')" required />
             <flux:input wire:model="email" :label="__('Email')" type="email" required />
             <flux:input wire:model="password" :label="__('Contraseña')" type="password" placeholder="{{ $editingId ? __('Dejar en blanco para no cambiarla') : '' }}" viewable />
 

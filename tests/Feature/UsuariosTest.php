@@ -9,6 +9,7 @@ test('un administrador puede crear usuarios con rol', function () {
     Livewire::actingAs($admin)
         ->test('pages::transporte.usuarios.index')
         ->set('name', 'Nuevo Empleado')
+        ->set('username', 'nuevo_empleado')
         ->set('email', 'empleado@example.com')
         ->set('password', 'password123')
         ->set('role', 'administrativo')
