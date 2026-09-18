@@ -11,6 +11,7 @@ new #[Title('Recepción de guía')] class extends Component {
 
     public string $pesaje_bruto = '';
     public string $tara = '';
+    public string $cantidad_recibida = '';
     public string $porcentaje_ganancia = '10';
 
     public function mount(Guia $guia): void
@@ -18,16 +19,27 @@ new #[Title('Recepción de guía')] class extends Component {
         abort_if($guia->estado === 'recibida', 403, __('Esta guía ya fue recepcionada.'));
 
         $this->guia = $guia;
+        $this->cantidad_recibida = (string) round((float) $guia->cantidad, 2);
+    }
+
+    #[Computed]
+    public function esPorKilos(): bool
+    {
+        return $this->guia->unidad === 'kilos';
     }
 
     #[Computed]
     public function neto(): ?float
     {
-        if ($this->pesaje_bruto === '' || $this->tara === '') {
-            return null;
+        if ($this->esPorKilos) {
+            if ($this->pesaje_bruto === '' || $this->tara === '') {
+                return null;
+            }
+
+            return round((float) $this->pesaje_bruto - (float) $this->tara, 2);
         }
 
-        return round((float) $this->pesaje_bruto - (float) $this->tara, 2);
+        return $this->cantidad_recibida === '' ? null : round((float) $this->cantidad_recibida, 2);
     }
 
     #[Computed]
@@ -42,17 +54,29 @@ new #[Title('Recepción de guía')] class extends Component {
 
     public function recepcionar(): void
     {
-        $validated = $this->validate([
-            'pesaje_bruto' => ['required', 'numeric', 'gt:0'],
-            'tara' => ['required', 'numeric', 'gte:0', 'lt:pesaje_bruto'],
-            'porcentaje_ganancia' => ['required', 'numeric', 'gte:0'],
-        ]);
+        if ($this->esPorKilos) {
+            $validated = $this->validate([
+                'pesaje_bruto' => ['required', 'numeric', 'gt:0'],
+                'tara' => ['required', 'numeric', 'gte:0', 'lt:pesaje_bruto'],
+                'porcentaje_ganancia' => ['required', 'numeric', 'gte:0'],
+            ]);
 
-        $this->guia->recepcionar(
-            pesajeBruto: (float) $validated['pesaje_bruto'],
-            tara: (float) $validated['tara'],
-            porcentajeGanancia: (float) $validated['porcentaje_ganancia'],
-        );
+            $this->guia->recepcionar(
+                pesajeBruto: (float) $validated['pesaje_bruto'],
+                tara: (float) $validated['tara'],
+                porcentajeGanancia: (float) $validated['porcentaje_ganancia'],
+            );
+        } else {
+            $validated = $this->validate([
+                'cantidad_recibida' => ['required', 'numeric', 'gt:0'],
+                'porcentaje_ganancia' => ['required', 'numeric', 'gte:0'],
+            ]);
+
+            $this->guia->recepcionarPorCantidad(
+                cantidadRecibida: (float) $validated['cantidad_recibida'],
+                porcentajeGanancia: (float) $validated['porcentaje_ganancia'],
+            );
+        }
 
         Flux::toast(variant: 'success', text: __('Guía recepcionada.'));
 
@@ -86,20 +110,60 @@ new #[Title('Recepción de guía')] class extends Component {
 
                 <flux:separator />
 
-                <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
-                        {{ __('Pesaje') }}
-                    </flux:heading>
+                @if ($this->esPorKilos)
+                    <div>
+                        <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                            {{ __('Pesaje') }}
+                        </flux:heading>
 
-                    <div class="mt-3 space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <flux:input wire:model.live="pesaje_bruto" :label="__('Pesaje bruto (kg)')" type="number" step="0.01" min="0.01" required autofocus />
-                            <flux:input wire:model.live="tara" :label="__('Tara (kg)')" type="number" step="0.01" min="0" required />
+                        <div class="mt-3 space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <flux:input
+                                    wire:model.live="pesaje_bruto"
+                                    :label="__('Bruto (kg)')"
+                                    :description="__('Camión + mercadería')"
+                                    type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                    required
+                                    autofocus
+                                />
+                                <flux:input
+                                    wire:model.live="tara"
+                                    :label="__('Tara (kg)')"
+                                    :description="__('Peso del camión vacío')"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    required
+                                />
+                            </div>
+
+                            <flux:input wire:model.live="porcentaje_ganancia" :label="__('Porcentaje de ganancia (%)')" type="number" step="0.01" min="0" required />
                         </div>
-
-                        <flux:input wire:model.live="porcentaje_ganancia" :label="__('Porcentaje de ganancia (%)')" type="number" step="0.01" min="0" required />
                     </div>
-                </div>
+                @else
+                    <div>
+                        <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                            {{ __('Cantidad recibida') }}
+                        </flux:heading>
+
+                        <div class="mt-3 space-y-4">
+                            <flux:input
+                                wire:model.live="cantidad_recibida"
+                                :label="__('Unidades recibidas')"
+                                :description="__('Precargado con lo declarado; ajustalo si llegó de menos.')"
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                required
+                                autofocus
+                            />
+
+                            <flux:input wire:model.live="porcentaje_ganancia" :label="__('Porcentaje de ganancia (%)')" type="number" step="0.01" min="0" required />
+                        </div>
+                    </div>
+                @endif
 
                 <flux:separator />
 
@@ -111,7 +175,7 @@ new #[Title('Recepción de guía')] class extends Component {
                     <div class="mt-3 rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
                         <div class="flex justify-between">
                             <flux:text>{{ __('Neto') }}</flux:text>
-                            <flux:text class="font-mono">{{ $this->neto !== null ? number_format($this->neto, 2, ',', '.').' kg' : '—' }}</flux:text>
+                            <flux:text class="font-mono">{{ $this->neto !== null ? number_format($this->neto, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
                         </div>
                         <div class="mt-2 flex justify-between">
                             <flux:text>{{ __('Ganancia a cargar en cta cte del cliente') }}</flux:text>

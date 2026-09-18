@@ -33,13 +33,14 @@ test('se puede cargar una guía buscando transporte y cliente por autocompletado
         ->and($guia->estado)->toBe('cargada');
 });
 
-test('recepcionar una guía desde la pantalla actualiza estado y cta cte', function () {
+test('recepcionar una guía por kilos calcula neto (bruto - tara) y actualiza cta cte', function () {
     $user = User::factory()->create();
     $cliente = Cliente::factory()->create();
-    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create();
+    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create(['unidad' => 'kilos']);
 
     Livewire::actingAs($user)
         ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
+        ->assertSee('Bruto (kg)')
         ->set('pesaje_bruto', '20000')
         ->set('tara', '8000')
         ->set('porcentaje_ganancia', '10')
@@ -56,4 +57,33 @@ test('recepcionar una guía desde la pantalla actualiza estado y cta cte', funct
         ->get(route('guias.index'))
         ->assertOk()
         ->assertSee('Recibida');
+});
+
+test('recepcionar una guía por unidades usa la cantidad recibida como neto', function () {
+    $user = User::factory()->create();
+    $cliente = Cliente::factory()->create();
+    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create([
+        'unidad' => 'unidades',
+        'cantidad' => 500,
+    ]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
+        ->assertSee('Unidades recibidas')
+        ->assertDontSee('Bruto (kg)');
+
+    expect($component->get('cantidad_recibida'))->toBe('500');
+
+    $component->set('cantidad_recibida', '480')
+        ->set('porcentaje_ganancia', '10')
+        ->call('recepcionar')
+        ->assertHasNoErrors();
+
+    $guia->refresh();
+
+    expect($guia->estado)->toBe('recibida')
+        ->and($guia->neto)->toEqual('480.00')
+        ->and($guia->pesaje_bruto)->toBeNull()
+        ->and($guia->tara)->toBeNull()
+        ->and($cliente->refresh()->saldo_cta_cte)->toEqual('48.00');
 });

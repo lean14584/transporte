@@ -70,13 +70,34 @@ class Guia extends Model
     }
 
     /**
-     * Cierra la recepción: calcula neto (bruto - tara) y la ganancia sobre el neto,
-     * y carga esa ganancia como saldo en la cta cte del cliente.
+     * Cierra la recepción de una guía por kilos: calcula neto (bruto - tara)
+     * y la ganancia sobre el neto, y la carga como saldo en la cta cte del cliente.
      */
     public function recepcionar(float $pesajeBruto, float $tara, float $porcentajeGanancia): void
     {
-        DB::transaction(function () use ($pesajeBruto, $tara, $porcentajeGanancia) {
-            $neto = $pesajeBruto - $tara;
+        $this->finalizarRecepcion(
+            neto: $pesajeBruto - $tara,
+            porcentajeGanancia: $porcentajeGanancia,
+            pesajeBruto: $pesajeBruto,
+            tara: $tara,
+        );
+    }
+
+    /**
+     * Cierra la recepción de una guía por unidades: la cantidad recibida
+     * (puede diferir de la declarada al cargar) es directamente el neto.
+     */
+    public function recepcionarPorCantidad(float $cantidadRecibida, float $porcentajeGanancia): void
+    {
+        $this->finalizarRecepcion(
+            neto: $cantidadRecibida,
+            porcentajeGanancia: $porcentajeGanancia,
+        );
+    }
+
+    private function finalizarRecepcion(float $neto, float $porcentajeGanancia, ?float $pesajeBruto = null, ?float $tara = null): void
+    {
+        DB::transaction(function () use ($neto, $porcentajeGanancia, $pesajeBruto, $tara) {
             $montoGanancia = round($neto * $porcentajeGanancia / 100, 2);
 
             $this->update([
