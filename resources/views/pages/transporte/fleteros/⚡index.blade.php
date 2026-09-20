@@ -19,6 +19,7 @@ new #[Title('Fleteros')] class extends Component {
     public string $razon_social = '';
     public string $direccion = '';
     public string $cuit = '';
+    public string $dni = '';
     public string $telefono = '';
     public string $contacto = '';
     public string $nacionalidad = '';
@@ -41,7 +42,7 @@ new #[Title('Fleteros')] class extends Component {
 
     public function crear(): void
     {
-        $this->reset(['editingId', 'numero_fletero', 'razon_social', 'direccion', 'cuit', 'telefono', 'contacto', 'nacionalidad']);
+        $this->reset(['editingId', 'numero_fletero', 'razon_social', 'direccion', 'cuit', 'dni', 'telefono', 'contacto', 'nacionalidad']);
         Flux::modal('fletero-form')->show();
     }
 
@@ -54,6 +55,7 @@ new #[Title('Fleteros')] class extends Component {
         $this->razon_social = $fletero->razon_social;
         $this->direccion = (string) $fletero->direccion;
         $this->cuit = (string) $fletero->cuit;
+        $this->dni = (string) $fletero->dni;
         $this->telefono = (string) $fletero->telefono;
         $this->contacto = (string) $fletero->contacto;
         $this->nacionalidad = (string) $fletero->nacionalidad;
@@ -68,6 +70,7 @@ new #[Title('Fleteros')] class extends Component {
             'razon_social' => ['required', 'string', 'max:255'],
             'direccion' => ['nullable', 'string', 'max:255'],
             'cuit' => ['nullable', 'string', 'max:255'],
+            'dni' => ['nullable', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:255'],
             'contacto' => ['nullable', 'string', 'max:255'],
             'nacionalidad' => ['nullable', 'string', 'max:255'],
@@ -201,6 +204,7 @@ new #[Title('Fleteros')] class extends Component {
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <flux:input wire:model="numero_fletero" :label="__('Número de fletero')" />
                 <flux:input wire:model="cuit" :label="__('CUIT')" />
+                <flux:input wire:model="dni" :label="__('DNI')" />
                 <flux:input wire:model="telefono" :label="__('Teléfono')" />
                 <flux:input wire:model="contacto" :label="__('Contacto')" />
                 <flux:input wire:model="nacionalidad" :label="__('Nacionalidad')" />

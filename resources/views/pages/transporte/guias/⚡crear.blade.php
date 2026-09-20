@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Cliente;
+use App\Models\Fletero;
 use App\Models\Guia;
 use App\Models\Transporte;
 use Flux\Flux;
@@ -21,7 +22,11 @@ new #[Title('Cargar guía')] class extends Component {
     public string $clienteNumero = '';
     public string $clienteRazonSocial = '';
 
+    public string $buscarFletero = '';
+    public ?int $fletero_id = null;
     public string $transportista = '';
+    public string $transportista_documento = '';
+
     public string $camion_marca = '';
     public string $camion_modelo = '';
     public string $camion_patente = '';
@@ -54,6 +59,16 @@ new #[Title('Cargar guía')] class extends Component {
         }
 
         return Cliente::where('nombre', 'like', "%{$this->buscarCliente}%")->limit(8)->get();
+    }
+
+    #[Computed]
+    public function fleterosSugeridos()
+    {
+        if ($this->fletero_id || strlen($this->buscarFletero) < 1) {
+            return collect();
+        }
+
+        return Fletero::where('razon_social', 'like', "%{$this->buscarFletero}%")->limit(8)->get();
     }
 
     public function seleccionarTransporte(int $id): void
@@ -92,12 +107,28 @@ new #[Title('Cargar guía')] class extends Component {
         $this->clienteRazonSocial = '';
     }
 
+    public function seleccionarFletero(int $id): void
+    {
+        $fletero = Fletero::findOrFail($id);
+        $this->fletero_id = $fletero->id;
+        $this->transportista = $fletero->razon_social;
+        $this->transportista_documento = (string) ($fletero->dni ?: $fletero->cuit);
+        $this->buscarFletero = '';
+    }
+
+    public function quitarFletero(): void
+    {
+        $this->fletero_id = null;
+        $this->transportista = '';
+        $this->transportista_documento = '';
+    }
+
     public function guardar(): void
     {
         $validated = $this->validate([
             'transporte_id' => ['required', 'exists:transportes,id'],
             'cliente_id' => ['required', 'exists:clientes,id'],
-            'transportista' => ['required', 'string', 'max:255'],
+            'fletero_id' => ['required', 'exists:fleteros,id'],
             'camion_marca' => ['nullable', 'string', 'max:255'],
             'camion_modelo' => ['nullable', 'string', 'max:255'],
             'camion_patente' => ['nullable', 'string', 'max:255'],
@@ -110,6 +141,8 @@ new #[Title('Cargar guía')] class extends Component {
 
         $guia = Guia::create([
             ...$validated,
+            'transportista' => $this->transportista,
+            'transportista_documento' => $this->transportista_documento ?: null,
             'estado' => 'cargada',
             'usuario_carga_id' => auth()->id(),
         ]);
@@ -217,7 +250,41 @@ new #[Title('Cargar guía')] class extends Component {
                     </flux:heading>
 
                     <div class="mt-3 space-y-4">
-                        <flux:input wire:model="transportista" :label="__('Transportista')" placeholder="{{ __('Nombre de quien maneja el camión') }}" required />
+                        <div class="relative">
+                            <flux:label>{{ __('Transportista') }}</flux:label>
+
+                            @if ($fletero_id)
+                                <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                                    <div>
+                                        <div>{{ $transportista }}</div>
+                                        <div class="text-xs text-zinc-500">
+                                            {{ __('Documento') }} {{ $transportista_documento ?: '—' }}
+                                        </div>
+                                    </div>
+                                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarFletero" />
+                                </div>
+                            @else
+                                <flux:input wire:model.live.debounce.200ms="buscarFletero" icon="magnifying-glass" placeholder="{{ __('Buscar fletero...') }}" />
+
+                                @if ($this->fleterosSugeridos->isNotEmpty())
+                                    <div class="absolute z-10 mt-1 w-full rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-zinc-800">
+                                        @foreach ($this->fleterosSugeridos as $sugerido)
+                                            <button
+                                                type="button"
+                                                wire:click="seleccionarFletero({{ $sugerido->id }})"
+                                                class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
+                                            >
+                                                <div>{{ $sugerido->razon_social }}</div>
+                                                <div class="text-xs text-zinc-500">
+                                                    {{ __('Documento') }} {{ $sugerido->dni ?: $sugerido->cuit ?: '—' }}
+                                                </div>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @endif
+                            @error('fletero_id') <flux:error>{{ $message }}</flux:error> @enderror
+                        </div>
 
                         <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                             <flux:input wire:model="camion_marca" :label="__('Marca')" />

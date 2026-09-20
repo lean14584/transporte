@@ -22,6 +22,7 @@ class FleteroFactory extends Factory
             'razon_social' => fake()->company(),
             'direccion' => fake()->streetAddress(),
             'cuit' => fake()->numerify('##-########-#'),
+            'dni' => fake()->numerify('########'),
             'telefono' => fake()->phoneNumber(),
             'contacto' => fake()->name(),
             'nacionalidad' => 'Argentina',
