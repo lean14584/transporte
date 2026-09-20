@@ -11,7 +11,7 @@ test('recepcionar una guía calcula el neto y carga la ganancia a la cta cte del
 
     $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create();
 
-    $guia->recepcionar(pesajeBruto: 20000, tara: 8000, porcentajeGanancia: 10);
+    $guia->recepcionar(pesajeBruto: 20000, tara: 8000, totalDescargado: 12000, totalCliente: 0, totalFletero: 0, montoGanancia: 1200);
 
     $guia->refresh();
     $cliente->refresh();
@@ -42,10 +42,10 @@ test('varias guías y cobros consecutivos mantienen el saldo acumulado correcto'
     $transporte = Transporte::factory()->create();
 
     Guia::factory()->for($cliente)->for($transporte)->create()
-        ->recepcionar(10000, 2000, 10); // +800
+        ->recepcionar(10000, 2000, 8000, 0, 0, 800); // +800
 
     Guia::factory()->for($cliente)->for($transporte)->create()
-        ->recepcionar(5000, 1000, 20); // +800
+        ->recepcionar(5000, 1000, 4000, 0, 0, 800); // +800
 
     Recibo::cobrar($cliente->refresh(), 1000, 'transferencia'); // -1000
 

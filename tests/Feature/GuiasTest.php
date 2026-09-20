@@ -31,8 +31,8 @@ test('se puede cargar una guía buscando transporte, cliente, fletero y producto
         ->call('seleccionarProducto', $producto->id)
         ->set('unidad', 'kilos')
         ->set('tn_cargadas', '25.5')
-        ->set('tn_cliente', '25.2')
-        ->set('tn_fletero', '25.3')
+        ->set('precio_cliente', '50000')
+        ->set('precio_fletero', '30000')
         ->call('guardar')
         ->assertHasNoErrors();
 
@@ -47,8 +47,8 @@ test('se puede cargar una guía buscando transporte, cliente, fletero y producto
         ->and($guia->transportista_documento)->toBe('30111222')
         ->and($guia->cantidad)->toEqual('25.50')
         ->and($guia->tn_cargadas)->toEqual('25.50')
-        ->and($guia->tn_cliente)->toEqual('25.20')
-        ->and($guia->tn_fletero)->toEqual('25.30')
+        ->and($guia->precio_cliente)->toEqual('50000.00')
+        ->and($guia->precio_fletero)->toEqual('30000.00')
         ->and($guia->estado)->toBe('cargada');
 });
 
@@ -74,21 +74,27 @@ test('cargar una guía por unidades no pide TN, solo cantidad', function () {
 
     expect($guia->cantidad)->toEqual('500.00')
         ->and($guia->tn_cargadas)->toBeNull()
-        ->and($guia->tn_cliente)->toBeNull()
-        ->and($guia->tn_fletero)->toBeNull();
+        ->and($guia->precio_cliente)->toBeNull()
+        ->and($guia->precio_fletero)->toBeNull();
 });
 
-test('recepcionar una guía por kilos calcula neto (bruto - tara) y actualiza cta cte', function () {
+test('recepcionar una guía por kilos precarga total descargado (bruto - tara) y carga los totales a mano en cta cte', function () {
     $user = User::factory()->create();
     $cliente = Cliente::factory()->create();
     $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create(['unidad' => 'kilos']);
 
-    Livewire::actingAs($user)
+    $component = Livewire::actingAs($user)
         ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
         ->assertSee('Bruto (kg)')
         ->set('pesaje_bruto', '20000')
-        ->set('tara', '8000')
-        ->set('porcentaje_ganancia', '10')
+        ->set('tara', '8000');
+
+    expect($component->get('total_descargado'))->toBe('12000');
+
+    $component
+        ->set('total_cliente', '600000')
+        ->set('total_fletero', '360000')
+        ->set('monto_ganancia', '1200')
         ->call('recepcionar')
         ->assertHasNoErrors();
 
@@ -96,6 +102,9 @@ test('recepcionar una guía por kilos calcula neto (bruto - tara) y actualiza ct
 
     expect($guia->estado)->toBe('recibida')
         ->and($guia->neto)->toEqual('12000.00')
+        ->and($guia->total_cliente)->toEqual('600000.00')
+        ->and($guia->total_fletero)->toEqual('360000.00')
+        ->and($guia->monto_ganancia)->toEqual('1200.00')
         ->and($cliente->refresh()->saldo_cta_cte)->toEqual('1200.00');
 
     $this->actingAs($user)
