@@ -189,19 +189,22 @@ new #[Title('Fleteros')] class extends Component {
 
     {{ $this->fleteros->links() }}
 
-    <flux:modal name="fletero-form" class="max-w-lg" @close="$set('editingId', null)">
+    <flux:modal name="fletero-form" class="max-w-2xl" @close="$set('editingId', null)">
         <form wire:submit="guardar" class="space-y-6">
             <flux:heading size="lg">
                 {{ $editingId ? __('Editar fletero') : __('Nuevo fletero') }}
             </flux:heading>
 
-            <flux:input wire:model="numero_fletero" :label="__('Número de fletero')" />
             <flux:input wire:model="razon_social" :label="__('Razón social')" required autofocus />
             <flux:input wire:model="direccion" :label="__('Dirección')" />
-            <flux:input wire:model="cuit" :label="__('CUIT')" />
-            <flux:input wire:model="telefono" :label="__('Teléfono')" />
-            <flux:input wire:model="contacto" :label="__('Contacto')" />
-            <flux:input wire:model="nacionalidad" :label="__('Nacionalidad')" />
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <flux:input wire:model="numero_fletero" :label="__('Número de fletero')" />
+                <flux:input wire:model="cuit" :label="__('CUIT')" />
+                <flux:input wire:model="telefono" :label="__('Teléfono')" />
+                <flux:input wire:model="contacto" :label="__('Contacto')" />
+                <flux:input wire:model="nacionalidad" :label="__('Nacionalidad')" />
+            </div>
 
             <div class="flex justify-end gap-2">
                 <flux:modal.close>

@@ -215,21 +215,24 @@ new #[Title('Clientes')] class extends Component {
 
     {{ $this->clientes->links() }}
 
-    <flux:modal name="cliente-form" class="max-w-lg" @close="$set('editingId', null)">
+    <flux:modal name="cliente-form" class="max-w-2xl" @close="$set('editingId', null)">
         <form wire:submit="guardar" class="space-y-6">
             <flux:heading size="lg">
                 {{ $editingId ? __('Editar cliente') : __('Nuevo cliente') }}
             </flux:heading>
 
-            <flux:input wire:model="numero_cliente" :label="__('Número de cliente')" />
             <flux:input wire:model="nombre" :label="__('Nombre')" required autofocus />
             <flux:input wire:model="razon_social" :label="__('Razón social')" />
             <flux:input wire:model="direccion" :label="__('Dirección')" />
-            <flux:input wire:model="dni" :label="__('DNI')" />
-            <flux:input wire:model="cuit" :label="__('CUIT')" />
-            <flux:input wire:model="telefono" :label="__('Teléfono')" />
-            <flux:input wire:model="contacto" :label="__('Contacto')" />
-            <flux:input wire:model="nacionalidad" :label="__('Nacionalidad')" />
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <flux:input wire:model="numero_cliente" :label="__('Número de cliente')" />
+                <flux:input wire:model="dni" :label="__('DNI')" />
+                <flux:input wire:model="cuit" :label="__('CUIT')" />
+                <flux:input wire:model="telefono" :label="__('Teléfono')" />
+                <flux:input wire:model="contacto" :label="__('Contacto')" />
+                <flux:input wire:model="nacionalidad" :label="__('Nacionalidad')" />
+            </div>
 
             <flux:select wire:model="condicion_iva" :label="__('Condición IVA')">
                 <flux:select.option value="responsable_inscripto">{{ __('Responsable Inscripto') }}</flux:select.option>
