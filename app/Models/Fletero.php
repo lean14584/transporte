@@ -15,6 +15,7 @@ class Fletero extends Model
         'razon_social',
         'direccion',
         'cuit',
+        'dni',
         'telefono',
         'contacto',
         'nacionalidad',

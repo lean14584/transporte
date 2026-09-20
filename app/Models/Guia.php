@@ -15,7 +15,9 @@ class Guia extends Model
     protected $fillable = [
         'transporte_id',
         'cliente_id',
+        'fletero_id',
         'transportista',
+        'transportista_documento',
         'camion_marca',
         'camion_modelo',
         'camion_patente',
@@ -57,6 +59,11 @@ class Guia extends Model
     public function cliente()
     {
         return $this->belongsTo(Cliente::class);
+    }
+
+    public function fletero()
+    {
+        return $this->belongsTo(Fletero::class);
     }
 
     public function movimientoCtaCte()

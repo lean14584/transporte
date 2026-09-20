@@ -72,7 +72,7 @@
             </tr>
             <tr>
                 <td class="label">Transportista</td>
-                <td class="valor">{{ $guia->transportista }}</td>
+                <td class="valor">{{ $guia->transportista }}{{ $guia->transportista_documento ? ' (Doc. '.$guia->transportista_documento.')' : '' }}</td>
                 <td class="label">Estado</td>
                 <td class="valor">{{ $guia->estado === 'recibida' ? 'Recibida' : 'Cargada' }}</td>
             </tr>

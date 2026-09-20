@@ -1,15 +1,17 @@
 <?php
 
 use App\Models\Cliente;
+use App\Models\Fletero;
 use App\Models\Guia;
 use App\Models\Transporte;
 use App\Models\User;
 use Livewire\Livewire;
 
-test('se puede cargar una guía buscando transporte y cliente por autocompletado', function () {
+test('se puede cargar una guía buscando transporte, cliente y fletero por autocompletado', function () {
     $user = User::factory()->create();
     $transporte = Transporte::factory()->create(['nombre' => 'Transporte Rápido SRL']);
     $cliente = Cliente::factory()->create(['nombre' => 'Cerealera del Norte']);
+    $fletero = Fletero::factory()->create(['razon_social' => 'Juan Pérez', 'dni' => '30111222']);
 
     Livewire::actingAs($user)
         ->test('pages::transporte.guias.crear')
@@ -19,7 +21,9 @@ test('se puede cargar una guía buscando transporte y cliente por autocompletado
         ->set('buscarCliente', 'Cerealera')
         ->assertSee('Cerealera del Norte')
         ->call('seleccionarCliente', $cliente->id)
-        ->set('transportista', 'Juan Pérez')
+        ->set('buscarFletero', 'Juan')
+        ->assertSee('Juan Pérez')
+        ->call('seleccionarFletero', $fletero->id)
         ->set('mercaderia', 'Soja')
         ->set('cantidad', '25000')
         ->set('unidad', 'kilos')
@@ -30,6 +34,9 @@ test('se puede cargar una guía buscando transporte y cliente por autocompletado
 
     expect($guia->transporte_id)->toBe($transporte->id)
         ->and($guia->cliente_id)->toBe($cliente->id)
+        ->and($guia->fletero_id)->toBe($fletero->id)
+        ->and($guia->transportista)->toBe('Juan Pérez')
+        ->and($guia->transportista_documento)->toBe('30111222')
         ->and($guia->estado)->toBe('cargada');
 });
 
