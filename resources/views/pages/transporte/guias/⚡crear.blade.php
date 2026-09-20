@@ -40,6 +40,9 @@ new #[Title('Cargar guía')] class extends Component {
     public string $productoFormaCarga = '';
 
     public string $cantidad = '';
+    public string $tn_cargadas = '';
+    public string $tn_cliente = '';
+    public string $tn_fletero = '';
     public string $unidad = 'kilos';
     public string $fecha_carga = '';
 
@@ -160,6 +163,8 @@ new #[Title('Cargar guía')] class extends Component {
 
     public function guardar(): void
     {
+        $esPorKilos = $this->unidad === 'kilos';
+
         $validated = $this->validate([
             'transporte_id' => ['required', 'exists:transportes,id'],
             'cliente_id' => ['required', 'exists:clientes,id'],
@@ -169,13 +174,20 @@ new #[Title('Cargar guía')] class extends Component {
             'camion_modelo' => ['nullable', 'string', 'max:255'],
             'camion_patente' => ['nullable', 'string', 'max:255'],
             'camion_color' => ['nullable', 'string', 'max:255'],
-            'cantidad' => ['required', 'numeric', 'gt:0'],
+            'cantidad' => $esPorKilos ? ['nullable'] : ['required', 'numeric', 'gt:0'],
+            'tn_cargadas' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
+            'tn_cliente' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
+            'tn_fletero' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
             'unidad' => ['required', 'in:kilos,unidades'],
             'fecha_carga' => ['required', 'date'],
         ]);
 
         $guia = Guia::create([
             ...$validated,
+            'cantidad' => $esPorKilos ? $validated['tn_cargadas'] : $validated['cantidad'],
+            'tn_cargadas' => $esPorKilos ? $validated['tn_cargadas'] : null,
+            'tn_cliente' => $esPorKilos ? $validated['tn_cliente'] : null,
+            'tn_fletero' => $esPorKilos ? $validated['tn_fletero'] : null,
             'transportista' => $this->transportista,
             'transportista_documento' => $this->transportista_documento ?: null,
             'mercaderia' => $this->mercaderia,
@@ -375,14 +387,20 @@ new #[Title('Cargar guía')] class extends Component {
                             @error('producto_id') <flux:error>{{ $message }}</flux:error> @enderror
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />
+                        <flux:select wire:model.live="unidad" :label="__('Unidad')">
+                            <flux:select.option value="kilos">{{ __('Kilos') }}</flux:select.option>
+                            <flux:select.option value="unidades">{{ __('Unidades') }}</flux:select.option>
+                        </flux:select>
 
-                            <flux:select wire:model="unidad" :label="__('Unidad')">
-                                <flux:select.option value="kilos">{{ __('Kilos') }}</flux:select.option>
-                                <flux:select.option value="unidades">{{ __('Unidades') }}</flux:select.option>
-                            </flux:select>
-                        </div>
+                        @if ($unidad === 'kilos')
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                <flux:input wire:model="tn_cargadas" :label="__('TN Cargadas')" type="number" step="0.01" min="0.01" required />
+                                <flux:input wire:model="tn_cliente" :label="__('TN Cliente')" type="number" step="0.01" min="0.01" required />
+                                <flux:input wire:model="tn_fletero" :label="__('TN Fletero')" type="number" step="0.01" min="0.01" required />
+                            </div>
+                        @else
+                            <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />
+                        @endif
 
                         <flux:input wire:model="fecha_carga" :label="__('Fecha de carga')" type="date" required />
                     </div>
