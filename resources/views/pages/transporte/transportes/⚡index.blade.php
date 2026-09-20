@@ -15,10 +15,13 @@ new #[Title('Transportes')] class extends Component {
 
     public ?int $editingId = null;
 
+    public string $numero_transporte = '';
     public string $nombre = '';
     public string $direccion = '';
     public string $telefono = '';
     public string $dueno = '';
+    public string $cuit = '';
+    public string $nacionalidad = '';
 
     public function updatingSearch(): void
     {
@@ -37,7 +40,7 @@ new #[Title('Transportes')] class extends Component {
 
     public function crear(): void
     {
-        $this->reset(['editingId', 'nombre', 'direccion', 'telefono', 'dueno']);
+        $this->reset(['editingId', 'numero_transporte', 'nombre', 'direccion', 'telefono', 'dueno', 'cuit', 'nacionalidad']);
         Flux::modal('transporte-form')->show();
     }
 
@@ -46,10 +49,13 @@ new #[Title('Transportes')] class extends Component {
         $transporte = Transporte::findOrFail($id);
 
         $this->editingId = $transporte->id;
+        $this->numero_transporte = (string) $transporte->numero_transporte;
         $this->nombre = $transporte->nombre;
         $this->direccion = (string) $transporte->direccion;
         $this->telefono = (string) $transporte->telefono;
         $this->dueno = (string) $transporte->dueno;
+        $this->cuit = (string) $transporte->cuit;
+        $this->nacionalidad = (string) $transporte->nacionalidad;
 
         Flux::modal('transporte-form')->show();
     }
@@ -57,10 +63,13 @@ new #[Title('Transportes')] class extends Component {
     public function guardar(): void
     {
         $validated = $this->validate([
+            'numero_transporte' => ['nullable', 'string', 'max:255'],
             'nombre' => ['required', 'string', 'max:255'],
             'direccion' => ['nullable', 'string', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:255'],
             'dueno' => ['nullable', 'string', 'max:255'],
+            'cuit' => ['nullable', 'string', 'max:255'],
+            'nacionalidad' => ['nullable', 'string', 'max:255'],
         ]);
 
         Transporte::updateOrCreate(['id' => $this->editingId], $validated);
@@ -107,6 +116,7 @@ new #[Title('Transportes')] class extends Component {
         <flux:table>
             <flux:table.columns>
                 <flux:table.column>{{ __('Nombre') }}</flux:table.column>
+                <flux:table.column>{{ __('CUIT') }}</flux:table.column>
                 <flux:table.column>{{ __('Dirección') }}</flux:table.column>
                 <flux:table.column>{{ __('Teléfono') }}</flux:table.column>
                 <flux:table.column>{{ __('Dueño') }}</flux:table.column>
@@ -117,6 +127,7 @@ new #[Title('Transportes')] class extends Component {
                 @forelse ($this->transportes as $transporte)
                     <flux:table.row wire:key="transporte-{{ $transporte->id }}">
                         <flux:table.cell class="font-medium">{{ $transporte->nombre }}</flux:table.cell>
+                        <flux:table.cell>{{ $transporte->cuit ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $transporte->direccion ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $transporte->telefono ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $transporte->dueno ?: '—' }}</flux:table.cell>
@@ -135,7 +146,7 @@ new #[Title('Transportes')] class extends Component {
                     </flux:table.row>
                 @empty
                     <flux:table.row>
-                        <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                        <flux:table.cell colspan="6" class="text-center text-zinc-500">
                             {{ __('Todavía no hay transportes cargados.') }}
                         </flux:table.cell>
                     </flux:table.row>
@@ -168,6 +179,7 @@ new #[Title('Transportes')] class extends Component {
                 <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-500">
                     <span>{{ __('Tel.') }} {{ $transporte->telefono ?: '—' }}</span>
                     <span>{{ __('Dueño') }} {{ $transporte->dueno ?: '—' }}</span>
+                    <span>{{ __('CUIT') }} {{ $transporte->cuit ?: '—' }}</span>
                 </div>
             </div>
         @empty
@@ -185,7 +197,10 @@ new #[Title('Transportes')] class extends Component {
                 {{ $editingId ? __('Editar transporte') : __('Nuevo transporte') }}
             </flux:heading>
 
+            <flux:input wire:model="numero_transporte" :label="__('Número de transporte')" />
             <flux:input wire:model="nombre" :label="__('Nombre')" required autofocus />
+            <flux:input wire:model="cuit" :label="__('CUIT')" />
+            <flux:input wire:model="nacionalidad" :label="__('Nacionalidad')" />
             <flux:input wire:model="direccion" :label="__('Dirección')" />
             <flux:input wire:model="telefono" :label="__('Teléfono')" />
             <flux:input wire:model="dueno" :label="__('Dueño')" />

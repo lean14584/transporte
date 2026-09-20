@@ -24,6 +24,12 @@
                     <flux:sidebar.item icon="truck" :href="route('transportes.index')" :current="request()->routeIs('transportes.*')" wire:navigate>
                         {{ __('Transportes') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="identification" :href="route('fleteros.index')" :current="request()->routeIs('fleteros.*')" wire:navigate>
+                        {{ __('Fleteros') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="cube" :href="route('productos.index')" :current="request()->routeIs('productos.*')" wire:navigate>
+                        {{ __('Productos') }}
+                    </flux:sidebar.item>
                     <flux:sidebar.item icon="user-group" :href="route('clientes.index')" :current="request()->routeIs('clientes.*')" wire:navigate>
                         {{ __('Clientes') }}
                     </flux:sidebar.item>
