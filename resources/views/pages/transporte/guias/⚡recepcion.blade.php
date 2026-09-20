@@ -202,8 +202,12 @@ new #[Title('Recepción de guía')] class extends Component {
                             <flux:text class="font-mono">{{ $guia->tn_cliente !== null ? number_format((float) $guia->tn_cliente, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
                         </div>
                         <div class="mt-2 flex justify-between">
-                            <flux:text>{{ __('Total flete') }}</flux:text>
+                            <flux:text>{{ __('Total fletero') }}</flux:text>
                             <flux:text class="font-mono">{{ $guia->tn_fletero !== null ? number_format((float) $guia->tn_fletero, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
+                        </div>
+                        <div class="mt-2 flex justify-between">
+                            <flux:text>{{ __('Total cargado') }}</flux:text>
+                            <flux:text class="font-mono">{{ $guia->tn_cargadas !== null ? number_format((float) $guia->tn_cargadas, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
                         </div>
 
                         <flux:separator class="my-3" />
