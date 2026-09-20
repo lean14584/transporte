@@ -18,10 +18,13 @@ class TransporteFactory extends Factory
     public function definition(): array
     {
         return [
+            'numero_transporte' => fake()->unique()->numerify('TRA-####'),
             'nombre' => fake()->company(),
             'direccion' => fake()->streetAddress(),
             'telefono' => fake()->phoneNumber(),
             'dueno' => fake()->name(),
+            'cuit' => fake()->numerify('##-########-#'),
+            'nacionalidad' => 'Argentina',
         ];
     }
 }

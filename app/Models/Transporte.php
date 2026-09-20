@@ -11,10 +11,13 @@ class Transporte extends Model
     use HasFactory;
 
     protected $fillable = [
+        'numero_transporte',
         'nombre',
         'direccion',
         'telefono',
         'dueno',
+        'cuit',
+        'nacionalidad',
     ];
 
     public function guias()

@@ -18,10 +18,15 @@ class ClienteFactory extends Factory
     public function definition(): array
     {
         return [
+            'numero_cliente' => fake()->unique()->numerify('CLI-####'),
             'nombre' => fake()->name(),
+            'razon_social' => fake()->company(),
             'direccion' => fake()->streetAddress(),
             'telefono' => fake()->phoneNumber(),
             'dni' => fake()->numerify('########'),
+            'cuit' => fake()->numerify('##-########-#'),
+            'contacto' => fake()->name(),
+            'nacionalidad' => 'Argentina',
             'condicion_iva' => fake()->randomElement([
                 'responsable_inscripto',
                 'monotributista',

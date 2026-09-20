@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('transportes', 'pages::transporte.transportes.index')->name('transportes.index');
 
+    Route::livewire('fleteros', 'pages::transporte.fleteros.index')->name('fleteros.index');
+
+    Route::livewire('productos', 'pages::transporte.productos.index')->name('productos.index');
+
     Route::livewire('clientes', 'pages::transporte.clientes.index')->name('clientes.index');
     Route::livewire('clientes/{cliente}/cta-cte', 'pages::transporte.clientes.cta-cte')->name('clientes.cta-cte');
 
