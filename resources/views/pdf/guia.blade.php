@@ -106,6 +106,20 @@
                 <td class="label">Cantidad declarada</td>
                 <td class="valor">{{ number_format((float) $guia->cantidad, 2, ',', '.') }} {{ $guia->unidad }}</td>
             </tr>
+            @if ($guia->unidad === 'kilos' && $guia->tn_cargadas !== null)
+                <tr>
+                    <td class="label">TN Cargadas</td>
+                    <td class="valor">{{ number_format((float) $guia->tn_cargadas, 2, ',', '.') }}</td>
+                    <td class="label">TN Cliente</td>
+                    <td class="valor">{{ number_format((float) $guia->tn_cliente, 2, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td class="label">TN Fletero</td>
+                    <td class="valor">{{ number_format((float) $guia->tn_fletero, 2, ',', '.') }}</td>
+                    <td class="label"></td>
+                    <td class="valor"></td>
+                </tr>
+            @endif
         </table>
     </div>
 

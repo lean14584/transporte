@@ -29,8 +29,10 @@ test('se puede cargar una guía buscando transporte, cliente, fletero y producto
         ->set('buscarProducto', 'Soja')
         ->assertSee('Soja')
         ->call('seleccionarProducto', $producto->id)
-        ->set('cantidad', '25000')
         ->set('unidad', 'kilos')
+        ->set('tn_cargadas', '25.5')
+        ->set('tn_cliente', '25.2')
+        ->set('tn_fletero', '25.3')
         ->call('guardar')
         ->assertHasNoErrors();
 
@@ -43,7 +45,37 @@ test('se puede cargar una guía buscando transporte, cliente, fletero y producto
         ->and($guia->mercaderia)->toBe('Soja')
         ->and($guia->transportista)->toBe('Juan Pérez')
         ->and($guia->transportista_documento)->toBe('30111222')
+        ->and($guia->cantidad)->toEqual('25.50')
+        ->and($guia->tn_cargadas)->toEqual('25.50')
+        ->and($guia->tn_cliente)->toEqual('25.20')
+        ->and($guia->tn_fletero)->toEqual('25.30')
         ->and($guia->estado)->toBe('cargada');
+});
+
+test('cargar una guía por unidades no pide TN, solo cantidad', function () {
+    $user = User::factory()->create();
+    $transporte = Transporte::factory()->create();
+    $cliente = Cliente::factory()->create();
+    $fletero = Fletero::factory()->create();
+    $producto = Producto::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::transporte.guias.crear')
+        ->call('seleccionarTransporte', $transporte->id)
+        ->call('seleccionarCliente', $cliente->id)
+        ->call('seleccionarFletero', $fletero->id)
+        ->call('seleccionarProducto', $producto->id)
+        ->set('unidad', 'unidades')
+        ->set('cantidad', '500')
+        ->call('guardar')
+        ->assertHasNoErrors();
+
+    $guia = Guia::firstOrFail();
+
+    expect($guia->cantidad)->toEqual('500.00')
+        ->and($guia->tn_cargadas)->toBeNull()
+        ->and($guia->tn_cliente)->toBeNull()
+        ->and($guia->tn_fletero)->toBeNull();
 });
 
 test('recepcionar una guía por kilos calcula neto (bruto - tara) y actualiza cta cte', function () {
