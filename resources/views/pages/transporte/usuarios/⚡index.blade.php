@@ -163,15 +163,19 @@ new #[Title('Usuarios')] class extends Component {
         @endforeach
     </div>
 
-    <flux:modal name="usuario-form" class="max-w-lg" @close="$set('editingId', null)">
+    <flux:modal name="usuario-form" class="max-w-xl" @close="$set('editingId', null)">
         <form wire:submit="guardar" class="space-y-6">
             <flux:heading size="lg">
                 {{ $editingId ? __('Editar usuario') : __('Nuevo usuario') }}
             </flux:heading>
 
             <flux:input wire:model="name" :label="__('Nombre')" required autofocus />
-            <flux:input wire:model="username" :label="__('Usuario')" :description="__('Con esto entra al sistema, sin espacios ni acentos.')" required />
-            <flux:input wire:model="email" :label="__('Email')" type="email" required />
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <flux:input wire:model="username" :label="__('Usuario')" :description="__('Con esto entra al sistema, sin espacios ni acentos.')" required />
+                <flux:input wire:model="email" :label="__('Email')" type="email" required />
+            </div>
+
             <flux:input wire:model="password" :label="__('Contraseña')" type="password" placeholder="{{ $editingId ? __('Dejar en blanco para no cambiarla') : '' }}" viewable />
 
             <flux:select wire:model="role" :label="__('Rol')">

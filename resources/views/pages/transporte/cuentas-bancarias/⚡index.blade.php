@@ -167,15 +167,18 @@ new #[Title('Cuentas bancarias')] class extends Component {
         @endforelse
     </div>
 
-    <flux:modal name="cuenta-bancaria-form" class="max-w-lg" @close="$set('editingId', null)">
+    <flux:modal name="cuenta-bancaria-form" class="max-w-xl" @close="$set('editingId', null)">
         <form wire:submit="guardar" class="space-y-6">
             <flux:heading size="lg">
                 {{ $editingId ? __('Editar cuenta bancaria') : __('Nueva cuenta bancaria') }}
             </flux:heading>
 
             <flux:input wire:model="banco" :label="__('Banco')" required autofocus />
-            <flux:input wire:model="numero_cuenta" :label="__('Número de cuenta')" />
-            <flux:input wire:model="alias_cbu" :label="__('Alias / CBU')" />
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <flux:input wire:model="numero_cuenta" :label="__('Número de cuenta')" />
+                <flux:input wire:model="alias_cbu" :label="__('Alias / CBU')" />
+            </div>
 
             @if ($editingId)
                 <flux:input
