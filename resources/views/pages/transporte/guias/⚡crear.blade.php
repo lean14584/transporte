@@ -3,6 +3,7 @@
 use App\Models\Cliente;
 use App\Models\Fletero;
 use App\Models\Guia;
+use App\Models\Producto;
 use App\Models\Transporte;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
@@ -31,7 +32,13 @@ new #[Title('Cargar guía')] class extends Component {
     public string $camion_modelo = '';
     public string $camion_patente = '';
     public string $camion_color = '';
+
+    public string $buscarProducto = '';
+    public ?int $producto_id = null;
     public string $mercaderia = '';
+    public string $productoNumero = '';
+    public string $productoFormaCarga = '';
+
     public string $cantidad = '';
     public string $unidad = 'kilos';
     public string $fecha_carga = '';
@@ -69,6 +76,16 @@ new #[Title('Cargar guía')] class extends Component {
         }
 
         return Fletero::where('razon_social', 'like', "%{$this->buscarFletero}%")->limit(8)->get();
+    }
+
+    #[Computed]
+    public function productosSugeridos()
+    {
+        if ($this->producto_id || strlen($this->buscarProducto) < 1) {
+            return collect();
+        }
+
+        return Producto::where('nombre', 'like', "%{$this->buscarProducto}%")->limit(8)->get();
     }
 
     public function seleccionarTransporte(int $id): void
@@ -123,17 +140,35 @@ new #[Title('Cargar guía')] class extends Component {
         $this->transportista_documento = '';
     }
 
+    public function seleccionarProducto(int $id): void
+    {
+        $producto = Producto::findOrFail($id);
+        $this->producto_id = $producto->id;
+        $this->mercaderia = $producto->nombre;
+        $this->productoNumero = (string) $producto->numero_producto;
+        $this->productoFormaCarga = (string) $producto->forma_de_carga;
+        $this->buscarProducto = '';
+    }
+
+    public function quitarProducto(): void
+    {
+        $this->producto_id = null;
+        $this->mercaderia = '';
+        $this->productoNumero = '';
+        $this->productoFormaCarga = '';
+    }
+
     public function guardar(): void
     {
         $validated = $this->validate([
             'transporte_id' => ['required', 'exists:transportes,id'],
             'cliente_id' => ['required', 'exists:clientes,id'],
             'fletero_id' => ['required', 'exists:fleteros,id'],
+            'producto_id' => ['required', 'exists:productos,id'],
             'camion_marca' => ['nullable', 'string', 'max:255'],
             'camion_modelo' => ['nullable', 'string', 'max:255'],
             'camion_patente' => ['nullable', 'string', 'max:255'],
             'camion_color' => ['nullable', 'string', 'max:255'],
-            'mercaderia' => ['required', 'string', 'max:255'],
             'cantidad' => ['required', 'numeric', 'gt:0'],
             'unidad' => ['required', 'in:kilos,unidades'],
             'fecha_carga' => ['required', 'date'],
@@ -143,6 +178,7 @@ new #[Title('Cargar guía')] class extends Component {
             ...$validated,
             'transportista' => $this->transportista,
             'transportista_documento' => $this->transportista_documento ?: null,
+            'mercaderia' => $this->mercaderia,
             'estado' => 'cargada',
             'usuario_carga_id' => auth()->id(),
         ]);
@@ -303,7 +339,41 @@ new #[Title('Cargar guía')] class extends Component {
                     </flux:heading>
 
                     <div class="mt-3 space-y-4">
-                        <flux:input wire:model="mercaderia" :label="__('Mercadería a transportar')" required />
+                        <div class="relative">
+                            <flux:label>{{ __('Mercadería a transportar') }}</flux:label>
+
+                            @if ($producto_id)
+                                <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                                    <div>
+                                        <div>{{ $mercaderia }}</div>
+                                        <div class="text-xs text-zinc-500">
+                                            {{ __('N°') }} {{ $productoNumero ?: '—' }} · {{ $productoFormaCarga ?: '—' }}
+                                        </div>
+                                    </div>
+                                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarProducto" />
+                                </div>
+                            @else
+                                <flux:input wire:model.live.debounce.200ms="buscarProducto" icon="magnifying-glass" placeholder="{{ __('Buscar producto...') }}" />
+
+                                @if ($this->productosSugeridos->isNotEmpty())
+                                    <div class="absolute z-10 mt-1 w-full rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-zinc-800">
+                                        @foreach ($this->productosSugeridos as $sugerido)
+                                            <button
+                                                type="button"
+                                                wire:click="seleccionarProducto({{ $sugerido->id }})"
+                                                class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
+                                            >
+                                                <div>{{ $sugerido->nombre }}</div>
+                                                <div class="text-xs text-zinc-500">
+                                                    {{ __('N°') }} {{ $sugerido->numero_producto ?: '—' }} · {{ $sugerido->forma_de_carga ?: '—' }}
+                                                </div>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @endif
+                            @error('producto_id') <flux:error>{{ $message }}</flux:error> @enderror
+                        </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />

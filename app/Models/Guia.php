@@ -16,6 +16,7 @@ class Guia extends Model
         'transporte_id',
         'cliente_id',
         'fletero_id',
+        'producto_id',
         'transportista',
         'transportista_documento',
         'camion_marca',
@@ -64,6 +65,11 @@ class Guia extends Model
     public function fletero()
     {
         return $this->belongsTo(Fletero::class);
+    }
+
+    public function producto()
+    {
+        return $this->belongsTo(Producto::class);
     }
 
     public function movimientoCtaCte()
