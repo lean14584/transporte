@@ -41,8 +41,8 @@ new #[Title('Cargar guía')] class extends Component {
 
     public string $cantidad = '';
     public string $tn_cargadas = '';
-    public string $tn_cliente = '';
-    public string $tn_fletero = '';
+    public string $precio_cliente = '';
+    public string $precio_fletero = '';
     public string $unidad = 'kilos';
     public string $fecha_carga = '';
 
@@ -176,8 +176,8 @@ new #[Title('Cargar guía')] class extends Component {
             'camion_color' => ['nullable', 'string', 'max:255'],
             'cantidad' => $esPorKilos ? ['nullable'] : ['required', 'numeric', 'gt:0'],
             'tn_cargadas' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
-            'tn_cliente' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
-            'tn_fletero' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
+            'precio_cliente' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
+            'precio_fletero' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
             'unidad' => ['required', 'in:kilos,unidades'],
             'fecha_carga' => ['required', 'date'],
         ]);
@@ -186,8 +186,8 @@ new #[Title('Cargar guía')] class extends Component {
             ...$validated,
             'cantidad' => $esPorKilos ? $validated['tn_cargadas'] : $validated['cantidad'],
             'tn_cargadas' => $esPorKilos ? $validated['tn_cargadas'] : null,
-            'tn_cliente' => $esPorKilos ? $validated['tn_cliente'] : null,
-            'tn_fletero' => $esPorKilos ? $validated['tn_fletero'] : null,
+            'precio_cliente' => $esPorKilos ? $validated['precio_cliente'] : null,
+            'precio_fletero' => $esPorKilos ? $validated['precio_fletero'] : null,
             'transportista' => $this->transportista,
             'transportista_documento' => $this->transportista_documento ?: null,
             'mercaderia' => $this->mercaderia,
@@ -395,8 +395,8 @@ new #[Title('Cargar guía')] class extends Component {
                         @if ($unidad === 'kilos')
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <flux:input wire:model="tn_cargadas" :label="__('TN Cargadas')" type="number" step="0.01" min="0.01" required />
-                                <flux:input wire:model="tn_cliente" :label="__('TN Cliente')" type="number" step="0.01" min="0.01" required />
-                                <flux:input wire:model="tn_fletero" :label="__('TN Fletero')" type="number" step="0.01" min="0.01" required />
+                                <flux:input wire:model="precio_cliente" :label="__('Precio Cliente')" type="number" step="0.01" min="0.01" required />
+                                <flux:input wire:model="precio_fletero" :label="__('Precio Fletero')" type="number" step="0.01" min="0.01" required />
                             </div>
                         @else
                             <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />

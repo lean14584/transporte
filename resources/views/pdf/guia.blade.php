@@ -110,12 +110,12 @@
                 <tr>
                     <td class="label">TN Cargadas</td>
                     <td class="valor">{{ number_format((float) $guia->tn_cargadas, 2, ',', '.') }}</td>
-                    <td class="label">TN Cliente</td>
-                    <td class="valor">{{ number_format((float) $guia->tn_cliente, 2, ',', '.') }}</td>
+                    <td class="label">Precio Cliente</td>
+                    <td class="valor">$ {{ number_format((float) $guia->precio_cliente, 2, ',', '.') }}</td>
                 </tr>
                 <tr>
-                    <td class="label">TN Fletero</td>
-                    <td class="valor">{{ number_format((float) $guia->tn_fletero, 2, ',', '.') }}</td>
+                    <td class="label">Precio Fletero</td>
+                    <td class="valor">$ {{ number_format((float) $guia->precio_fletero, 2, ',', '.') }}</td>
                     <td class="label"></td>
                     <td class="valor"></td>
                 </tr>
@@ -127,20 +127,37 @@
         <div class="recuadro">
             <div class="seccion-titulo">Recepción — {{ $guia->fecha_recepcion?->format('d/m/Y') }}</div>
             <table class="totales" style="width: 100%;">
+                @if ($guia->unidad === 'kilos')
+                    <tr>
+                        <td class="label">Pesaje bruto</td>
+                        <td class="valor">{{ number_format((float) $guia->pesaje_bruto, 2, ',', '.') }} kg</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Tara</td>
+                        <td class="valor">{{ number_format((float) $guia->tara, 2, ',', '.') }} kg</td>
+                    </tr>
+                @endif
                 <tr>
-                    <td class="label">Pesaje bruto</td>
-                    <td class="valor">{{ number_format((float) $guia->pesaje_bruto, 2, ',', '.') }} kg</td>
+                    <td class="label">Total descargado</td>
+                    <td class="valor">{{ number_format((float) $guia->neto, 2, ',', '.') }} {{ $guia->unidad }}</td>
                 </tr>
+                @if ($guia->unidad === 'kilos')
+                    <tr>
+                        <td class="label">Total cliente</td>
+                        <td class="valor">$ {{ number_format((float) $guia->total_cliente, 2, ',', '.') }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Total fletero</td>
+                        <td class="valor">$ {{ number_format((float) $guia->total_fletero, 2, ',', '.') }}</td>
+                    </tr>
+                @endif
                 <tr>
-                    <td class="label">Tara</td>
-                    <td class="valor">{{ number_format((float) $guia->tara, 2, ',', '.') }} kg</td>
-                </tr>
-                <tr>
-                    <td class="label">Neto</td>
-                    <td class="valor">{{ number_format((float) $guia->neto, 2, ',', '.') }} kg</td>
-                </tr>
-                <tr>
-                    <td class="label">Ganancia ({{ rtrim(rtrim(number_format((float) $guia->porcentaje_ganancia, 2, ',', '.'), '0'), ',') }}% sobre el neto)</td>
+                    <td class="label">
+                        Ganancia
+                        @if ($guia->porcentaje_ganancia !== null)
+                            ({{ rtrim(rtrim(number_format((float) $guia->porcentaje_ganancia, 2, ',', '.'), '0'), ',') }}% sobre el neto)
+                        @endif
+                    </td>
                     <td class="valor">$ {{ number_format((float) $guia->monto_ganancia, 2, ',', '.') }}</td>
                 </tr>
             </table>

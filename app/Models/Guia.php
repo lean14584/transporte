@@ -26,8 +26,8 @@ class Guia extends Model
         'mercaderia',
         'cantidad',
         'tn_cargadas',
-        'tn_cliente',
-        'tn_fletero',
+        'precio_cliente',
+        'precio_fletero',
         'unidad',
         'fecha_carga',
         'estado',
@@ -36,6 +36,8 @@ class Guia extends Model
         'neto',
         'porcentaje_ganancia',
         'monto_ganancia',
+        'total_cliente',
+        'total_fletero',
         'fecha_recepcion',
         'usuario_carga_id',
         'usuario_recepcion_id',
@@ -48,13 +50,15 @@ class Guia extends Model
             'fecha_recepcion' => 'date',
             'cantidad' => 'decimal:2',
             'tn_cargadas' => 'decimal:2',
-            'tn_cliente' => 'decimal:2',
-            'tn_fletero' => 'decimal:2',
+            'precio_cliente' => 'decimal:2',
+            'precio_fletero' => 'decimal:2',
             'pesaje_bruto' => 'decimal:2',
             'tara' => 'decimal:2',
             'neto' => 'decimal:2',
             'porcentaje_ganancia' => 'decimal:2',
             'monto_ganancia' => 'decimal:2',
+            'total_cliente' => 'decimal:2',
+            'total_fletero' => 'decimal:2',
         ];
     }
 
@@ -99,45 +103,55 @@ class Guia extends Model
     }
 
     /**
-     * Cierra la recepción de una guía por kilos: calcula neto (bruto - tara)
-     * y la ganancia sobre el neto, y la carga como saldo en la cta cte del cliente.
+     * Cierra la recepción de una guía por kilos: el pesaje bruto/tara queda
+     * como referencia, pero el total descargado, el total cliente, el total
+     * fletero y la ganancia se cargan a mano (números reales de esa guía).
      */
-    public function recepcionar(float $pesajeBruto, float $tara, float $porcentajeGanancia): void
+    public function recepcionar(float $pesajeBruto, float $tara, float $totalDescargado, float $totalCliente, float $totalFletero, float $montoGanancia): void
     {
         if ($pesajeBruto <= $tara) {
             throw new \InvalidArgumentException('El peso bruto debe ser mayor que la tara.');
         }
 
         $this->finalizarRecepcion(
-            neto: $pesajeBruto - $tara,
-            porcentajeGanancia: $porcentajeGanancia,
+            neto: $totalDescargado,
+            montoGanancia: $montoGanancia,
             pesajeBruto: $pesajeBruto,
             tara: $tara,
+            totalCliente: $totalCliente,
+            totalFletero: $totalFletero,
         );
     }
 
     /**
      * Cierra la recepción de una guía por unidades: la cantidad recibida
-     * (puede diferir de la declarada al cargar) es directamente el neto.
+     * (puede diferir de la declarada al cargar) es directamente el neto,
+     * y la ganancia se calcula sobre un porcentaje configurado.
      */
     public function recepcionarPorCantidad(float $cantidadRecibida, float $porcentajeGanancia): void
     {
         $this->finalizarRecepcion(
             neto: $cantidadRecibida,
+            montoGanancia: round($cantidadRecibida * $porcentajeGanancia / 100, 2),
             porcentajeGanancia: $porcentajeGanancia,
         );
     }
 
-    private function finalizarRecepcion(float $neto, float $porcentajeGanancia, ?float $pesajeBruto = null, ?float $tara = null): void
-    {
-        DB::transaction(function () use ($neto, $porcentajeGanancia, $pesajeBruto, $tara) {
+    private function finalizarRecepcion(
+        float $neto,
+        float $montoGanancia,
+        ?float $pesajeBruto = null,
+        ?float $tara = null,
+        ?float $porcentajeGanancia = null,
+        ?float $totalCliente = null,
+        ?float $totalFletero = null,
+    ): void {
+        DB::transaction(function () use ($neto, $montoGanancia, $pesajeBruto, $tara, $porcentajeGanancia, $totalCliente, $totalFletero) {
             $guiaBloqueada = self::whereKey($this->id)->lockForUpdate()->first();
 
             if ($guiaBloqueada->estado === 'recibida') {
                 throw new \RuntimeException('Esta guía ya fue recepcionada.');
             }
-
-            $montoGanancia = round($neto * $porcentajeGanancia / 100, 2);
 
             $guiaBloqueada->update([
                 'pesaje_bruto' => $pesajeBruto,
@@ -145,6 +159,8 @@ class Guia extends Model
                 'neto' => $neto,
                 'porcentaje_ganancia' => $porcentajeGanancia,
                 'monto_ganancia' => $montoGanancia,
+                'total_cliente' => $totalCliente,
+                'total_fletero' => $totalFletero,
                 'estado' => 'recibida',
                 'fecha_recepcion' => now()->toDateString(),
                 'usuario_recepcion_id' => Auth::id(),

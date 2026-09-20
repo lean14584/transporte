@@ -14,7 +14,7 @@ test('se pueden generar los pdf de guía, recibo y orden de pago', function () {
     $transporte = Transporte::factory()->create();
 
     $guia = Guia::factory()->for($cliente)->for($transporte)->create();
-    $guia->recepcionar(20000, 8000, 10);
+    $guia->recepcionar(20000, 8000, 12000, 600000, 360000, 1200);
 
     $recibo = Recibo::cobrar($cliente->refresh(), 500, 'efectivo');
 
