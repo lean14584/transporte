@@ -215,17 +215,20 @@ new #[Title('Clientes')] class extends Component {
 
     {{ $this->clientes->links() }}
 
-    <flux:modal name="cliente-form" class="max-w-2xl" @close="$set('editingId', null)">
-        <form wire:submit="guardar" class="space-y-6">
+    <flux:modal name="cliente-form" class="max-w-3xl" @close="$set('editingId', null)">
+        <form wire:submit="guardar" class="space-y-5">
             <flux:heading size="lg">
                 {{ $editingId ? __('Editar cliente') : __('Nuevo cliente') }}
             </flux:heading>
 
-            <flux:input wire:model="nombre" :label="__('Nombre')" required autofocus />
-            <flux:input wire:model="razon_social" :label="__('Razón social')" />
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <flux:input wire:model="nombre" :label="__('Nombre')" required autofocus />
+                <flux:input wire:model="razon_social" :label="__('Razón social')" />
+            </div>
+
             <flux:input wire:model="direccion" :label="__('Dirección')" />
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <flux:input wire:model="numero_cliente" :label="__('Número de cliente')" />
                 <flux:input wire:model="dni" :label="__('DNI')" />
                 <flux:input wire:model="cuit" :label="__('CUIT')" />
