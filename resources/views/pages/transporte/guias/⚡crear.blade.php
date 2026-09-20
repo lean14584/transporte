@@ -12,10 +12,14 @@ new #[Title('Cargar guía')] class extends Component {
     public string $buscarTransporte = '';
     public ?int $transporte_id = null;
     public string $transporteSeleccionado = '';
+    public string $transporteCuit = '';
+    public string $transporteNacionalidad = '';
 
     public string $buscarCliente = '';
     public ?int $cliente_id = null;
     public string $clienteSeleccionado = '';
+    public string $clienteNumero = '';
+    public string $clienteRazonSocial = '';
 
     public string $transportista = '';
     public string $camion_marca = '';
@@ -57,6 +61,8 @@ new #[Title('Cargar guía')] class extends Component {
         $transporte = Transporte::findOrFail($id);
         $this->transporte_id = $transporte->id;
         $this->transporteSeleccionado = $transporte->nombre;
+        $this->transporteCuit = (string) $transporte->cuit;
+        $this->transporteNacionalidad = (string) $transporte->nacionalidad;
         $this->buscarTransporte = '';
     }
 
@@ -64,6 +70,8 @@ new #[Title('Cargar guía')] class extends Component {
     {
         $this->transporte_id = null;
         $this->transporteSeleccionado = '';
+        $this->transporteCuit = '';
+        $this->transporteNacionalidad = '';
     }
 
     public function seleccionarCliente(int $id): void
@@ -71,6 +79,8 @@ new #[Title('Cargar guía')] class extends Component {
         $cliente = Cliente::findOrFail($id);
         $this->cliente_id = $cliente->id;
         $this->clienteSeleccionado = $cliente->nombre;
+        $this->clienteNumero = (string) $cliente->numero_cliente;
+        $this->clienteRazonSocial = (string) $cliente->razon_social;
         $this->buscarCliente = '';
     }
 
@@ -78,6 +88,8 @@ new #[Title('Cargar guía')] class extends Component {
     {
         $this->cliente_id = null;
         $this->clienteSeleccionado = '';
+        $this->clienteNumero = '';
+        $this->clienteRazonSocial = '';
     }
 
     public function guardar(): void
@@ -128,7 +140,12 @@ new #[Title('Cargar guía')] class extends Component {
 
                             @if ($transporte_id)
                                 <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-white/5">
-                                    <span>{{ $transporteSeleccionado }}</span>
+                                    <div>
+                                        <div>{{ $transporteSeleccionado }}</div>
+                                        <div class="text-xs text-zinc-500">
+                                            {{ __('CUIT') }} {{ $transporteCuit ?: '—' }} · {{ __('Nacionalidad') }} {{ $transporteNacionalidad ?: '—' }}
+                                        </div>
+                                    </div>
                                     <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarTransporte" />
                                 </div>
                             @else
@@ -142,7 +159,10 @@ new #[Title('Cargar guía')] class extends Component {
                                                 wire:click="seleccionarTransporte({{ $sugerido->id }})"
                                                 class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
                                             >
-                                                {{ $sugerido->nombre }}
+                                                <div>{{ $sugerido->nombre }}</div>
+                                                <div class="text-xs text-zinc-500">
+                                                    {{ __('CUIT') }} {{ $sugerido->cuit ?: '—' }} · {{ __('Nacionalidad') }} {{ $sugerido->nacionalidad ?: '—' }}
+                                                </div>
                                             </button>
                                         @endforeach
                                     </div>
@@ -156,7 +176,12 @@ new #[Title('Cargar guía')] class extends Component {
 
                             @if ($cliente_id)
                                 <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-white/5">
-                                    <span>{{ $clienteSeleccionado }}</span>
+                                    <div>
+                                        <div>{{ $clienteSeleccionado }}</div>
+                                        <div class="text-xs text-zinc-500">
+                                            {{ __('N°') }} {{ $clienteNumero ?: '—' }} · {{ $clienteRazonSocial ?: '—' }}
+                                        </div>
+                                    </div>
                                     <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarCliente" />
                                 </div>
                             @else
@@ -170,7 +195,10 @@ new #[Title('Cargar guía')] class extends Component {
                                                 wire:click="seleccionarCliente({{ $sugerido->id }})"
                                                 class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
                                             >
-                                                {{ $sugerido->nombre }}
+                                                <div>{{ $sugerido->nombre }}</div>
+                                                <div class="text-xs text-zinc-500">
+                                                    {{ __('N°') }} {{ $sugerido->numero_cliente ?: '—' }} · {{ $sugerido->razon_social ?: '—' }}
+                                                </div>
                                             </button>
                                         @endforeach
                                     </div>
