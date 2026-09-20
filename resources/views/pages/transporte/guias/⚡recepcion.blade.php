@@ -189,15 +189,26 @@ new #[Title('Recepción de guía')] class extends Component {
 
                 <div>
                     <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
-                        {{ __('Resultado') }}
+                        {{ __('Resultado facturación') }}
                     </flux:heading>
 
                     <div class="mt-3 rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
                         <div class="flex justify-between">
-                            <flux:text>{{ __('Neto') }}</flux:text>
+                            <flux:text>{{ __('Total descargado') }}</flux:text>
                             <flux:text class="font-mono">{{ $this->neto !== null ? number_format($this->neto, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
                         </div>
                         <div class="mt-2 flex justify-between">
+                            <flux:text>{{ __('Total cliente') }}</flux:text>
+                            <flux:text class="font-mono">{{ $guia->tn_cliente !== null ? number_format((float) $guia->tn_cliente, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
+                        </div>
+                        <div class="mt-2 flex justify-between">
+                            <flux:text>{{ __('Total flete') }}</flux:text>
+                            <flux:text class="font-mono">{{ $guia->tn_fletero !== null ? number_format((float) $guia->tn_fletero, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
+                        </div>
+
+                        <flux:separator class="my-3" />
+
+                        <div class="flex justify-between">
                             <flux:text>{{ __('Ganancia a cargar en cta cte del cliente') }}</flux:text>
                             <flux:heading class="font-mono">{{ $this->montoGanancia !== null ? '$ '.number_format($this->montoGanancia, 2, ',', '.') : '—' }}</flux:heading>
                         </div>
