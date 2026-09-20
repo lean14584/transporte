@@ -223,7 +223,7 @@ new #[Title('Órdenes de pago')] class extends Component {
 
     {{ $this->ordenesPago->links() }}
 
-    <flux:modal name="orden-pago-form" class="max-w-lg" @close="$set('transporte_id', null); $set('transporteSeleccionado', '')">
+    <flux:modal name="orden-pago-form" class="max-w-xl" @close="$set('transporte_id', null); $set('transporteSeleccionado', '')">
         <form wire:submit="emitir" class="space-y-6">
             <flux:heading size="lg">{{ __('Nueva orden de pago') }}</flux:heading>
 
@@ -255,8 +255,10 @@ new #[Title('Órdenes de pago')] class extends Component {
                 @error('transporte_id') <flux:error>{{ $message }}</flux:error> @enderror
             </div>
 
-            <flux:input wire:model="monto" :label="__('Monto')" type="number" step="0.01" min="0.01" required />
-            <flux:input wire:model="concepto" :label="__('Concepto')" placeholder="{{ __('Opcional') }}" />
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <flux:input wire:model="monto" :label="__('Monto')" type="number" step="0.01" min="0.01" required />
+                <flux:input wire:model="concepto" :label="__('Concepto')" placeholder="{{ __('Opcional') }}" />
+            </div>
 
             <flux:select wire:model.live="medio_pago" :label="__('Medio de pago')">
                 <flux:select.option value="efectivo">{{ __('Efectivo') }}</flux:select.option>
@@ -272,8 +274,11 @@ new #[Title('Órdenes de pago')] class extends Component {
                         @endforeach
                     </flux:select>
 
-                    <flux:input wire:model="numero_cheque" :label="__('Número de cheque')" required />
-                    <flux:input wire:model="banco_cheque" :label="__('Banco del cheque')" required />
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <flux:input wire:model="numero_cheque" :label="__('Número de cheque')" required />
+                        <flux:input wire:model="banco_cheque" :label="__('Banco del cheque')" required />
+                    </div>
+
                     <flux:input wire:model="fecha_pago_cheque" :label="__('Fecha de pago')" type="date" required />
                 </div>
             @endif
