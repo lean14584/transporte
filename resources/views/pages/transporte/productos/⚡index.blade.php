@@ -180,9 +180,12 @@ new #[Title('Productos')] class extends Component {
                 {{ $editingId ? __('Editar producto') : __('Nuevo producto') }}
             </flux:heading>
 
-            <flux:input wire:model="numero_producto" :label="__('Número de producto')" />
             <flux:input wire:model="nombre" :label="__('Nombre')" required autofocus />
-            <flux:input wire:model="forma_de_carga" :label="__('Forma de carga')" />
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <flux:input wire:model="numero_producto" :label="__('Número de producto')" />
+                <flux:input wire:model="forma_de_carga" :label="__('Forma de carga')" />
+            </div>
 
             <div class="flex justify-end gap-2">
                 <flux:modal.close>
