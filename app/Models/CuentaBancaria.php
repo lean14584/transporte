@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraAutoria;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,6 +10,7 @@ class CuentaBancaria extends Model
 {
     /** @use HasFactory<\Database\Factories\CuentaBancariaFactory> */
     use HasFactory;
+    use RegistraAutoria;
 
     protected $fillable = [
         'banco',
