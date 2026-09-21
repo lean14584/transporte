@@ -38,8 +38,8 @@ class Fletero extends Model
         return $this->hasMany(FleteroCuentaCorrienteMovimiento::class);
     }
 
-    public function pagos()
+    public function ordenesPago()
     {
-        return $this->hasMany(PagoFletero::class);
+        return $this->hasMany(OrdenPago::class);
     }
 }

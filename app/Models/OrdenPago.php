@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrdenPago extends Model
 {
@@ -12,7 +13,7 @@ class OrdenPago extends Model
     use HasFactory;
 
     protected $fillable = [
-        'transporte_id',
+        'fletero_id',
         'fecha',
         'monto',
         'concepto',
@@ -29,14 +30,19 @@ class OrdenPago extends Model
         ];
     }
 
-    public function transporte()
+    public function fletero()
     {
-        return $this->belongsTo(Transporte::class);
+        return $this->belongsTo(Fletero::class);
     }
 
     public function cheque()
     {
         return $this->belongsTo(Cheque::class);
+    }
+
+    public function movimientoCtaCte()
+    {
+        return $this->hasOne(FleteroCuentaCorrienteMovimiento::class);
     }
 
     public function usuario()
@@ -47,6 +53,34 @@ class OrdenPago extends Model
     public function folio(): string
     {
         return 'OP-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Emite la orden de pago y descuenta el monto de la cta cte del fletero
+     * (lo que la empresa le debe baja en la misma medida que se le paga).
+     */
+    public static function emitir(Fletero $fletero, float $monto, string $medioPago, ?string $concepto = null, ?int $chequeId = null): self
+    {
+        return DB::transaction(function () use ($fletero, $monto, $medioPago, $concepto, $chequeId) {
+            $orden = self::create([
+                'fletero_id' => $fletero->id,
+                'fecha' => now()->toDateString(),
+                'monto' => $monto,
+                'concepto' => $concepto,
+                'medio_pago' => $medioPago,
+                'cheque_id' => $chequeId,
+            ]);
+
+            FleteroCuentaCorrienteMovimiento::registrar(
+                $fletero,
+                'pago',
+                $concepto ?: "Orden de pago {$orden->folio()}",
+                $monto,
+                ['orden_pago_id' => $orden->id],
+            );
+
+            return $orden;
+        });
     }
 
     protected static function booted(): void

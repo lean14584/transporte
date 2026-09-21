@@ -24,9 +24,4 @@ class Transporte extends Model
     {
         return $this->hasMany(Guia::class);
     }
-
-    public function ordenesPago()
-    {
-        return $this->hasMany(OrdenPago::class);
-    }
 }

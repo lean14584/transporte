@@ -20,7 +20,7 @@ class FleteroCuentaCorrienteMovimiento extends Model
         'monto',
         'saldo',
         'guia_id',
-        'pago_fletero_id',
+        'orden_pago_id',
         'usuario_id',
     ];
 
@@ -43,9 +43,9 @@ class FleteroCuentaCorrienteMovimiento extends Model
         return $this->belongsTo(Guia::class);
     }
 
-    public function pagoFletero()
+    public function ordenPago()
     {
-        return $this->belongsTo(PagoFletero::class);
+        return $this->belongsTo(OrdenPago::class);
     }
 
     public function usuario()
@@ -74,7 +74,7 @@ class FleteroCuentaCorrienteMovimiento extends Model
                 'monto' => $monto,
                 'saldo' => $nuevoSaldo,
                 'guia_id' => $extra['guia_id'] ?? null,
-                'pago_fletero_id' => $extra['pago_fletero_id'] ?? null,
+                'orden_pago_id' => $extra['orden_pago_id'] ?? null,
                 'usuario_id' => Auth::id(),
             ]);
 

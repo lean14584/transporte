@@ -31,7 +31,7 @@ class PdfController extends Controller
 
     public function ordenPago(OrdenPago $ordenPago): Response
     {
-        $ordenPago->load(['transporte', 'cheque']);
+        $ordenPago->load(['fletero', 'cheque']);
 
         return Pdf::loadView('pdf.orden-pago', ['ordenPago' => $ordenPago, 'empresa' => Configuracion::actual()])
             ->setPaper('a4')

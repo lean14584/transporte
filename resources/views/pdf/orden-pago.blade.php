@@ -67,7 +67,7 @@
     <table class="datos">
         <tr>
             <td class="label">Páguese a</td>
-            <td class="valor">{{ $ordenPago->transporte->nombre }}</td>
+            <td class="valor">{{ $ordenPago->fletero->razon_social }}</td>
         </tr>
         <tr>
             <td class="label">En concepto de</td>

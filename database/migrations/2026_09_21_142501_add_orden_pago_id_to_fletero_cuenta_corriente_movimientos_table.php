@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('fletero_cuenta_corriente_movimientos', function (Blueprint $table) {
-            $table->foreignId('pago_fletero_id')->nullable()->unique()->after('guia_id')->constrained('pago_fleteros')->nullOnDelete();
+            $table->foreignId('orden_pago_id')->nullable()->unique()->after('guia_id')->constrained('orden_pagos')->nullOnDelete();
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('fletero_cuenta_corriente_movimientos', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('pago_fletero_id');
+            $table->dropConstrainedForeignId('orden_pago_id');
         });
     }
 };

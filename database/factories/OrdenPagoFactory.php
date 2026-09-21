@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Fletero;
 use App\Models\OrdenPago;
-use App\Models\Transporte;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +19,7 @@ class OrdenPagoFactory extends Factory
     public function definition(): array
     {
         return [
-            'transporte_id' => Transporte::factory(),
+            'fletero_id' => Fletero::factory(),
             'fecha' => fake()->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
             'monto' => fake()->randomFloat(2, 1000, 100000),
             'concepto' => 'Pago de flete',

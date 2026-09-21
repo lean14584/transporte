@@ -2,6 +2,7 @@
 
 use App\Models\Cliente;
 use App\Models\Configuracion;
+use App\Models\Fletero;
 use App\Models\Guia;
 use App\Models\OrdenPago;
 use App\Models\Recibo;
@@ -19,7 +20,7 @@ test('se pueden generar los pdf de guía, recibo y orden de pago', function () {
     $recibo = Recibo::cobrar($cliente->refresh(), 500, 'efectivo');
 
     $orden = OrdenPago::create([
-        'transporte_id' => $transporte->id,
+        'fletero_id' => Fletero::factory()->create()->id,
         'fecha' => now()->toDateString(),
         'monto' => 1000,
         'medio_pago' => 'efectivo',
@@ -53,7 +54,7 @@ test('el folio de cada documento tiene el prefijo correcto', function () {
     $guia = Guia::factory()->for($cliente)->for($transporte)->create();
     $recibo = Recibo::cobrar($cliente, 100, 'efectivo');
     $orden = OrdenPago::create([
-        'transporte_id' => $transporte->id,
+        'fletero_id' => Fletero::factory()->create()->id,
         'fecha' => now()->toDateString(),
         'monto' => 100,
         'medio_pago' => 'efectivo',

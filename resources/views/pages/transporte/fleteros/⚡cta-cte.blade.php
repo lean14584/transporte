@@ -1,8 +1,6 @@
 <?php
 
 use App\Models\Fletero;
-use App\Models\PagoFletero;
-use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -15,10 +13,6 @@ new #[Title('Cuenta corriente')] class extends Component {
     #[Locked]
     public Fletero $fletero;
 
-    public float $monto = 0;
-    public string $medio_pago = 'efectivo';
-    public string $concepto = '';
-
     public function mount(Fletero $fletero): void
     {
         $this->fletero = $fletero;
@@ -29,26 +23,6 @@ new #[Title('Cuenta corriente')] class extends Component {
     {
         return $this->fletero->movimientosCtaCte()->latest('fecha')->latest('id')->paginate(15);
     }
-
-    public function pagar(): void
-    {
-        $validated = $this->validate([
-            'monto' => ['required', 'numeric', 'gt:0'],
-            'medio_pago' => ['required', 'in:efectivo,transferencia,cheque'],
-            'concepto' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        PagoFletero::pagar($this->fletero, (float) $validated['monto'], $validated['medio_pago'], $validated['concepto'] ?: null);
-
-        $this->fletero->refresh();
-        $this->reset(['monto', 'concepto']);
-        $this->medio_pago = 'efectivo';
-
-        unset($this->movimientos);
-        Flux::modal('pagar-form')->close();
-
-        Flux::toast(variant: 'success', text: __('Pago registrado.'));
-    }
 }; ?>
 
 <div class="flex flex-col gap-6">
@@ -58,11 +32,9 @@ new #[Title('Cuenta corriente')] class extends Component {
             <flux:subheading>{{ __('Cuenta corriente') }}</flux:subheading>
         </div>
 
-        <flux:modal.trigger name="pagar-form">
-            <flux:button variant="primary" icon="banknotes">
-                {{ __('Registrar pago') }}
-            </flux:button>
-        </flux:modal.trigger>
+        <flux:button variant="primary" icon="banknotes" :href="route('ordenes-pago.index')" wire:navigate>
+            {{ __('Registrar pago') }}
+        </flux:button>
     </div>
 
     <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
@@ -137,29 +109,4 @@ new #[Title('Cuenta corriente')] class extends Component {
     </div>
 
     {{ $this->movimientos->links() }}
-
-    <flux:modal name="pagar-form" class="max-w-lg">
-        <form wire:submit="pagar" class="space-y-6">
-            <flux:heading size="lg">{{ __('Registrar pago') }}</flux:heading>
-            <flux:subheading>{{ $fletero->razon_social }}</flux:subheading>
-
-            <flux:input wire:model="monto" :label="__('Monto')" type="number" step="0.01" min="0.01" required autofocus />
-
-            <flux:select wire:model="medio_pago" :label="__('Medio de pago')">
-                <flux:select.option value="efectivo">{{ __('Efectivo') }}</flux:select.option>
-                <flux:select.option value="transferencia">{{ __('Transferencia') }}</flux:select.option>
-                <flux:select.option value="cheque">{{ __('Cheque') }}</flux:select.option>
-            </flux:select>
-
-            <flux:input wire:model="concepto" :label="__('Concepto')" placeholder="{{ __('Opcional') }}" />
-
-            <div class="flex justify-end gap-2">
-                <flux:modal.close>
-                    <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
-                </flux:modal.close>
-
-                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="pagar">{{ __('Pagar') }}</flux:button>
-            </div>
-        </form>
-    </flux:modal>
 </div>
