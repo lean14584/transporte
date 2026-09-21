@@ -46,6 +46,10 @@ class Cheque extends Model
      */
     public static function emitir(CuentaBancaria $cuentaBancaria, array $datos): self
     {
+        if ($datos['monto'] <= 0) {
+            throw new \RuntimeException('El monto del cheque debe ser mayor a cero.');
+        }
+
         return DB::transaction(function () use ($cuentaBancaria, $datos) {
             $cuentaBloqueada = CuentaBancaria::whereKey($cuentaBancaria->id)->lockForUpdate()->first();
 
