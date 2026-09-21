@@ -138,10 +138,14 @@
                     </tr>
                 @endif
                 <tr>
-                    <td class="label">Total descargado</td>
+                    <td class="label">{{ $guia->unidad === 'kilos' ? 'TN Descargadas' : 'Total descargado' }}</td>
                     <td class="valor">{{ number_format((float) $guia->neto, 2, ',', '.') }} {{ $guia->unidad }}</td>
                 </tr>
                 @if ($guia->unidad === 'kilos')
+                    <tr>
+                        <td class="label">Pérdida</td>
+                        <td class="valor">{{ number_format((float) $guia->tn_cargadas - (float) $guia->neto, 2, ',', '.') }} {{ $guia->unidad }}</td>
+                    </tr>
                     <tr>
                         <td class="label">Total cliente</td>
                         <td class="valor">$ {{ number_format((float) $guia->total_cliente, 2, ',', '.') }}</td>

@@ -78,10 +78,10 @@ test('cargar una guía por unidades no pide TN, solo cantidad', function () {
         ->and($guia->precio_fletero)->toBeNull();
 });
 
-test('recepcionar una guía por kilos precarga total descargado (bruto - tara) y carga los totales a mano en cta cte', function () {
+test('recepcionar una guía por kilos precarga TN descargadas (bruto - tara), calcula la pérdida y carga los totales a mano en cta cte', function () {
     $user = User::factory()->create();
     $cliente = Cliente::factory()->create();
-    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create(['unidad' => 'kilos']);
+    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create(['unidad' => 'kilos', 'tn_cargadas' => 12500]);
 
     $component = Livewire::actingAs($user)
         ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
@@ -89,7 +89,8 @@ test('recepcionar una guía por kilos precarga total descargado (bruto - tara) y
         ->set('pesaje_bruto', '20000')
         ->set('tara', '8000');
 
-    expect($component->get('total_descargado'))->toBe('12000');
+    expect($component->get('tn_descargadas'))->toBe('12000')
+        ->and($component->instance()->perdida)->toBe(500.0);
 
     $component
         ->set('total_cliente', '600000')
