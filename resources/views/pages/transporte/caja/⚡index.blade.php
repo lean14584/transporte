@@ -11,6 +11,25 @@ use Livewire\WithPagination;
 new #[Title('Caja')] class extends Component {
     use WithPagination;
 
+    public string $desde = '';
+    public string $hasta = '';
+
+    public function updatingDesde(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingHasta(): void
+    {
+        $this->resetPage();
+    }
+
+    public function limpiarFiltro(): void
+    {
+        $this->reset(['desde', 'hasta']);
+        $this->resetPage();
+    }
+
     /**
      * Cobranzas (Recibo) y Órdenes de pago (OrdenPago) combinadas en un solo
      * libro, ordenadas por fecha. No hay una tabla propia de "movimientos de
@@ -21,10 +40,14 @@ new #[Title('Caja')] class extends Component {
     {
         $cobros = DB::table('recibos as r')
             ->join('clientes as c', 'c.id', '=', 'r.cliente_id')
+            ->when($this->desde, fn ($query) => $query->whereDate('r.fecha', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('r.fecha', '<=', $this->hasta))
             ->selectRaw("r.id, r.fecha, r.monto, r.concepto, 'cobro' as tipo, c.nombre as referencia");
 
         $pagos = DB::table('orden_pagos as o')
             ->join('fleteros as f', 'f.id', '=', 'o.fletero_id')
+            ->when($this->desde, fn ($query) => $query->whereDate('o.fecha', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('o.fecha', '<=', $this->hasta))
             ->selectRaw("o.id, o.fecha, o.monto, o.concepto, 'pago' as tipo, f.razon_social as referencia");
 
         return $cobros->unionAll($pagos)
@@ -36,13 +59,19 @@ new #[Title('Caja')] class extends Component {
     #[Computed]
     public function totalDebe(): float
     {
-        return (float) Recibo::sum('monto');
+        return (float) Recibo::query()
+            ->when($this->desde, fn ($query) => $query->whereDate('fecha', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('fecha', '<=', $this->hasta))
+            ->sum('monto');
     }
 
     #[Computed]
     public function totalHaber(): float
     {
-        return (float) OrdenPago::sum('monto');
+        return (float) OrdenPago::query()
+            ->when($this->desde, fn ($query) => $query->whereDate('fecha', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('fecha', '<=', $this->hasta))
+            ->sum('monto');
     }
 
     #[Computed]
@@ -65,6 +94,16 @@ new #[Title('Caja')] class extends Component {
             <flux:heading size="xl">{{ __('Caja') }}</flux:heading>
             <flux:subheading>{{ __('Cobranzas y órdenes de pago juntas, como debe y haber.') }}</flux:subheading>
         </div>
+    </div>
+
+    <div class="flex flex-wrap items-end gap-4">
+        <flux:input wire:model.live="desde" :label="__('Desde')" type="date" class="max-w-xs" />
+        <flux:input wire:model.live="hasta" :label="__('Hasta')" type="date" class="max-w-xs" />
+        @if ($desde || $hasta)
+            <flux:button variant="ghost" icon="x-mark" wire:click="limpiarFiltro">
+                {{ __('Limpiar filtro') }}
+            </flux:button>
+        @endif
     </div>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
