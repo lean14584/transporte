@@ -142,7 +142,7 @@ new #[Title('Configuración')] class extends Component {
                     <div class="mt-4 grid grid-cols-2 gap-4">
                         <flux:input
                             wire:model="porcentaje_ganancia_kilo"
-                            :label="__('% ganancia por kilo')"
+                            :label="__('% ganancia por tonelada (TN)')"
                             type="number"
                             step="0.01"
                             min="0"

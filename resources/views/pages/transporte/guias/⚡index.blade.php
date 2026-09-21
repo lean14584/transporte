@@ -68,7 +68,7 @@ new #[Title('Guías')] class extends Component {
                         <flux:table.cell>{{ $guia->fecha_carga->format('d/m/Y') }}</flux:table.cell>
                         <flux:table.cell>{{ $guia->cliente->nombre }}</flux:table.cell>
                         <flux:table.cell>{{ $guia->transporte->nombre }}</flux:table.cell>
-                        <flux:table.cell>{{ $guia->mercaderia }} ({{ number_format((float) $guia->cantidad, 0, ',', '.') }} {{ $guia->unidad }})</flux:table.cell>
+                        <flux:table.cell>{{ $guia->mercaderia }} ({{ number_format((float) $guia->cantidad, 0, ',', '.') }} {{ $guia->unidadLabel() }})</flux:table.cell>
                         <flux:table.cell>
                             <flux:badge size="sm" :color="$guia->estado === 'recibida' ? 'green' : 'yellow'">
                                 {{ $guia->estado === 'recibida' ? __('Recibida') : __('Cargada') }}
@@ -110,7 +110,7 @@ new #[Title('Guías')] class extends Component {
                     </flux:badge>
                 </div>
                 <div class="mt-2 text-sm text-zinc-500">
-                    {{ $guia->transporte->nombre }} · {{ $guia->mercaderia }} ({{ number_format((float) $guia->cantidad, 0, ',', '.') }} {{ $guia->unidad }})
+                    {{ $guia->transporte->nombre }} · {{ $guia->mercaderia }} ({{ number_format((float) $guia->cantidad, 0, ',', '.') }} {{ $guia->unidadLabel() }})
                 </div>
                 <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-white/5">
                     <span class="font-mono text-sm">

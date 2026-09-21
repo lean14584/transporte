@@ -192,7 +192,7 @@ new #[Title('Recepción de guía')] class extends Component {
                             <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
                                 <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Pérdida') }}</div>
                                 <div class="text-2xl font-semibold font-mono {{ ($this->perdida ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : '' }}">
-                                    {{ $this->perdida !== null ? number_format($this->perdida, 2, ',', '.').' '.$guia->unidad : '—' }}
+                                    {{ $this->perdida !== null ? number_format($this->perdida, 2, ',', '.').' '.$guia->unidadLabel() : '—' }}
                                 </div>
                             </div>
                         </div>
@@ -208,7 +208,7 @@ new #[Title('Recepción de guía')] class extends Component {
                         <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-4">
                             <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
                                 <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Total Descargado') }}</div>
-                                <div class="text-2xl font-semibold font-mono">{{ is_numeric($tn_descargadas) ? number_format((float) $tn_descargadas, 2, ',', '.').' '.$guia->unidad : '—' }}</div>
+                                <div class="text-2xl font-semibold font-mono">{{ is_numeric($tn_descargadas) ? number_format((float) $tn_descargadas, 2, ',', '.').' '.$guia->unidadLabel() : '—' }}</div>
                             </div>
                             <flux:input wire:model="total_cliente" :label="__('Total Cliente $')" type="number" step="0.01" min="0" required />
                             <flux:input wire:model="total_fletero" :label="__('Total Flete $')" type="number" step="0.01" min="0" required />
@@ -247,7 +247,7 @@ new #[Title('Recepción de guía')] class extends Component {
                         <div class="mt-3 rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
                             <div class="flex justify-between">
                                 <flux:text>{{ __('Neto') }}</flux:text>
-                                <flux:text class="font-mono">{{ $this->neto !== null ? number_format($this->neto, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
+                                <flux:text class="font-mono">{{ $this->neto !== null ? number_format($this->neto, 2, ',', '.').' '.$guia->unidadLabel() : '—' }}</flux:text>
                             </div>
                             <div class="mt-2 flex justify-between">
                                 <flux:text>{{ __('Ganancia a cargar en cta cte del cliente') }}</flux:text>

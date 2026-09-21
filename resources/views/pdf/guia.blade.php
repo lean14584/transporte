@@ -104,7 +104,7 @@
                 <td class="label">Descripción</td>
                 <td class="valor">{{ $guia->mercaderia }}</td>
                 <td class="label">Cantidad declarada</td>
-                <td class="valor">{{ number_format((float) $guia->cantidad, 2, ',', '.') }} {{ $guia->unidad }}</td>
+                <td class="valor">{{ number_format((float) $guia->cantidad, 2, ',', '.') }} {{ $guia->unidadLabel() }}</td>
             </tr>
             @if ($guia->unidad === 'kilos' && $guia->tn_cargadas !== null)
                 <tr>
@@ -139,12 +139,12 @@
                 @endif
                 <tr>
                     <td class="label">{{ $guia->unidad === 'kilos' ? 'TN Descargadas' : 'Total descargado' }}</td>
-                    <td class="valor">{{ number_format((float) $guia->neto, 2, ',', '.') }} {{ $guia->unidad }}</td>
+                    <td class="valor">{{ number_format((float) $guia->neto, 2, ',', '.') }} {{ $guia->unidadLabel() }}</td>
                 </tr>
                 @if ($guia->unidad === 'kilos')
                     <tr>
                         <td class="label">Pérdida</td>
-                        <td class="valor">{{ number_format((float) $guia->tn_cargadas - (float) $guia->neto, 2, ',', '.') }} {{ $guia->unidad }}</td>
+                        <td class="valor">{{ number_format((float) $guia->tn_cargadas - (float) $guia->neto, 2, ',', '.') }} {{ $guia->unidadLabel() }}</td>
                     </tr>
                     <tr>
                         <td class="label">Total cliente</td>

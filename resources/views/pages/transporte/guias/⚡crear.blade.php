@@ -389,7 +389,7 @@ new #[Title('Cargar guía')] class extends Component {
 
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 {{ $unidad === 'kilos' ? 'lg:grid-cols-5' : 'lg:grid-cols-3' }}">
                             <flux:select wire:model.live="unidad" :label="__('Unidad')">
-                                <flux:select.option value="kilos">{{ __('Kilos') }}</flux:select.option>
+                                <flux:select.option value="kilos">{{ __('Toneladas (TN)') }}</flux:select.option>
                                 <flux:select.option value="unidades">{{ __('Unidades') }}</flux:select.option>
                             </flux:select>
 

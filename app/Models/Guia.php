@@ -103,6 +103,16 @@ class Guia extends Model
     }
 
     /**
+     * La carga "por kilos" en realidad se pesa y se factura en toneladas (TN Cargadas,
+     * TN Descargadas), no en kilogramos — 'kilos' es solo el valor interno histórico
+     * de la columna `unidad`. Esta etiqueta evita mostrarle "kilos" al usuario.
+     */
+    public function unidadLabel(): string
+    {
+        return $this->unidad === 'kilos' ? 'TN' : 'unidades';
+    }
+
+    /**
      * Cierra la recepción de una guía por kilos: TN descargadas, total cliente,
      * total fletero y la ganancia se cargan a mano (números reales de esa guía).
      * El pesaje bruto/tara son opcionales, solo quedan como referencia si se informan.
