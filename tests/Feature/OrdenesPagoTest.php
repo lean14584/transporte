@@ -54,3 +54,20 @@ test('emitir una orden de pago con cheque descuenta el saldo de la cuenta bancar
         ->and($cuenta->refresh()->saldo)->toEqual('70000.00')
         ->and($fletero->refresh()->saldo_cta_cte)->toEqual('20000.00');
 });
+
+test('las órdenes de pago se pueden filtrar por rango de fechas', function () {
+    $user = User::factory()->create(['role' => 'administrador']);
+    $fletero = Fletero::factory()->create();
+
+    OrdenPago::emitir($fletero, 1000, 'efectivo', 'Pago fuera de rango');
+    OrdenPago::query()->latest('id')->first()->update(['fecha' => now()->subDays(10)->toDateString()]);
+
+    OrdenPago::emitir($fletero, 2000, 'efectivo', 'Pago dentro de rango');
+
+    Livewire::actingAs($user)
+        ->test('pages::transporte.ordenes-pago.index')
+        ->set('desde', now()->subDays(2)->toDateString())
+        ->set('hasta', now()->toDateString())
+        ->assertSee('Pago dentro de rango')
+        ->assertDontSee('Pago fuera de rango');
+});
