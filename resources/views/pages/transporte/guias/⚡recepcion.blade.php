@@ -158,34 +158,26 @@ new #[Title('Recepción de guía')] class extends Component {
                 <flux:separator />
 
                 @if ($this->esPorKilos)
-                    <div>
-                        <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
-                            {{ __('Pesaje') }}
-                        </flux:heading>
-
-                        <div class="mt-3 space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <flux:input
-                                    wire:model.live="pesaje_bruto"
-                                    :label="__('Bruto (kg)')"
-                                    :description="__('Camión + mercadería')"
-                                    type="number"
-                                    step="0.01"
-                                    min="0.01"
-                                    required
-                                    autofocus
-                                />
-                                <flux:input
-                                    wire:model.live="tara"
-                                    :label="__('Tara (kg)')"
-                                    :description="__('Peso del camión vacío')"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    required
-                                />
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <flux:input
+                            wire:model.live="pesaje_bruto"
+                            :label="__('Bruto (kg)')"
+                            :description="__('Camión + mercadería')"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            required
+                            autofocus
+                        />
+                        <flux:input
+                            wire:model.live="tara"
+                            :label="__('Tara (kg)')"
+                            :description="__('Peso del camión vacío')"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            required
+                        />
                     </div>
 
                     <flux:separator />
