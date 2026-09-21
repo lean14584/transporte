@@ -83,7 +83,7 @@ new #[Title('Guías')] class extends Component {
                                     {{ __('Recepcionar') }}
                                 </flux:button>
                             @endif
-                            <flux:button size="sm" variant="ghost" icon="printer" :href="route('guias.pdf', $guia)" target="_blank" />
+                            <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir guía') }}" :href="route('guias.pdf', $guia)" target="_blank" />
                         </flux:table.cell>
                     </flux:table.row>
                 @empty
@@ -122,7 +122,7 @@ new #[Title('Guías')] class extends Component {
                                 {{ __('Recepcionar') }}
                             </flux:button>
                         @endif
-                        <flux:button size="sm" variant="ghost" icon="printer" :href="route('guias.pdf', $guia)" target="_blank" />
+                        <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir guía') }}" :href="route('guias.pdf', $guia)" target="_blank" />
                     </div>
                 </div>
             </div>

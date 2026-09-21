@@ -65,7 +65,7 @@ new #[Title('Cobranzas')] class extends Component {
                         <flux:table.cell>{{ ucfirst($recibo->medio_pago) }}</flux:table.cell>
                         <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $recibo->monto, 2, ',', '.') }}</flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="printer" :href="route('recibos.pdf', $recibo)" target="_blank" />
+                            <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir recibo') }}" :href="route('recibos.pdf', $recibo)" target="_blank" />
                         </flux:table.cell>
                     </flux:table.row>
                 @empty
@@ -89,7 +89,7 @@ new #[Title('Cobranzas')] class extends Component {
                             {{ $recibo->cliente->nombre }}
                         </flux:link>
                     </div>
-                    <flux:button size="sm" variant="ghost" icon="printer" :href="route('recibos.pdf', $recibo)" target="_blank" />
+                    <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir recibo') }}" :href="route('recibos.pdf', $recibo)" target="_blank" />
                 </div>
                 <div class="mt-2 text-sm text-zinc-500">{{ $recibo->fecha->format('d/m/Y') }} · {{ ucfirst($recibo->medio_pago) }}</div>
                 <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-white/5">

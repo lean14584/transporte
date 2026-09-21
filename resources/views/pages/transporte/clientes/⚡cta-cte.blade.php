@@ -4,6 +4,7 @@ use App\Models\Cliente;
 use App\Models\Recibo;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -11,6 +12,7 @@ use Livewire\WithPagination;
 new #[Title('Cuenta corriente')] class extends Component {
     use WithPagination;
 
+    #[Locked]
     public Cliente $cliente;
 
     public float $monto = 0;

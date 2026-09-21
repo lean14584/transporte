@@ -117,11 +117,12 @@ new #[Title('Productos')] class extends Component {
                         <flux:table.cell class="font-medium">{{ $producto->nombre }}</flux:table.cell>
                         <flux:table.cell>{{ $producto->forma_de_carga ?: '—' }}</flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $producto->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $producto->id }})" />
                             @if (auth()->user()->isAdministrador())
                                 <flux:button
                                     size="sm"
                                     variant="ghost"
+                                    aria-label="{{ __('Eliminar') }}"
                                     icon="trash"
                                     wire:click="eliminar({{ $producto->id }})"
                                     wire:confirm="{{ __('¿Eliminar este producto?') }}"
@@ -149,11 +150,12 @@ new #[Title('Productos')] class extends Component {
                         <div class="mt-1 text-sm text-zinc-500">{{ __('Nº') }} {{ $producto->numero_producto ?: '—' }}</div>
                     </div>
                     <div class="flex shrink-0 gap-1">
-                        <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $producto->id }})" />
+                        <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $producto->id }})" />
                         @if (auth()->user()->isAdministrador())
                             <flux:button
                                 size="sm"
                                 variant="ghost"
+                                aria-label="{{ __('Eliminar') }}"
                                 icon="trash"
                                 wire:click="eliminar({{ $producto->id }})"
                                 wire:confirm="{{ __('¿Eliminar este producto?') }}"

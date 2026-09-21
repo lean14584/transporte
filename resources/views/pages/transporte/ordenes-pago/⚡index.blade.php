@@ -179,7 +179,7 @@ new #[Title('Órdenes de pago')] class extends Component {
                         </flux:table.cell>
                         <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $orden->monto, 2, ',', '.') }}</flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="printer" :href="route('ordenes-pago.pdf', $orden)" target="_blank" />
+                            <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir orden de pago') }}" :href="route('ordenes-pago.pdf', $orden)" target="_blank" />
                         </flux:table.cell>
                     </flux:table.row>
                 @empty
@@ -201,7 +201,7 @@ new #[Title('Órdenes de pago')] class extends Component {
                         <div class="font-mono text-sm text-zinc-500">{{ $orden->folio() }}</div>
                         <div class="font-medium">{{ $orden->transporte->nombre }}</div>
                     </div>
-                    <flux:button size="sm" variant="ghost" icon="printer" :href="route('ordenes-pago.pdf', $orden)" target="_blank" />
+                    <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir orden de pago') }}" :href="route('ordenes-pago.pdf', $orden)" target="_blank" />
                 </div>
                 <div class="mt-2 text-sm text-zinc-500">
                     {{ $orden->fecha->format('d/m/Y') }} · {{ ucfirst($orden->medio_pago) }}
@@ -233,7 +233,7 @@ new #[Title('Órdenes de pago')] class extends Component {
                 @if ($transporte_id)
                     <div class="mt-1 flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 dark:border-white/10">
                         <span>{{ $transporteSeleccionado }}</span>
-                        <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarTransporte" />
+                        <flux:button size="xs" variant="ghost" icon="x-mark" aria-label="{{ __('Quitar transporte seleccionado') }}" wire:click="quitarTransporte" />
                     </div>
                 @else
                     <flux:input wire:model.live.debounce.200ms="buscarTransporte" icon="magnifying-glass" placeholder="{{ __('Buscar transporte...') }}" />

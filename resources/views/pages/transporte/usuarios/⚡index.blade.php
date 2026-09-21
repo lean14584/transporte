@@ -59,6 +59,17 @@ new #[Title('Usuarios')] class extends Component {
             'role' => ['required', 'in:administrador,administrativo'],
         ]);
 
+        if (
+            $this->editingId
+            && $validated['role'] !== 'administrador'
+            && User::whereKey($this->editingId)->where('role', 'administrador')->exists()
+            && User::where('role', 'administrador')->where('id', '!=', $this->editingId)->doesntExist()
+        ) {
+            $this->addError('role', __('No podés sacarle el rol de administrador al último administrador del sistema.'));
+
+            return;
+        }
+
         $usuario = User::updateOrCreate(['id' => $this->editingId], [
             'name' => $validated['name'],
             'username' => $validated['username'],
@@ -118,11 +129,12 @@ new #[Title('Usuarios')] class extends Component {
                             </flux:badge>
                         </flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $usuario->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $usuario->id }})" />
                             @if ($usuario->id !== auth()->id())
                                 <flux:button
                                     size="sm"
                                     variant="ghost"
+                                    aria-label="{{ __('Eliminar') }}"
                                     icon="trash"
                                     wire:click="eliminar({{ $usuario->id }})"
                                     wire:confirm="{{ __('¿Eliminar este usuario?') }}"
@@ -148,11 +160,12 @@ new #[Title('Usuarios')] class extends Component {
                     </flux:badge>
                 </div>
                 <div class="mt-3 flex justify-end gap-1 border-t border-zinc-100 pt-3 dark:border-white/5">
-                    <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $usuario->id }})" />
+                    <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $usuario->id }})" />
                     @if ($usuario->id !== auth()->id())
                         <flux:button
                             size="sm"
                             variant="ghost"
+                            aria-label="{{ __('Eliminar') }}"
                             icon="trash"
                             wire:click="eliminar({{ $usuario->id }})"
                             wire:confirm="{{ __('¿Eliminar este usuario?') }}"
