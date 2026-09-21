@@ -16,8 +16,6 @@ new #[Title('Recepción de guía')] class extends Component {
     public string $porcentaje_ganancia = '';
 
     public string $tn_descargadas = '';
-    public string $total_cliente = '';
-    public string $total_fletero = '';
     public string $monto_ganancia = '';
 
     public function mount(Guia $guia): void
@@ -65,21 +63,45 @@ new #[Title('Recepción de guía')] class extends Component {
         return round((float) $this->guia->tn_cargadas - (float) $this->tn_descargadas, 2);
     }
 
+    #[Computed]
+    public function totalCliente(): ?float
+    {
+        if (! is_numeric($this->tn_descargadas) || $this->guia->precio_cliente === null) {
+            return null;
+        }
+
+        return round((float) $this->tn_descargadas * (float) $this->guia->precio_cliente, 2);
+    }
+
+    #[Computed]
+    public function totalFletero(): ?float
+    {
+        if (! is_numeric($this->tn_descargadas) || $this->guia->precio_fletero === null) {
+            return null;
+        }
+
+        return round((float) $this->tn_descargadas * (float) $this->guia->precio_fletero, 2);
+    }
+
     public function recepcionar(): void
     {
         if ($this->esPorKilos) {
             $validated = $this->validate([
                 'tn_descargadas' => ['required', 'numeric', 'gt:0'],
-                'total_cliente' => ['required', 'numeric', 'gte:0'],
-                'total_fletero' => ['required', 'numeric', 'gte:0'],
                 'monto_ganancia' => ['required', 'numeric', 'gte:0'],
             ]);
+
+            if ($this->totalCliente === null || $this->totalFletero === null) {
+                Flux::toast(variant: 'danger', text: __('Esta guía no tiene Valor TN Cliente o Valor TN Fletero cargado; no se puede calcular el total.'));
+
+                return;
+            }
 
             try {
                 $this->guia->recepcionar(
                     totalDescargado: (float) $validated['tn_descargadas'],
-                    totalCliente: (float) $validated['total_cliente'],
-                    totalFletero: (float) $validated['total_fletero'],
+                    totalCliente: $this->totalCliente,
+                    totalFletero: $this->totalFletero,
                     montoGanancia: (float) $validated['monto_ganancia'],
                 );
             } catch (\RuntimeException $e) {
@@ -210,8 +232,14 @@ new #[Title('Recepción de guía')] class extends Component {
                                 <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Total Descargado') }}</div>
                                 <div class="text-2xl font-semibold font-mono">{{ is_numeric($tn_descargadas) ? number_format((float) $tn_descargadas, 2, ',', '.').' '.$guia->unidadLabel() : '—' }}</div>
                             </div>
-                            <flux:input wire:model="total_cliente" :label="__('Total Cliente $')" type="number" step="0.01" min="0" required />
-                            <flux:input wire:model="total_fletero" :label="__('Total Flete $')" type="number" step="0.01" min="0" required />
+                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Total Cliente $') }}</div>
+                                <div class="text-2xl font-semibold font-mono">{{ $this->totalCliente !== null ? '$ '.number_format($this->totalCliente, 2, ',', '.') : '—' }}</div>
+                            </div>
+                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Total Flete $') }}</div>
+                                <div class="text-2xl font-semibold font-mono">{{ $this->totalFletero !== null ? '$ '.number_format($this->totalFletero, 2, ',', '.') : '—' }}</div>
+                            </div>
                             <flux:input wire:model="monto_ganancia" :label="__('Ganancia a cargar en cta cte del cliente')" type="number" step="0.01" min="0" required />
                         </div>
                     </div>

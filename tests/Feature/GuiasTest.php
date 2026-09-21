@@ -78,10 +78,15 @@ test('cargar una guía por unidades no pide TN, solo cantidad', function () {
         ->and($guia->precio_fletero)->toBeNull();
 });
 
-test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la pérdida y carga los totales a mano en cta cte', function () {
+test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la pérdida y recalcula los totales solo con Valor TN', function () {
     $user = User::factory()->create();
     $cliente = Cliente::factory()->create();
-    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create(['unidad' => 'kilos', 'tn_cargadas' => 12500]);
+    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create([
+        'unidad' => 'kilos',
+        'tn_cargadas' => 12500,
+        'precio_cliente' => 50,
+        'precio_fletero' => 30,
+    ]);
 
     $component = Livewire::actingAs($user)
         ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
@@ -89,11 +94,11 @@ test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la p�
         ->assertDontSee('Bruto (kg)')
         ->set('tn_descargadas', '12000');
 
-    expect($component->instance()->perdida)->toBe(500.0);
+    expect($component->instance()->perdida)->toBe(500.0)
+        ->and($component->instance()->totalCliente)->toBe(600000.0)
+        ->and($component->instance()->totalFletero)->toBe(360000.0);
 
     $component
-        ->set('total_cliente', '600000')
-        ->set('total_fletero', '360000')
         ->set('monto_ganancia', '1200')
         ->call('recepcionar')
         ->assertHasNoErrors();
