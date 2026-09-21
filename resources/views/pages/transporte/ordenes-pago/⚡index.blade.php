@@ -1,11 +1,13 @@
 <?php
 
+use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Cheque;
 use App\Models\CuentaBancaria;
 use App\Models\Fletero;
 use App\Models\OrdenPago;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -14,29 +16,11 @@ use Livewire\WithPagination;
 
 new #[Title('Órdenes de pago')] class extends Component {
     use WithPagination;
+    use FiltraPorRangoDeFechas;
 
     public function mount(): void
     {
         abort_unless(Auth::user()->isAdministrador(), 403);
-    }
-
-    public string $desde = '';
-    public string $hasta = '';
-
-    public function updatingDesde(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatingHasta(): void
-    {
-        $this->resetPage();
-    }
-
-    public function limpiarFiltro(): void
-    {
-        $this->reset(['desde', 'hasta']);
-        $this->resetPage();
     }
 
     public string $buscarFletero = '';
@@ -118,28 +102,30 @@ new #[Title('Órdenes de pago')] class extends Component {
         $validated = $this->validate($rules);
 
         try {
-            $fletero = Fletero::findOrFail($validated['fletero_id']);
-            $chequeId = null;
+            DB::transaction(function () use ($validated) {
+                $fletero = Fletero::findOrFail($validated['fletero_id']);
+                $chequeId = null;
 
-            if ($this->medio_pago === 'cheque') {
-                $cheque = Cheque::emitir(CuentaBancaria::findOrFail($validated['cuenta_bancaria_id']), [
-                    'numero' => $validated['numero_cheque'],
-                    'banco' => $validated['banco_cheque'],
-                    'beneficiario' => $this->fleteroSeleccionado,
-                    'fecha_pago' => $validated['fecha_pago_cheque'],
-                    'monto' => $validated['monto'],
-                ]);
+                if ($this->medio_pago === 'cheque') {
+                    $cheque = Cheque::emitir(CuentaBancaria::findOrFail($validated['cuenta_bancaria_id']), [
+                        'numero' => $validated['numero_cheque'],
+                        'banco' => $validated['banco_cheque'],
+                        'beneficiario' => $this->fleteroSeleccionado,
+                        'fecha_pago' => $validated['fecha_pago_cheque'],
+                        'monto' => $validated['monto'],
+                    ]);
 
-                $chequeId = $cheque->id;
-            }
+                    $chequeId = $cheque->id;
+                }
 
-            OrdenPago::emitir(
-                $fletero,
-                (float) $validated['monto'],
-                $validated['medio_pago'],
-                $validated['concepto'] ?: null,
-                $chequeId,
-            );
+                OrdenPago::emitir(
+                    $fletero,
+                    (float) $validated['monto'],
+                    $validated['medio_pago'],
+                    $validated['concepto'] ?: null,
+                    $chequeId,
+                );
+            });
         } catch (\RuntimeException $e) {
             Flux::toast(variant: 'danger', text: $e->getMessage());
 
@@ -170,15 +156,7 @@ new #[Title('Órdenes de pago')] class extends Component {
         </flux:modal.trigger>
     </div>
 
-    <div class="flex flex-wrap items-end gap-4">
-        <flux:input wire:model.live="desde" :label="__('Desde')" type="date" class="max-w-xs" />
-        <flux:input wire:model.live="hasta" :label="__('Hasta')" type="date" class="max-w-xs" />
-        @if ($desde || $hasta)
-            <flux:button variant="ghost" icon="x-mark" wire:click="limpiarFiltro">
-                {{ __('Limpiar filtro') }}
-            </flux:button>
-        @endif
-    </div>
+    <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
     <div class="hidden overflow-x-auto md:block">
         <flux:table>

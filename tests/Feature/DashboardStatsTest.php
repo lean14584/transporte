@@ -10,7 +10,7 @@ use App\Models\User;
 use Livewire\Livewire;
 
 test('el dashboard muestra los indicadores calculados a partir de los datos reales', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => 'administrador']);
     $cliente = Cliente::factory()->create();
     $transporte = Transporte::factory()->create();
 
@@ -37,4 +37,25 @@ test('el dashboard muestra los indicadores calculados a partir de los datos real
 
     $component->assertSee($cliente->nombre)
         ->assertSee($transporte->nombre);
+});
+
+test('un usuario no administrador no ve el saldo bancario ni los próximos cheques en el dashboard', function () {
+    $user = User::factory()->create(['role' => 'administrativo']);
+
+    $cuenta = CuentaBancaria::factory()->create(['saldo' => 50000]);
+    Cheque::emitir($cuenta, [
+        'numero' => '1',
+        'banco' => 'Banco Nación',
+        'beneficiario' => 'Fletero Confidencial',
+        'fecha_pago' => now()->addDays(10)->toDateString(),
+        'monto' => 5000,
+    ]);
+
+    $component = Livewire::actingAs($user)->test('pages::dashboard');
+
+    expect($component->instance()->saldoBancario)->toBeNull()
+        ->and($component->instance()->proximosCheques)->toHaveCount(0);
+
+    $component->assertDontSee('Saldo en cuentas bancarias')
+        ->assertDontSee('Fletero Confidencial');
 });

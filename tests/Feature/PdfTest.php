@@ -10,7 +10,7 @@ use App\Models\Transporte;
 use App\Models\User;
 
 test('se pueden generar los pdf de guía, recibo y orden de pago', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['role' => 'administrador']);
     $cliente = Cliente::factory()->create();
     $transporte = Transporte::factory()->create();
 
@@ -32,6 +32,21 @@ test('se pueden generar los pdf de guía, recibo y orden de pago', function () {
     $this->get(route('guias.pdf', $guia))->assertOk()->assertHeader('content-type', 'application/pdf');
     $this->get(route('recibos.pdf', $recibo))->assertOk()->assertHeader('content-type', 'application/pdf');
     $this->get(route('ordenes-pago.pdf', $orden))->assertOk()->assertHeader('content-type', 'application/pdf');
+});
+
+test('el pdf de orden de pago no es accesible para un usuario no administrador', function () {
+    $user = User::factory()->create(['role' => 'administrativo']);
+    $orden = OrdenPago::create([
+        'fletero_id' => Fletero::factory()->create()->id,
+        'fecha' => now()->toDateString(),
+        'monto' => 1000,
+        'medio_pago' => 'efectivo',
+        'usuario_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('ordenes-pago.pdf', $orden))
+        ->assertForbidden();
 });
 
 test('el pdf de guía renderiza sin errores con nombre de empresa configurado', function () {

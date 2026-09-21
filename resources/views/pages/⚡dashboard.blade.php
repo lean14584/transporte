@@ -5,6 +5,7 @@ use App\Models\Cliente;
 use App\Models\CuentaBancaria;
 use App\Models\Guia;
 use App\Models\Recibo;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -29,8 +30,12 @@ new #[Title('Dashboard')] class extends Component {
     }
 
     #[Computed]
-    public function saldoBancario(): float
+    public function saldoBancario(): ?float
     {
+        if (! Auth::user()->isAdministrador()) {
+            return null;
+        }
+
         return (float) CuentaBancaria::sum('saldo');
     }
 
@@ -47,6 +52,10 @@ new #[Title('Dashboard')] class extends Component {
     #[Computed]
     public function proximosCheques()
     {
+        if (! Auth::user()->isAdministrador()) {
+            return collect();
+        }
+
         return Cheque::where('estado', 'emitido')
             ->orderBy('fecha_pago')
             ->limit(6)
@@ -91,19 +100,21 @@ new #[Title('Dashboard')] class extends Component {
             <flux:heading size="xl" class="mt-3 font-mono text-amber-900 dark:text-amber-100">$ {{ number_format($this->totalACobrar, 2, ',', '.') }}</flux:heading>
         </div>
 
-        <div class="min-w-0 rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/50 dark:bg-violet-950/30">
-            <div class="flex items-center gap-3">
-                <div class="rounded-lg bg-violet-100 p-2 dark:bg-violet-900/50">
-                    <flux:icon.building-library class="size-5 text-violet-600 dark:text-violet-400" />
+        @if (auth()->user()->isAdministrador())
+            <div class="min-w-0 rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/50 dark:bg-violet-950/30">
+                <div class="flex items-center gap-3">
+                    <div class="rounded-lg bg-violet-100 p-2 dark:bg-violet-900/50">
+                        <flux:icon.building-library class="size-5 text-violet-600 dark:text-violet-400" />
+                    </div>
+                    <flux:text size="sm" class="text-violet-900/70 dark:text-violet-300">{{ __('Saldo en cuentas bancarias') }}</flux:text>
                 </div>
-                <flux:text size="sm" class="text-violet-900/70 dark:text-violet-300">{{ __('Saldo en cuentas bancarias') }}</flux:text>
+                <flux:heading size="xl" class="mt-3 font-mono text-violet-900 dark:text-violet-100">$ {{ number_format($this->saldoBancario, 2, ',', '.') }}</flux:heading>
             </div>
-            <flux:heading size="xl" class="mt-3 font-mono text-violet-900 dark:text-violet-100">$ {{ number_format($this->saldoBancario, 2, ',', '.') }}</flux:heading>
-        </div>
+        @endif
     </div>
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div class="min-w-0 rounded-xl border border-zinc-200 dark:border-white/10 overflow-hidden">
+        <div class="min-w-0 rounded-xl border border-zinc-200 dark:border-white/10 overflow-hidden @unless (auth()->user()->isAdministrador()) lg:col-span-2 @endunless">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 p-4 dark:border-white/10">
                 <flux:heading size="lg">{{ __('Últimas guías') }}</flux:heading>
                 <flux:link :href="route('guias.index')" wire:navigate>{{ __('Ver todas') }}</flux:link>
@@ -156,51 +167,53 @@ new #[Title('Dashboard')] class extends Component {
             </div>
         </div>
 
-        <div class="min-w-0 rounded-xl border border-zinc-200 dark:border-white/10 overflow-hidden">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 p-4 dark:border-white/10">
-                <flux:heading size="lg">{{ __('Próximos cheques a pagar') }}</flux:heading>
-                <flux:link :href="route('cheques.index')" wire:navigate>{{ __('Ver todos') }}</flux:link>
-            </div>
+        @if (auth()->user()->isAdministrador())
+            <div class="min-w-0 rounded-xl border border-zinc-200 dark:border-white/10 overflow-hidden">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 p-4 dark:border-white/10">
+                    <flux:heading size="lg">{{ __('Próximos cheques a pagar') }}</flux:heading>
+                    <flux:link :href="route('cheques.index')" wire:navigate>{{ __('Ver todos') }}</flux:link>
+                </div>
 
-            <div class="hidden overflow-x-auto md:block">
-                <flux:table>
-                    <flux:table.columns>
-                        <flux:table.column>{{ __('Fecha de pago') }}</flux:table.column>
-                        <flux:table.column>{{ __('Beneficiario') }}</flux:table.column>
-                        <flux:table.column align="end">{{ __('Monto') }}</flux:table.column>
-                    </flux:table.columns>
+                <div class="hidden overflow-x-auto md:block">
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>{{ __('Fecha de pago') }}</flux:table.column>
+                            <flux:table.column>{{ __('Beneficiario') }}</flux:table.column>
+                            <flux:table.column align="end">{{ __('Monto') }}</flux:table.column>
+                        </flux:table.columns>
 
-                    <flux:table.rows>
-                        @forelse ($this->proximosCheques as $cheque)
-                            <flux:table.row wire:key="dash-cheque-{{ $cheque->id }}">
-                                <flux:table.cell>{{ $cheque->fecha_pago->format('d/m/Y') }}</flux:table.cell>
-                                <flux:table.cell>{{ $cheque->beneficiario }}</flux:table.cell>
-                                <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $cheque->monto, 2, ',', '.') }}</flux:table.cell>
-                            </flux:table.row>
-                        @empty
-                            <flux:table.row>
-                                <flux:table.cell colspan="3" class="text-center text-zinc-500">
-                                    {{ __('No hay cheques pendientes.') }}
-                                </flux:table.cell>
-                            </flux:table.row>
-                        @endforelse
-                    </flux:table.rows>
-                </flux:table>
-            </div>
+                        <flux:table.rows>
+                            @forelse ($this->proximosCheques as $cheque)
+                                <flux:table.row wire:key="dash-cheque-{{ $cheque->id }}">
+                                    <flux:table.cell>{{ $cheque->fecha_pago->format('d/m/Y') }}</flux:table.cell>
+                                    <flux:table.cell>{{ $cheque->beneficiario }}</flux:table.cell>
+                                    <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $cheque->monto, 2, ',', '.') }}</flux:table.cell>
+                                </flux:table.row>
+                            @empty
+                                <flux:table.row>
+                                    <flux:table.cell colspan="3" class="text-center text-zinc-500">
+                                        {{ __('No hay cheques pendientes.') }}
+                                    </flux:table.cell>
+                                </flux:table.row>
+                            @endforelse
+                        </flux:table.rows>
+                    </flux:table>
+                </div>
 
-            <div class="divide-y divide-zinc-200 md:hidden dark:divide-white/10">
-                @forelse ($this->proximosCheques as $cheque)
-                    <div class="flex items-center justify-between gap-3 p-4" wire:key="dash-cheque-mobile-{{ $cheque->id }}">
-                        <div>
-                            <div class="text-sm text-zinc-500">{{ $cheque->fecha_pago->format('d/m/Y') }}</div>
-                            <div class="font-medium">{{ $cheque->beneficiario }}</div>
+                <div class="divide-y divide-zinc-200 md:hidden dark:divide-white/10">
+                    @forelse ($this->proximosCheques as $cheque)
+                        <div class="flex items-center justify-between gap-3 p-4" wire:key="dash-cheque-mobile-{{ $cheque->id }}">
+                            <div>
+                                <div class="text-sm text-zinc-500">{{ $cheque->fecha_pago->format('d/m/Y') }}</div>
+                                <div class="font-medium">{{ $cheque->beneficiario }}</div>
+                            </div>
+                            <div class="font-mono">$ {{ number_format((float) $cheque->monto, 2, ',', '.') }}</div>
                         </div>
-                        <div class="font-mono">$ {{ number_format((float) $cheque->monto, 2, ',', '.') }}</div>
-                    </div>
-                @empty
-                    <div class="p-4 text-center text-zinc-500">{{ __('No hay cheques pendientes.') }}</div>
-                @endforelse
+                    @empty
+                        <div class="p-4 text-center text-zinc-500">{{ __('No hay cheques pendientes.') }}</div>
+                    @endforelse
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 </div>

@@ -50,3 +50,13 @@ test('la caja se puede filtrar por rango de fechas', function () {
         ->assertSee('2.000,00') // total debe filtrado
         ->assertSee('500,00');  // total haber filtrado
 });
+
+test('la caja avisa cuando el rango de fechas está invertido', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::transporte.caja.index')
+        ->set('desde', now()->toDateString())
+        ->set('hasta', now()->subDays(5)->toDateString())
+        ->assertSee('rango de fechas está invertido');
+});
