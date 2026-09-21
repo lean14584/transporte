@@ -35,8 +35,8 @@ new #[Title('Configuración')] class extends Component {
     public function guardar(): void
     {
         $validated = $this->validate([
-            'porcentaje_ganancia_kilo' => ['required', 'numeric', 'gte:0'],
-            'porcentaje_ganancia_unidad' => ['required', 'numeric', 'gte:0'],
+            'porcentaje_ganancia_kilo' => ['required', 'numeric', 'gte:0', 'max:100'],
+            'porcentaje_ganancia_unidad' => ['required', 'numeric', 'gte:0', 'max:100'],
             'empresa_nombre' => ['nullable', 'string', 'max:255'],
             'empresa_propietario' => ['nullable', 'string', 'max:255'],
             'empresa_direccion' => ['nullable', 'string', 'max:255'],
@@ -146,6 +146,7 @@ new #[Title('Configuración')] class extends Component {
                             type="number"
                             step="0.01"
                             min="0"
+                            max="100"
                             required
                         />
                         <flux:input
@@ -154,6 +155,7 @@ new #[Title('Configuración')] class extends Component {
                             type="number"
                             step="0.01"
                             min="0"
+                            max="100"
                             required
                         />
                     </div>

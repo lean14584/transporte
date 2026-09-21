@@ -110,7 +110,7 @@ new #[Title('Recepción de guía')] class extends Component {
         } else {
             $validated = $this->validate([
                 'cantidad_recibida' => ['required', 'numeric', 'gt:0'],
-                'porcentaje_ganancia' => ['required', 'numeric', 'gte:0'],
+                'porcentaje_ganancia' => ['required', 'numeric', 'gte:0', 'max:100'],
             ]);
 
             try {
@@ -257,7 +257,7 @@ new #[Title('Recepción de guía')] class extends Component {
                                 autofocus
                             />
 
-                            <flux:input wire:model.live="porcentaje_ganancia" :label="__('Porcentaje de ganancia (%)')" type="number" step="0.01" min="0" required />
+                            <flux:input wire:model.live="porcentaje_ganancia" :label="__('Porcentaje de ganancia (%)')" type="number" step="0.01" min="0" max="100" required />
                         </div>
                     </div>
 
