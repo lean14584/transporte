@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\OrdenPago;
 use App\Models\Recibo;
 use Illuminate\Support\Facades\DB;
@@ -10,25 +11,7 @@ use Livewire\WithPagination;
 
 new #[Title('Caja')] class extends Component {
     use WithPagination;
-
-    public string $desde = '';
-    public string $hasta = '';
-
-    public function updatingDesde(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatingHasta(): void
-    {
-        $this->resetPage();
-    }
-
-    public function limpiarFiltro(): void
-    {
-        $this->reset(['desde', 'hasta']);
-        $this->resetPage();
-    }
+    use FiltraPorRangoDeFechas;
 
     /**
      * Cobranzas (Recibo) y Órdenes de pago (OrdenPago) combinadas en un solo
@@ -96,15 +79,7 @@ new #[Title('Caja')] class extends Component {
         </div>
     </div>
 
-    <div class="flex flex-wrap items-end gap-4">
-        <flux:input wire:model.live="desde" :label="__('Desde')" type="date" class="max-w-xs" />
-        <flux:input wire:model.live="hasta" :label="__('Hasta')" type="date" class="max-w-xs" />
-        @if ($desde || $hasta)
-            <flux:button variant="ghost" icon="x-mark" wire:click="limpiarFiltro">
-                {{ __('Limpiar filtro') }}
-            </flux:button>
-        @endif
-    </div>
+    <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">

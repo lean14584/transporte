@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Recibo;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -8,25 +9,7 @@ use Livewire\WithPagination;
 
 new #[Title('Cobranzas')] class extends Component {
     use WithPagination;
-
-    public string $desde = '';
-    public string $hasta = '';
-
-    public function updatingDesde(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatingHasta(): void
-    {
-        $this->resetPage();
-    }
-
-    public function limpiarFiltro(): void
-    {
-        $this->reset(['desde', 'hasta']);
-        $this->resetPage();
-    }
+    use FiltraPorRangoDeFechas;
 
     #[Computed]
     public function recibos()
@@ -60,15 +43,7 @@ new #[Title('Cobranzas')] class extends Component {
         </div>
     </div>
 
-    <div class="flex flex-wrap items-end gap-4">
-        <flux:input wire:model.live="desde" :label="__('Desde')" type="date" class="max-w-xs" />
-        <flux:input wire:model.live="hasta" :label="__('Hasta')" type="date" class="max-w-xs" />
-        @if ($desde || $hasta)
-            <flux:button variant="ghost" icon="x-mark" wire:click="limpiarFiltro">
-                {{ __('Limpiar filtro') }}
-            </flux:button>
-        @endif
-    </div>
+    <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
     <div class="hidden overflow-x-auto md:block">
         <flux:table>
