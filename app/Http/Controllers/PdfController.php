@@ -7,6 +7,7 @@ use App\Models\Guia;
 use App\Models\OrdenPago;
 use App\Models\Recibo;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class PdfController extends Controller
@@ -31,6 +32,8 @@ class PdfController extends Controller
 
     public function ordenPago(OrdenPago $ordenPago): Response
     {
+        abort_unless(Auth::user()->isAdministrador(), 403);
+
         $ordenPago->load(['fletero', 'cheque']);
 
         return Pdf::loadView('pdf.orden-pago', ['ordenPago' => $ordenPago, 'empresa' => Configuracion::actual()])
