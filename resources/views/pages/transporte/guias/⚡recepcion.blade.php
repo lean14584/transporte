@@ -116,7 +116,7 @@ new #[Title('Recepción de guía')] class extends Component {
 <div class="flex flex-col gap-6">
     <div>
         <flux:heading size="xl">{{ __('Recepción de guía :folio', ['folio' => $guia->folio()]) }}</flux:heading>
-        <flux:subheading>{{ $guia->cliente->nombre }} · {{ $guia->mercaderia }} · {{ $guia->transportista }}</flux:subheading>
+        <flux:subheading>{{ __('Cargado el :fecha', ['fecha' => $guia->fecha_carga->format('d/m/Y')]) }}</flux:subheading>
     </div>
 
     <form wire:submit="recepcionar">
@@ -124,17 +124,23 @@ new #[Title('Recepción de guía')] class extends Component {
             <div class="space-y-6 p-6">
                 <div>
                     <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
-                        {{ __('Datos de la carga') }}
+                        {{ __('Datos generales') }}
                     </flux:heading>
 
-                    <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                        {{ __('Cargado el :fecha para :transporte. Cantidad declarada: :cantidad :unidad.', [
-                            'fecha' => $guia->fecha_carga->format('d/m/Y'),
-                            'transporte' => $guia->transporte->nombre,
-                            'cantidad' => number_format((float) $guia->cantidad, 0, ',', '.'),
-                            'unidad' => $guia->unidad,
-                        ]) }}
-                    </p>
+                    <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                            <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Cliente') }}</div>
+                            <div class="text-xl font-semibold">{{ $guia->cliente->nombre }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Transporte') }}</div>
+                            <div class="text-xl font-semibold">{{ $guia->transporte->nombre }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Chofer') }}</div>
+                            <div class="text-xl font-semibold">{{ $guia->transportista ?: '—' }}</div>
+                        </div>
+                    </div>
                 </div>
 
                 <flux:separator />
@@ -142,40 +148,71 @@ new #[Title('Recepción de guía')] class extends Component {
                 @if ($this->esPorKilos)
                     <div>
                         <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                            {{ __('Datos de la carga') }}
+                        </flux:heading>
+
+                        <div class="mt-3 grid grid-cols-2 gap-4 lg:grid-cols-4">
+                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Producto') }}</div>
+                                <div class="text-xl font-semibold">{{ $guia->producto?->nombre ?? $guia->mercaderia }}</div>
+                            </div>
+                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('TN Cargadas') }}</div>
+                                <div class="text-xl font-semibold font-mono">{{ $guia->tn_cargadas !== null ? number_format((float) $guia->tn_cargadas, 2, ',', '.') : '—' }}</div>
+                            </div>
+                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Valor TN Cliente') }}</div>
+                                <div class="text-xl font-semibold font-mono">{{ $guia->precio_cliente !== null ? '$ '.number_format((float) $guia->precio_cliente, 2, ',', '.') : '—' }}</div>
+                            </div>
+                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Valor TN Fletero') }}</div>
+                                <div class="text-xl font-semibold font-mono">{{ $guia->precio_fletero !== null ? '$ '.number_format((float) $guia->precio_fletero, 2, ',', '.') : '—' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <flux:separator />
+
+                    <div>
+                        <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                            {{ __('TN Descargadas') }}
+                        </flux:heading>
+
+                        <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                            <flux:input
+                                wire:model.live="tn_descargadas"
+                                :label="__('TN Descargadas')"
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                required
+                                autofocus
+                            />
+
+                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Pérdida') }}</div>
+                                <div class="text-2xl font-semibold font-mono {{ ($this->perdida ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : '' }}">
+                                    {{ $this->perdida !== null ? number_format($this->perdida, 2, ',', '.').' '.$guia->unidad : '—' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <flux:separator />
+
+                    <div>
+                        <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
                             {{ __('Resultado facturación') }}
                         </flux:heading>
 
-                        <div class="mt-3 space-y-4">
-                            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                                <flux:input
-                                    wire:model.live="tn_descargadas"
-                                    :label="__('TN Descargadas')"
-                                    type="number"
-                                    step="0.01"
-                                    min="0.01"
-                                    required
-                                    autofocus
-                                />
-
-                                <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                    <div class="flex justify-between">
-                                        <flux:text>{{ __('Total cargado (declarado al cargar)') }}</flux:text>
-                                        <flux:text class="font-mono">{{ $guia->tn_cargadas !== null ? number_format((float) $guia->tn_cargadas, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
-                                    </div>
-                                    <div class="mt-2 flex justify-between">
-                                        <flux:text>{{ __('Pérdida') }}</flux:text>
-                                        <flux:text class="font-mono {{ ($this->perdida ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : '' }}">
-                                            {{ $this->perdida !== null ? number_format($this->perdida, 2, ',', '.').' '.$guia->unidad : '—' }}
-                                        </flux:text>
-                                    </div>
-                                </div>
+                        <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-4">
+                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Total Descargado') }}</div>
+                                <div class="text-2xl font-semibold font-mono">{{ is_numeric($tn_descargadas) ? number_format((float) $tn_descargadas, 2, ',', '.').' '.$guia->unidad : '—' }}</div>
                             </div>
-
-                            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                                <flux:input wire:model="total_cliente" :label="__('Total cliente')" type="number" step="0.01" min="0" required />
-                                <flux:input wire:model="total_fletero" :label="__('Total fletero')" type="number" step="0.01" min="0" required />
-                                <flux:input wire:model="monto_ganancia" :label="__('Ganancia a cargar en cta cte del cliente')" type="number" step="0.01" min="0" required />
-                            </div>
+                            <flux:input wire:model="total_cliente" :label="__('Total Cliente $')" type="number" step="0.01" min="0" required />
+                            <flux:input wire:model="total_fletero" :label="__('Total Flete $')" type="number" step="0.01" min="0" required />
+                            <flux:input wire:model="monto_ganancia" :label="__('Ganancia a cargar en cta cte del cliente')" type="number" step="0.01" min="0" required />
                         </div>
                     </div>
                 @else
