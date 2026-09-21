@@ -9,11 +9,32 @@ use Livewire\WithPagination;
 new #[Title('Cobranzas')] class extends Component {
     use WithPagination;
 
+    public string $desde = '';
+    public string $hasta = '';
+
+    public function updatingDesde(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingHasta(): void
+    {
+        $this->resetPage();
+    }
+
+    public function limpiarFiltro(): void
+    {
+        $this->reset(['desde', 'hasta']);
+        $this->resetPage();
+    }
+
     #[Computed]
     public function recibos()
     {
         return Recibo::query()
             ->with('cliente')
+            ->when($this->desde, fn ($query) => $query->whereDate('fecha', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('fecha', '<=', $this->hasta))
             ->latest('fecha')
             ->latest('id')
             ->paginate(15);
@@ -37,6 +58,16 @@ new #[Title('Cobranzas')] class extends Component {
             <flux:text size="sm" class="text-emerald-900/70 dark:text-emerald-300">{{ __('Cobrado hoy') }}</flux:text>
             <flux:heading size="lg" class="font-mono text-emerald-900 dark:text-emerald-100">$ {{ number_format($this->totalDelDia, 2, ',', '.') }}</flux:heading>
         </div>
+    </div>
+
+    <div class="flex flex-wrap items-end gap-4">
+        <flux:input wire:model.live="desde" :label="__('Desde')" type="date" class="max-w-xs" />
+        <flux:input wire:model.live="hasta" :label="__('Hasta')" type="date" class="max-w-xs" />
+        @if ($desde || $hasta)
+            <flux:button variant="ghost" icon="x-mark" wire:click="limpiarFiltro">
+                {{ __('Limpiar filtro') }}
+            </flux:button>
+        @endif
     </div>
 
     <div class="hidden overflow-x-auto md:block">

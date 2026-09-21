@@ -20,6 +20,25 @@ new #[Title('Órdenes de pago')] class extends Component {
         abort_unless(Auth::user()->isAdministrador(), 403);
     }
 
+    public string $desde = '';
+    public string $hasta = '';
+
+    public function updatingDesde(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingHasta(): void
+    {
+        $this->resetPage();
+    }
+
+    public function limpiarFiltro(): void
+    {
+        $this->reset(['desde', 'hasta']);
+        $this->resetPage();
+    }
+
     public string $buscarFletero = '';
     public ?int $fletero_id = null;
     public string $fleteroSeleccionado = '';
@@ -38,6 +57,8 @@ new #[Title('Órdenes de pago')] class extends Component {
     {
         return OrdenPago::query()
             ->with(['fletero', 'cheque'])
+            ->when($this->desde, fn ($query) => $query->whereDate('fecha', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('fecha', '<=', $this->hasta))
             ->latest('fecha')
             ->latest('id')
             ->paginate(10);
@@ -147,6 +168,16 @@ new #[Title('Órdenes de pago')] class extends Component {
                 {{ __('Nueva orden de pago') }}
             </flux:button>
         </flux:modal.trigger>
+    </div>
+
+    <div class="flex flex-wrap items-end gap-4">
+        <flux:input wire:model.live="desde" :label="__('Desde')" type="date" class="max-w-xs" />
+        <flux:input wire:model.live="hasta" :label="__('Hasta')" type="date" class="max-w-xs" />
+        @if ($desde || $hasta)
+            <flux:button variant="ghost" icon="x-mark" wire:click="limpiarFiltro">
+                {{ __('Limpiar filtro') }}
+            </flux:button>
+        @endif
     </div>
 
     <div class="hidden overflow-x-auto md:block">
