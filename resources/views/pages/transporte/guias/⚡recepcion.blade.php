@@ -10,8 +10,6 @@ use Livewire\Component;
 new #[Title('Recepción de guía')] class extends Component {
     public Guia $guia;
 
-    public string $pesaje_bruto = '';
-    public string $tara = '';
     public string $cantidad_recibida = '';
     public string $porcentaje_ganancia = '';
 
@@ -65,26 +63,10 @@ new #[Title('Recepción de guía')] class extends Component {
         return round((float) $this->guia->tn_cargadas - (float) $this->tn_descargadas, 2);
     }
 
-    public function updated(string $property): void
-    {
-        if (
-            in_array($property, ['pesaje_bruto', 'tara'], true)
-            && $this->tn_descargadas === ''
-            && $this->pesaje_bruto !== ''
-            && $this->tara !== ''
-            && is_numeric($this->pesaje_bruto)
-            && is_numeric($this->tara)
-        ) {
-            $this->tn_descargadas = (string) round((float) $this->pesaje_bruto - (float) $this->tara, 2);
-        }
-    }
-
     public function recepcionar(): void
     {
         if ($this->esPorKilos) {
             $validated = $this->validate([
-                'pesaje_bruto' => ['required', 'numeric', 'gt:0'],
-                'tara' => ['required', 'numeric', 'gte:0', 'lt:pesaje_bruto'],
                 'tn_descargadas' => ['required', 'numeric', 'gt:0'],
                 'total_cliente' => ['required', 'numeric', 'gte:0'],
                 'total_fletero' => ['required', 'numeric', 'gte:0'],
@@ -93,8 +75,6 @@ new #[Title('Recepción de guía')] class extends Component {
 
             try {
                 $this->guia->recepcionar(
-                    pesajeBruto: (float) $validated['pesaje_bruto'],
-                    tara: (float) $validated['tara'],
                     totalDescargado: (float) $validated['tn_descargadas'],
                     totalCliente: (float) $validated['total_cliente'],
                     totalFletero: (float) $validated['total_fletero'],
@@ -158,30 +138,6 @@ new #[Title('Recepción de guía')] class extends Component {
                 <flux:separator />
 
                 @if ($this->esPorKilos)
-                    <div class="grid grid-cols-2 gap-4">
-                        <flux:input
-                            wire:model.live="pesaje_bruto"
-                            :label="__('Bruto (kg)')"
-                            :description="__('Camión + mercadería')"
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            required
-                            autofocus
-                        />
-                        <flux:input
-                            wire:model.live="tara"
-                            :label="__('Tara (kg)')"
-                            :description="__('Peso del camión vacío')"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            required
-                        />
-                    </div>
-
-                    <flux:separator />
-
                     <div>
                         <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
                             {{ __('Resultado facturación') }}
@@ -191,11 +147,11 @@ new #[Title('Recepción de guía')] class extends Component {
                             <flux:input
                                 wire:model.live="tn_descargadas"
                                 :label="__('TN Descargadas')"
-                                :description="__('Precargado con Bruto - Tara; ajustalo si hace falta.')"
                                 type="number"
                                 step="0.01"
                                 min="0.01"
                                 required
+                                autofocus
                             />
 
                             <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">

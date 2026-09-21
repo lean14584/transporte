@@ -127,7 +127,7 @@
         <div class="recuadro">
             <div class="seccion-titulo">Recepción — {{ $guia->fecha_recepcion?->format('d/m/Y') }}</div>
             <table class="totales" style="width: 100%;">
-                @if ($guia->unidad === 'kilos')
+                @if ($guia->pesaje_bruto !== null && $guia->tara !== null)
                     <tr>
                         <td class="label">Pesaje bruto</td>
                         <td class="valor">{{ number_format((float) $guia->pesaje_bruto, 2, ',', '.') }} kg</td>
