@@ -7,6 +7,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('transportes', 'pages::transporte.transportes.index')->name('transportes.index');
 
     Route::livewire('fleteros', 'pages::transporte.fleteros.index')->name('fleteros.index');
+    Route::livewire('fleteros/{fletero}/cta-cte', 'pages::transporte.fleteros.cta-cte')->name('fleteros.cta-cte');
 
     Route::livewire('productos', 'pages::transporte.productos.index')->name('productos.index');
 

@@ -16,7 +16,6 @@ new #[Title('Recepción de guía')] class extends Component {
     public string $porcentaje_ganancia = '';
 
     public string $tn_descargadas = '';
-    public string $monto_ganancia = '';
 
     public function mount(Guia $guia): void
     {
@@ -88,7 +87,6 @@ new #[Title('Recepción de guía')] class extends Component {
         if ($this->esPorKilos) {
             $validated = $this->validate([
                 'tn_descargadas' => ['required', 'numeric', 'gt:0'],
-                'monto_ganancia' => ['required', 'numeric', 'gte:0'],
             ]);
 
             if ($this->totalCliente === null || $this->totalFletero === null) {
@@ -102,7 +100,6 @@ new #[Title('Recepción de guía')] class extends Component {
                     totalDescargado: (float) $validated['tn_descargadas'],
                     totalCliente: $this->totalCliente,
                     totalFletero: $this->totalFletero,
-                    montoGanancia: (float) $validated['monto_ganancia'],
                 );
             } catch (\RuntimeException $e) {
                 Flux::toast(variant: 'danger', text: $e->getMessage());
@@ -227,7 +224,7 @@ new #[Title('Recepción de guía')] class extends Component {
                             {{ __('Resultado facturación') }}
                         </flux:heading>
 
-                        <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-4">
+                        <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
                             <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
                                 <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Total Descargado') }}</div>
                                 <div class="text-2xl font-semibold font-mono">{{ is_numeric($tn_descargadas) ? number_format((float) $tn_descargadas, 2, ',', '.').' '.$guia->unidadLabel() : '—' }}</div>
@@ -240,7 +237,6 @@ new #[Title('Recepción de guía')] class extends Component {
                                 <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Total Flete $') }}</div>
                                 <div class="text-2xl font-semibold font-mono">{{ $this->totalFletero !== null ? '$ '.number_format($this->totalFletero, 2, ',', '.') : '—' }}</div>
                             </div>
-                            <flux:input wire:model="monto_ganancia" :label="__('Ganancia a cargar en cta cte del cliente')" type="number" step="0.01" min="0" required />
                         </div>
                     </div>
                 @else

@@ -6,18 +6,18 @@ use App\Models\Recibo;
 use App\Models\Transporte;
 use App\Models\User;
 
-test('recepcionar una guía calcula el neto y carga la ganancia a la cta cte del cliente', function () {
+test('recepcionar una guía calcula el neto y carga el Total Cliente $ a la cta cte del cliente', function () {
     $cliente = Cliente::factory()->create();
 
     $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create();
 
-    $guia->recepcionar(pesajeBruto: 20000, tara: 8000, totalDescargado: 12000, totalCliente: 0, totalFletero: 0, montoGanancia: 1200);
+    $guia->recepcionar(totalDescargado: 12000, totalCliente: 1200, totalFletero: 0, pesajeBruto: 20000, tara: 8000);
 
     $guia->refresh();
     $cliente->refresh();
 
     expect($guia->neto)->toEqual('12000.00')
-        ->and($guia->monto_ganancia)->toEqual('1200.00')
+        ->and($guia->total_cliente)->toEqual('1200.00')
         ->and($guia->estado)->toBe('recibida')
         ->and($cliente->saldo_cta_cte)->toEqual('1200.00');
 
@@ -42,10 +42,10 @@ test('varias guías y cobros consecutivos mantienen el saldo acumulado correcto'
     $transporte = Transporte::factory()->create();
 
     Guia::factory()->for($cliente)->for($transporte)->create()
-        ->recepcionar(pesajeBruto: 10000, tara: 2000, totalDescargado: 8000, totalCliente: 0, totalFletero: 0, montoGanancia: 800); // +800
+        ->recepcionar(totalDescargado: 8000, totalCliente: 800, totalFletero: 0, pesajeBruto: 10000, tara: 2000); // +800
 
     Guia::factory()->for($cliente)->for($transporte)->create()
-        ->recepcionar(pesajeBruto: 5000, tara: 1000, totalDescargado: 4000, totalCliente: 0, totalFletero: 0, montoGanancia: 800); // +800
+        ->recepcionar(totalDescargado: 4000, totalCliente: 800, totalFletero: 0, pesajeBruto: 5000, tara: 1000); // +800
 
     Recibo::cobrar($cliente->refresh(), 1000, 'transferencia'); // -1000
 

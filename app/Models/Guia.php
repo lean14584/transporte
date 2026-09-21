@@ -87,6 +87,11 @@ class Guia extends Model
         return $this->hasOne(CuentaCorrienteMovimiento::class);
     }
 
+    public function movimientoCtaCteFletero()
+    {
+        return $this->hasOne(FleteroCuentaCorrienteMovimiento::class);
+    }
+
     public function usuarioCarga()
     {
         return $this->belongsTo(User::class, 'usuario_carga_id');
@@ -113,64 +118,71 @@ class Guia extends Model
     }
 
     /**
-     * Cierra la recepción de una guía por kilos: TN descargadas, total cliente,
-     * total fletero y la ganancia se cargan a mano (números reales de esa guía).
+     * Cierra la recepción de una guía por kilos: TN descargadas, total cliente y
+     * total fletero se cargan a mano (números reales de esa guía). El total cliente
+     * se carga como "cargo" en la cta cte del cliente, y el total fletero como
+     * "cargo" en la cta cte del fletero (lo que la empresa le debe por este flete).
      * El pesaje bruto/tara son opcionales, solo quedan como referencia si se informan.
      */
-    public function recepcionar(float $totalDescargado, float $totalCliente, float $totalFletero, float $montoGanancia, ?float $pesajeBruto = null, ?float $tara = null): void
+    public function recepcionar(float $totalDescargado, float $totalCliente, float $totalFletero, ?float $pesajeBruto = null, ?float $tara = null): void
     {
         if ($pesajeBruto !== null && $tara !== null && $pesajeBruto <= $tara) {
             throw new \InvalidArgumentException('El peso bruto debe ser mayor que la tara.');
         }
 
-        $this->finalizarRecepcion(
-            neto: $totalDescargado,
-            montoGanancia: $montoGanancia,
-            pesajeBruto: $pesajeBruto,
-            tara: $tara,
-            totalCliente: $totalCliente,
-            totalFletero: $totalFletero,
-        );
+        DB::transaction(function () use ($totalDescargado, $totalCliente, $totalFletero, $pesajeBruto, $tara) {
+            $guiaBloqueada = $this->lockParaRecepcion();
+
+            $guiaBloqueada->update([
+                'pesaje_bruto' => $pesajeBruto,
+                'tara' => $tara,
+                'neto' => $totalDescargado,
+                'total_cliente' => $totalCliente,
+                'total_fletero' => $totalFletero,
+                'estado' => 'recibida',
+                'fecha_recepcion' => now()->toDateString(),
+                'usuario_recepcion_id' => Auth::id(),
+            ]);
+
+            CuentaCorrienteMovimiento::registrar(
+                $guiaBloqueada->cliente,
+                'cargo',
+                "Guía {$guiaBloqueada->folio()} - flete {$guiaBloqueada->mercaderia}",
+                $totalCliente,
+                ['guia_id' => $guiaBloqueada->id],
+            );
+
+            if ($guiaBloqueada->fletero_id !== null) {
+                FleteroCuentaCorrienteMovimiento::registrar(
+                    $guiaBloqueada->fletero,
+                    'cargo',
+                    "Guía {$guiaBloqueada->folio()} - flete {$guiaBloqueada->mercaderia}",
+                    $totalFletero,
+                    ['guia_id' => $guiaBloqueada->id],
+                );
+            }
+        });
+
+        $this->refresh();
     }
 
     /**
      * Cierra la recepción de una guía por unidades: la cantidad recibida
      * (puede diferir de la declarada al cargar) es directamente el neto,
-     * y la ganancia se calcula sobre un porcentaje configurado.
+     * y la ganancia se calcula sobre un porcentaje configurado y se carga
+     * a la cta cte del cliente.
      */
     public function recepcionarPorCantidad(float $cantidadRecibida, float $porcentajeGanancia): void
     {
-        $this->finalizarRecepcion(
-            neto: $cantidadRecibida,
-            montoGanancia: round($cantidadRecibida * $porcentajeGanancia / 100, 2),
-            porcentajeGanancia: $porcentajeGanancia,
-        );
-    }
+        $montoGanancia = round($cantidadRecibida * $porcentajeGanancia / 100, 2);
 
-    private function finalizarRecepcion(
-        float $neto,
-        float $montoGanancia,
-        ?float $pesajeBruto = null,
-        ?float $tara = null,
-        ?float $porcentajeGanancia = null,
-        ?float $totalCliente = null,
-        ?float $totalFletero = null,
-    ): void {
-        DB::transaction(function () use ($neto, $montoGanancia, $pesajeBruto, $tara, $porcentajeGanancia, $totalCliente, $totalFletero) {
-            $guiaBloqueada = self::whereKey($this->id)->lockForUpdate()->first();
-
-            if ($guiaBloqueada->estado === 'recibida') {
-                throw new \RuntimeException('Esta guía ya fue recepcionada.');
-            }
+        DB::transaction(function () use ($cantidadRecibida, $porcentajeGanancia, $montoGanancia) {
+            $guiaBloqueada = $this->lockParaRecepcion();
 
             $guiaBloqueada->update([
-                'pesaje_bruto' => $pesajeBruto,
-                'tara' => $tara,
-                'neto' => $neto,
+                'neto' => $cantidadRecibida,
                 'porcentaje_ganancia' => $porcentajeGanancia,
                 'monto_ganancia' => $montoGanancia,
-                'total_cliente' => $totalCliente,
-                'total_fletero' => $totalFletero,
                 'estado' => 'recibida',
                 'fecha_recepcion' => now()->toDateString(),
                 'usuario_recepcion_id' => Auth::id(),
@@ -186,5 +198,20 @@ class Guia extends Model
         });
 
         $this->refresh();
+    }
+
+    /**
+     * Bloquea la fila de la guía dentro de la transacción activa y verifica que
+     * todavía no haya sido recepcionada. Debe llamarse dentro de un DB::transaction.
+     */
+    private function lockParaRecepcion(): self
+    {
+        $guiaBloqueada = self::whereKey($this->id)->lockForUpdate()->first();
+
+        if ($guiaBloqueada->estado === 'recibida') {
+            throw new \RuntimeException('Esta guía ya fue recepcionada.');
+        }
+
+        return $guiaBloqueada;
     }
 }

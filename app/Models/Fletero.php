@@ -20,4 +20,21 @@ class Fletero extends Model
         'contacto',
         'nacionalidad',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'saldo_cta_cte' => 'decimal:2',
+        ];
+    }
+
+    public function guias()
+    {
+        return $this->hasMany(Guia::class);
+    }
+
+    public function movimientosCtaCte()
+    {
+        return $this->hasMany(FleteroCuentaCorrienteMovimiento::class);
+    }
 }

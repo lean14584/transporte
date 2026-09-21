@@ -26,6 +26,7 @@ class FleteroFactory extends Factory
             'telefono' => fake()->phoneNumber(),
             'contacto' => fake()->name(),
             'nacionalidad' => 'Argentina',
+            'saldo_cta_cte' => 0,
         ];
     }
 }

@@ -155,15 +155,17 @@
                         <td class="valor">$ {{ number_format((float) $guia->total_fletero, 2, ',', '.') }}</td>
                     </tr>
                 @endif
-                <tr>
-                    <td class="label">
-                        Ganancia
-                        @if ($guia->porcentaje_ganancia !== null)
-                            ({{ rtrim(rtrim(number_format((float) $guia->porcentaje_ganancia, 2, ',', '.'), '0'), ',') }}% sobre el neto)
-                        @endif
-                    </td>
-                    <td class="valor">$ {{ number_format((float) $guia->monto_ganancia, 2, ',', '.') }}</td>
-                </tr>
+                @if ($guia->unidad !== 'kilos')
+                    <tr>
+                        <td class="label">
+                            Ganancia
+                            @if ($guia->porcentaje_ganancia !== null)
+                                ({{ rtrim(rtrim(number_format((float) $guia->porcentaje_ganancia, 2, ',', '.'), '0'), ',') }}% sobre el neto)
+                            @endif
+                        </td>
+                        <td class="valor">$ {{ number_format((float) $guia->monto_ganancia, 2, ',', '.') }}</td>
+                    </tr>
+                @endif
             </table>
         </div>
     @endif

@@ -78,10 +78,11 @@ test('cargar una guía por unidades no pide TN, solo cantidad', function () {
         ->and($guia->precio_fletero)->toBeNull();
 });
 
-test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la pérdida y recalcula los totales solo con Valor TN', function () {
+test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la pérdida y carga Total Cliente $ a la cta cte del cliente y Total Flete $ a la del fletero', function () {
     $user = User::factory()->create();
     $cliente = Cliente::factory()->create();
-    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create([
+    $fletero = Fletero::factory()->create();
+    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->for($fletero)->create([
         'unidad' => 'kilos',
         'tn_cargadas' => 12500,
         'precio_cliente' => 50,
@@ -92,6 +93,7 @@ test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la p�
         ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
         ->assertSee('TN Descargadas')
         ->assertDontSee('Bruto (kg)')
+        ->assertDontSee('Ganancia a cargar en cta cte del cliente')
         ->set('tn_descargadas', '12000');
 
     expect($component->instance()->perdida)->toBe(500.0)
@@ -99,7 +101,6 @@ test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la p�
         ->and($component->instance()->totalFletero)->toBe(360000.0);
 
     $component
-        ->set('monto_ganancia', '1200')
         ->call('recepcionar')
         ->assertHasNoErrors();
 
@@ -109,8 +110,8 @@ test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la p�
         ->and($guia->neto)->toEqual('12000.00')
         ->and($guia->total_cliente)->toEqual('600000.00')
         ->and($guia->total_fletero)->toEqual('360000.00')
-        ->and($guia->monto_ganancia)->toEqual('1200.00')
-        ->and($cliente->refresh()->saldo_cta_cte)->toEqual('1200.00');
+        ->and($cliente->refresh()->saldo_cta_cte)->toEqual('600000.00')
+        ->and($fletero->refresh()->saldo_cta_cte)->toEqual('360000.00');
 
     $this->actingAs($user)
         ->get(route('guias.index'))

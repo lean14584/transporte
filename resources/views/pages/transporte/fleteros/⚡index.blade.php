@@ -123,6 +123,7 @@ new #[Title('Fleteros')] class extends Component {
                 <flux:table.column>{{ __('CUIT') }}</flux:table.column>
                 <flux:table.column>{{ __('Teléfono') }}</flux:table.column>
                 <flux:table.column>{{ __('Contacto') }}</flux:table.column>
+                <flux:table.column align="end">{{ __('Saldo cta cte') }}</flux:table.column>
                 <flux:table.column></flux:table.column>
             </flux:table.columns>
 
@@ -133,7 +134,11 @@ new #[Title('Fleteros')] class extends Component {
                         <flux:table.cell>{{ $fletero->cuit ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $fletero->telefono ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $fletero->contacto ?: '—' }}</flux:table.cell>
+                        <flux:table.cell align="end" class="font-mono {{ $fletero->saldo_cta_cte > 0 ? 'text-amber-600 dark:text-amber-400' : '' }}">
+                            $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
+                        </flux:table.cell>
                         <flux:table.cell align="end">
+                            <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('fleteros.cta-cte', $fletero)" wire:navigate />
                             <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $fletero->id }})" />
                             @if (auth()->user()->isAdministrador())
                                 <flux:button
@@ -149,7 +154,7 @@ new #[Title('Fleteros')] class extends Component {
                     </flux:table.row>
                 @empty
                     <flux:table.row>
-                        <flux:table.cell colspan="5" class="text-center text-zinc-500">
+                        <flux:table.cell colspan="6" class="text-center text-zinc-500">
                             {{ __('Todavía no hay fleteros cargados.') }}
                         </flux:table.cell>
                     </flux:table.row>
@@ -167,6 +172,7 @@ new #[Title('Fleteros')] class extends Component {
                         <div class="mt-1 text-sm text-zinc-500">{{ __('CUIT') }} {{ $fletero->cuit ?: '—' }}</div>
                     </div>
                     <div class="flex shrink-0 gap-1">
+                        <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('fleteros.cta-cte', $fletero)" wire:navigate />
                         <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $fletero->id }})" />
                         @if (auth()->user()->isAdministrador())
                             <flux:button
@@ -180,9 +186,14 @@ new #[Title('Fleteros')] class extends Component {
                         @endif
                     </div>
                 </div>
-                <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-500">
-                    <span>{{ __('Tel.') }} {{ $fletero->telefono ?: '—' }}</span>
-                    <span>{{ __('Contacto') }} {{ $fletero->contacto ?: '—' }}</span>
+                <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-white/5">
+                    <span class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-500">
+                        <span>{{ __('Tel.') }} {{ $fletero->telefono ?: '—' }}</span>
+                        <span>{{ __('Contacto') }} {{ $fletero->contacto ?: '—' }}</span>
+                    </span>
+                    <span class="font-mono text-sm {{ $fletero->saldo_cta_cte > 0 ? 'text-amber-600 dark:text-amber-400' : '' }}">
+                        $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
+                    </span>
                 </div>
             </div>
         @empty
