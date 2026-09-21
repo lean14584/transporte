@@ -103,13 +103,13 @@ class Guia extends Model
     }
 
     /**
-     * Cierra la recepción de una guía por kilos: el pesaje bruto/tara queda
-     * como referencia, pero el total descargado, el total cliente, el total
-     * fletero y la ganancia se cargan a mano (números reales de esa guía).
+     * Cierra la recepción de una guía por kilos: TN descargadas, total cliente,
+     * total fletero y la ganancia se cargan a mano (números reales de esa guía).
+     * El pesaje bruto/tara son opcionales, solo quedan como referencia si se informan.
      */
-    public function recepcionar(float $pesajeBruto, float $tara, float $totalDescargado, float $totalCliente, float $totalFletero, float $montoGanancia): void
+    public function recepcionar(float $totalDescargado, float $totalCliente, float $totalFletero, float $montoGanancia, ?float $pesajeBruto = null, ?float $tara = null): void
     {
-        if ($pesajeBruto <= $tara) {
+        if ($pesajeBruto !== null && $tara !== null && $pesajeBruto <= $tara) {
             throw new \InvalidArgumentException('El peso bruto debe ser mayor que la tara.');
         }
 

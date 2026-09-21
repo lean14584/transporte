@@ -42,10 +42,10 @@ test('varias guías y cobros consecutivos mantienen el saldo acumulado correcto'
     $transporte = Transporte::factory()->create();
 
     Guia::factory()->for($cliente)->for($transporte)->create()
-        ->recepcionar(10000, 2000, 8000, 0, 0, 800); // +800
+        ->recepcionar(pesajeBruto: 10000, tara: 2000, totalDescargado: 8000, totalCliente: 0, totalFletero: 0, montoGanancia: 800); // +800
 
     Guia::factory()->for($cliente)->for($transporte)->create()
-        ->recepcionar(5000, 1000, 4000, 0, 0, 800); // +800
+        ->recepcionar(pesajeBruto: 5000, tara: 1000, totalDescargado: 4000, totalCliente: 0, totalFletero: 0, montoGanancia: 800); // +800
 
     Recibo::cobrar($cliente->refresh(), 1000, 'transferencia'); // -1000
 

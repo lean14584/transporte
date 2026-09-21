@@ -15,7 +15,7 @@ test('el dashboard muestra los indicadores calculados a partir de los datos real
     $transporte = Transporte::factory()->create();
 
     Guia::factory()->for($cliente)->for($transporte)->create(); // en tránsito
-    Guia::factory()->for($cliente)->for($transporte)->create()->recepcionar(10000, 2000, 8000, 0, 0, 800); // +800 cta cte
+    Guia::factory()->for($cliente)->for($transporte)->create()->recepcionar(pesajeBruto: 10000, tara: 2000, totalDescargado: 8000, totalCliente: 0, totalFletero: 0, montoGanancia: 800); // +800 cta cte
 
     Recibo::cobrar($cliente->refresh(), 300, 'efectivo');
 
