@@ -28,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('cobranzas', 'pages::transporte.cobranzas.index')->name('cobranzas.index');
     Route::get('recibos/{recibo}/pdf', [PdfController::class, 'recibo'])->name('recibos.pdf');
 
+    Route::livewire('caja', 'pages::transporte.caja.index')->name('caja.index');
+
     Route::livewire('usuarios', 'pages::transporte.usuarios.index')->name('usuarios.index');
 
     Route::livewire('configuracion', 'pages::transporte.configuracion.editar')->name('configuracion.edit');

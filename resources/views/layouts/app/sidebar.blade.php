@@ -36,6 +36,9 @@
                 </flux:sidebar.group>
 
                 <flux:sidebar.group :heading="__('Administración')" class="grid">
+                    <flux:sidebar.item icon="calculator" :href="route('caja.index')" :current="request()->routeIs('caja.*')" wire:navigate>
+                        {{ __('Caja') }}
+                    </flux:sidebar.item>
                     <flux:sidebar.item icon="banknotes" :href="route('cobranzas.index')" :current="request()->routeIs('cobranzas.*')" wire:navigate>
                         {{ __('Cobranzas') }}
                     </flux:sidebar.item>
