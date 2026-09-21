@@ -118,10 +118,11 @@ new #[Title('Cuentas bancarias')] class extends Component {
                         <flux:table.cell>{{ $cuenta->alias_cbu ?: '—' }}</flux:table.cell>
                         <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $cuenta->saldo, 2, ',', '.') }}</flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cuenta->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $cuenta->id }})" />
                             <flux:button
                                 size="sm"
                                 variant="ghost"
+                                aria-label="{{ __('Eliminar') }}"
                                 icon="trash"
                                 wire:click="eliminar({{ $cuenta->id }})"
                                 wire:confirm="{{ __('¿Eliminar esta cuenta bancaria?') }}"
@@ -148,10 +149,11 @@ new #[Title('Cuentas bancarias')] class extends Component {
                         <div class="mt-1 text-sm text-violet-900/70 dark:text-violet-300">{{ $cuenta->numero_cuenta ?: '—' }}</div>
                     </div>
                     <div class="flex shrink-0 gap-1">
-                        <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cuenta->id }})" />
+                        <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $cuenta->id }})" />
                         <flux:button
                             size="sm"
                             variant="ghost"
+                            aria-label="{{ __('Eliminar') }}"
                             icon="trash"
                             wire:click="eliminar({{ $cuenta->id }})"
                             wire:confirm="{{ __('¿Eliminar esta cuenta bancaria?') }}"

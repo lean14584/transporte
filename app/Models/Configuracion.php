@@ -26,17 +26,24 @@ class Configuracion extends Model
         ];
     }
 
+    private static ?self $instanciaActual = null;
+
     /**
      * Fila única de configuración global, creada con los defaults de la migración
-     * si todavía no existe.
+     * si todavía no existe. Memoizada por request: se llama varias veces por
+     * página (header, sidebar, etc.) y es siempre la misma fila.
      */
     public static function actual(): self
     {
+        if (static::$instanciaActual !== null) {
+            return static::$instanciaActual;
+        }
+
         // Se pasan los defaults explícitos acá (no solo en la migración):
         // firstOrCreate([]) con create() no relee los defaults de columna de
         // la base tras el insert, así que sin esto el modelo recién creado
         // queda con los % en null en memoria hasta el próximo request.
-        return static::query()->firstOrCreate([], [
+        return static::$instanciaActual = static::query()->firstOrCreate([], [
             'porcentaje_ganancia_kilo' => 10,
             'porcentaje_ganancia_unidad' => 10,
         ]);

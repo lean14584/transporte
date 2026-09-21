@@ -132,11 +132,12 @@ new #[Title('Transportes')] class extends Component {
                         <flux:table.cell>{{ $transporte->telefono ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $transporte->dueno ?: '—' }}</flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $transporte->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $transporte->id }})" />
                             @if (auth()->user()->isAdministrador())
                                 <flux:button
                                     size="sm"
                                     variant="ghost"
+                                    aria-label="{{ __('Eliminar') }}"
                                     icon="trash"
                                     wire:click="eliminar({{ $transporte->id }})"
                                     wire:confirm="{{ __('¿Eliminar este transporte?') }}"
@@ -164,11 +165,12 @@ new #[Title('Transportes')] class extends Component {
                         <div class="mt-1 text-sm text-zinc-500">{{ $transporte->direccion ?: __('Sin dirección') }}</div>
                     </div>
                     <div class="flex shrink-0 gap-1">
-                        <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $transporte->id }})" />
+                        <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $transporte->id }})" />
                         @if (auth()->user()->isAdministrador())
                             <flux:button
                                 size="sm"
                                 variant="ghost"
+                                aria-label="{{ __('Eliminar') }}"
                                 icon="trash"
                                 wire:click="eliminar({{ $transporte->id }})"
                                 wire:confirm="{{ __('¿Eliminar este transporte?') }}"

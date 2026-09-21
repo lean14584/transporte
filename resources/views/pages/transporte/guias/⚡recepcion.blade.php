@@ -4,10 +4,12 @@ use App\Models\Configuracion;
 use App\Models\Guia;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Title('Recepción de guía')] class extends Component {
+    #[Locked]
     public Guia $guia;
 
     public string $cantidad_recibida = '';
@@ -111,7 +113,7 @@ new #[Title('Recepción de guía')] class extends Component {
     }
 }; ?>
 
-<div class="flex max-w-2xl flex-col gap-6">
+<div class="flex flex-col gap-6">
     <div>
         <flux:heading size="xl">{{ __('Recepción de guía :folio', ['folio' => $guia->folio()]) }}</flux:heading>
         <flux:subheading>{{ $guia->cliente->nombre }} · {{ $guia->mercaderia }} · {{ $guia->transportista }}</flux:subheading>
@@ -144,35 +146,36 @@ new #[Title('Recepción de guía')] class extends Component {
                         </flux:heading>
 
                         <div class="mt-3 space-y-4">
-                            <flux:input
-                                wire:model.live="tn_descargadas"
-                                :label="__('TN Descargadas')"
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                required
-                                autofocus
-                            />
+                            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                <flux:input
+                                    wire:model.live="tn_descargadas"
+                                    :label="__('TN Descargadas')"
+                                    type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                    required
+                                    autofocus
+                                />
 
-                            <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-                                <div class="flex justify-between">
-                                    <flux:text>{{ __('Total cargado (declarado al cargar)') }}</flux:text>
-                                    <flux:text class="font-mono">{{ $guia->tn_cargadas !== null ? number_format((float) $guia->tn_cargadas, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
-                                </div>
-                                <div class="mt-2 flex justify-between">
-                                    <flux:text>{{ __('Pérdida') }}</flux:text>
-                                    <flux:text class="font-mono {{ ($this->perdida ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : '' }}">
-                                        {{ $this->perdida !== null ? number_format($this->perdida, 2, ',', '.').' '.$guia->unidad : '—' }}
-                                    </flux:text>
+                                <div class="rounded-lg border border-white bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                                    <div class="flex justify-between">
+                                        <flux:text>{{ __('Total cargado (declarado al cargar)') }}</flux:text>
+                                        <flux:text class="font-mono">{{ $guia->tn_cargadas !== null ? number_format((float) $guia->tn_cargadas, 2, ',', '.').' '.$guia->unidad : '—' }}</flux:text>
+                                    </div>
+                                    <div class="mt-2 flex justify-between">
+                                        <flux:text>{{ __('Pérdida') }}</flux:text>
+                                        <flux:text class="font-mono {{ ($this->perdida ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : '' }}">
+                                            {{ $this->perdida !== null ? number_format($this->perdida, 2, ',', '.').' '.$guia->unidad : '—' }}
+                                        </flux:text>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                                 <flux:input wire:model="total_cliente" :label="__('Total cliente')" type="number" step="0.01" min="0" required />
                                 <flux:input wire:model="total_fletero" :label="__('Total fletero')" type="number" step="0.01" min="0" required />
+                                <flux:input wire:model="monto_ganancia" :label="__('Ganancia a cargar en cta cte del cliente')" type="number" step="0.01" min="0" required />
                             </div>
-
-                            <flux:input wire:model="monto_ganancia" :label="__('Ganancia a cargar en cta cte del cliente')" type="number" step="0.01" min="0" required />
                         </div>
                     </div>
                 @else
@@ -181,7 +184,7 @@ new #[Title('Recepción de guía')] class extends Component {
                             {{ __('Cantidad recibida') }}
                         </flux:heading>
 
-                        <div class="mt-3 space-y-4">
+                        <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <flux:input
                                 wire:model.live="cantidad_recibida"
                                 :label="__('Unidades recibidas')"

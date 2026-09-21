@@ -201,7 +201,7 @@ new #[Title('Cargar guía')] class extends Component {
     }
 }; ?>
 
-<div class="flex max-w-3xl flex-col gap-6">
+<div class="flex flex-col gap-6">
     <div>
         <flux:heading size="xl">{{ __('Cargar guía') }}</flux:heading>
         <flux:subheading>{{ __('Datos de la carga: transporte, cliente, camión y mercadería.') }}</flux:subheading>
@@ -227,7 +227,7 @@ new #[Title('Cargar guía')] class extends Component {
                                             {{ __('CUIT') }} {{ $transporteCuit ?: '—' }} · {{ __('Nacionalidad') }} {{ $transporteNacionalidad ?: '—' }}
                                         </div>
                                     </div>
-                                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarTransporte" />
+                                    <flux:button size="xs" variant="ghost" icon="x-mark" aria-label="{{ __('Quitar transporte seleccionado') }}" wire:click="quitarTransporte" />
                                 </div>
                             @else
                                 <flux:input wire:model.live.debounce.200ms="buscarTransporte" icon="magnifying-glass" placeholder="{{ __('Buscar transporte...') }}" />
@@ -263,7 +263,7 @@ new #[Title('Cargar guía')] class extends Component {
                                             {{ __('N°') }} {{ $clienteNumero ?: '—' }} · {{ $clienteRazonSocial ?: '—' }}
                                         </div>
                                     </div>
-                                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarCliente" />
+                                    <flux:button size="xs" variant="ghost" icon="x-mark" aria-label="{{ __('Quitar cliente seleccionado') }}" wire:click="quitarCliente" />
                                 </div>
                             @else
                                 <flux:input wire:model.live.debounce.200ms="buscarCliente" icon="magnifying-glass" placeholder="{{ __('Buscar cliente...') }}" />
@@ -309,7 +309,7 @@ new #[Title('Cargar guía')] class extends Component {
                                             {{ __('Documento') }} {{ $transportista_documento ?: '—' }}
                                         </div>
                                     </div>
-                                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarFletero" />
+                                    <flux:button size="xs" variant="ghost" icon="x-mark" aria-label="{{ __('Quitar transportista seleccionado') }}" wire:click="quitarFletero" />
                                 </div>
                             @else
                                 <flux:input wire:model.live.debounce.200ms="buscarFletero" icon="magnifying-glass" placeholder="{{ __('Buscar fletero...') }}" />
@@ -362,7 +362,7 @@ new #[Title('Cargar guía')] class extends Component {
                                             {{ __('N°') }} {{ $productoNumero ?: '—' }} · {{ $productoFormaCarga ?: '—' }}
                                         </div>
                                     </div>
-                                    <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="quitarProducto" />
+                                    <flux:button size="xs" variant="ghost" icon="x-mark" aria-label="{{ __('Quitar producto seleccionado') }}" wire:click="quitarProducto" />
                                 </div>
                             @else
                                 <flux:input wire:model.live.debounce.200ms="buscarProducto" icon="magnifying-glass" placeholder="{{ __('Buscar producto...') }}" />
@@ -387,22 +387,22 @@ new #[Title('Cargar guía')] class extends Component {
                             @error('producto_id') <flux:error>{{ $message }}</flux:error> @enderror
                         </div>
 
-                        <flux:select wire:model.live="unidad" :label="__('Unidad')">
-                            <flux:select.option value="kilos">{{ __('Kilos') }}</flux:select.option>
-                            <flux:select.option value="unidades">{{ __('Unidades') }}</flux:select.option>
-                        </flux:select>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 {{ $unidad === 'kilos' ? 'lg:grid-cols-5' : 'lg:grid-cols-3' }}">
+                            <flux:select wire:model.live="unidad" :label="__('Unidad')">
+                                <flux:select.option value="kilos">{{ __('Kilos') }}</flux:select.option>
+                                <flux:select.option value="unidades">{{ __('Unidades') }}</flux:select.option>
+                            </flux:select>
 
-                        @if ($unidad === 'kilos')
-                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            @if ($unidad === 'kilos')
                                 <flux:input wire:model="tn_cargadas" :label="__('TN Cargadas')" type="number" step="0.01" min="0.01" required />
                                 <flux:input wire:model="precio_cliente" :label="__('Precio Cliente')" type="number" step="0.01" min="0.01" required />
                                 <flux:input wire:model="precio_fletero" :label="__('Precio Fletero')" type="number" step="0.01" min="0.01" required />
-                            </div>
-                        @else
-                            <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />
-                        @endif
+                            @else
+                                <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />
+                            @endif
 
-                        <flux:input wire:model="fecha_carga" :label="__('Fecha de carga')" type="date" required />
+                            <flux:input wire:model="fecha_carga" :label="__('Fecha de carga')" type="date" required />
+                        </div>
                     </div>
                 </div>
             </div>

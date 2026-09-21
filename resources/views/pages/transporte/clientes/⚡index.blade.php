@@ -147,12 +147,13 @@ new #[Title('Clientes')] class extends Component {
                             $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
                         </flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="banknotes" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
-                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cliente->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
+                            <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $cliente->id }})" />
                             @if (auth()->user()->isAdministrador())
                                 <flux:button
                                     size="sm"
                                     variant="ghost"
+                                    aria-label="{{ __('Eliminar') }}"
                                     icon="trash"
                                     wire:click="eliminar({{ $cliente->id }})"
                                     wire:confirm="{{ __('¿Eliminar este cliente?') }}"
@@ -192,12 +193,13 @@ new #[Title('Clientes')] class extends Component {
                         $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
                     </span>
                     <div class="flex shrink-0 gap-1">
-                        <flux:button size="sm" variant="ghost" icon="banknotes" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
-                        <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $cliente->id }})" />
+                        <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
+                        <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $cliente->id }})" />
                         @if (auth()->user()->isAdministrador())
                             <flux:button
                                 size="sm"
                                 variant="ghost"
+                                aria-label="{{ __('Eliminar') }}"
                                 icon="trash"
                                 wire:click="eliminar({{ $cliente->id }})"
                                 wire:confirm="{{ __('¿Eliminar este cliente?') }}"

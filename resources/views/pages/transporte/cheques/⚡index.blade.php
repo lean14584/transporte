@@ -110,7 +110,7 @@ new #[Title('Cheques')] class extends Component {
                                 <flux:button size="sm" variant="ghost" icon="check" wire:click="marcarCobrado({{ $cheque->id }})">
                                     {{ __('Cobrado') }}
                                 </flux:button>
-                                <flux:button size="sm" variant="ghost" icon="x-mark" wire:click="marcarRechazado({{ $cheque->id }})">
+                                <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar rechazado') }}" wire:click="marcarRechazado({{ $cheque->id }})">
                                     {{ __('Rechazado') }}
                                 </flux:button>
                             @endif
@@ -151,7 +151,7 @@ new #[Title('Cheques')] class extends Component {
                     @if ($cheque->estado === 'emitido')
                         <div class="flex shrink-0 gap-1">
                             <flux:button size="sm" variant="ghost" icon="check" wire:click="marcarCobrado({{ $cheque->id }})" />
-                            <flux:button size="sm" variant="ghost" icon="x-mark" wire:click="marcarRechazado({{ $cheque->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar rechazado') }}" wire:click="marcarRechazado({{ $cheque->id }})" />
                         </div>
                     @endif
                 </div>

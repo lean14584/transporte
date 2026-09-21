@@ -27,3 +27,30 @@ test('un administrativo no puede acceder a la pantalla de usuarios', function ()
         ->get(route('usuarios.index'))
         ->assertForbidden();
 });
+
+test('el último administrador no puede sacarse a sí mismo el rol de administrador', function () {
+    $admin = User::factory()->create(['role' => 'administrador']);
+
+    Livewire::actingAs($admin)
+        ->test('pages::transporte.usuarios.index')
+        ->call('editar', $admin->id)
+        ->set('role', 'administrativo')
+        ->call('guardar')
+        ->assertHasErrors('role');
+
+    expect($admin->refresh()->role)->toBe('administrador');
+});
+
+test('un administrador puede demover a otro administrador si queda al menos uno', function () {
+    $admin = User::factory()->create(['role' => 'administrador']);
+    $otroAdmin = User::factory()->create(['role' => 'administrador']);
+
+    Livewire::actingAs($admin)
+        ->test('pages::transporte.usuarios.index')
+        ->call('editar', $otroAdmin->id)
+        ->set('role', 'administrativo')
+        ->call('guardar')
+        ->assertHasNoErrors();
+
+    expect($otroAdmin->refresh()->role)->toBe('administrativo');
+});

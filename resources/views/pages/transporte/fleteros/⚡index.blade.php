@@ -134,11 +134,12 @@ new #[Title('Fleteros')] class extends Component {
                         <flux:table.cell>{{ $fletero->telefono ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $fletero->contacto ?: '—' }}</flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $fletero->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $fletero->id }})" />
                             @if (auth()->user()->isAdministrador())
                                 <flux:button
                                     size="sm"
                                     variant="ghost"
+                                    aria-label="{{ __('Eliminar') }}"
                                     icon="trash"
                                     wire:click="eliminar({{ $fletero->id }})"
                                     wire:confirm="{{ __('¿Eliminar este fletero?') }}"
@@ -166,11 +167,12 @@ new #[Title('Fleteros')] class extends Component {
                         <div class="mt-1 text-sm text-zinc-500">{{ __('CUIT') }} {{ $fletero->cuit ?: '—' }}</div>
                     </div>
                     <div class="flex shrink-0 gap-1">
-                        <flux:button size="sm" variant="ghost" icon="pencil" wire:click="editar({{ $fletero->id }})" />
+                        <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $fletero->id }})" />
                         @if (auth()->user()->isAdministrador())
                             <flux:button
                                 size="sm"
                                 variant="ghost"
+                                aria-label="{{ __('Eliminar') }}"
                                 icon="trash"
                                 wire:click="eliminar({{ $fletero->id }})"
                                 wire:confirm="{{ __('¿Eliminar este fletero?') }}"
