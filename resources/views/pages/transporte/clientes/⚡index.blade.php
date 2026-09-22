@@ -35,8 +35,9 @@ new #[Title('Clientes')] class extends Component {
     public function clientes()
     {
         return Cliente::query()
-            ->when($this->search, fn ($query) => $query->where('nombre', 'like', "%{$this->search}%")
-                ->orWhere('dni', 'like', "%{$this->search}%"))
+            ->when($this->search, fn ($query) => $query->where(fn ($q) => $q
+                ->where('nombre', 'like', "%{$this->search}%")
+                ->orWhere('dni', 'like', "%{$this->search}%")))
             ->orderBy('nombre')
             ->orderBy('id')
             ->paginate(10);

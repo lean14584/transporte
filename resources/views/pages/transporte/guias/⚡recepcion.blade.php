@@ -14,6 +14,7 @@ new #[Title('Recepción de guía')] class extends Component {
 
     public string $cantidad_recibida = '';
     public string $porcentaje_ganancia = '';
+    public string $monto_fletero = '';
 
     public string $tn_descargadas = '';
 
@@ -111,12 +112,14 @@ new #[Title('Recepción de guía')] class extends Component {
             $validated = $this->validate([
                 'cantidad_recibida' => ['required', 'numeric', 'gt:0'],
                 'porcentaje_ganancia' => ['required', 'numeric', 'gte:0', 'max:100'],
+                'monto_fletero' => ['required', 'numeric', 'gte:0'],
             ]);
 
             try {
                 $this->guia->recepcionarPorCantidad(
                     cantidadRecibida: (float) $validated['cantidad_recibida'],
                     porcentajeGanancia: (float) $validated['porcentaje_ganancia'],
+                    montoFletero: (float) $validated['monto_fletero'],
                 );
             } catch (\RuntimeException $e) {
                 Flux::toast(variant: 'danger', text: $e->getMessage());
@@ -245,7 +248,7 @@ new #[Title('Recepción de guía')] class extends Component {
                             {{ __('Cantidad recibida') }}
                         </flux:heading>
 
-                        <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
                             <flux:input
                                 wire:model.live="cantidad_recibida"
                                 :label="__('Unidades recibidas')"
@@ -258,6 +261,8 @@ new #[Title('Recepción de guía')] class extends Component {
                             />
 
                             <flux:input wire:model.live="porcentaje_ganancia" :label="__('Porcentaje de ganancia (%)')" type="number" step="0.01" min="0" max="100" required />
+
+                            <flux:input wire:model.live="monto_fletero" :label="__('Monto a pagar al fletero ($)')" type="number" step="0.01" min="0" required />
                         </div>
                     </div>
 
@@ -276,6 +281,10 @@ new #[Title('Recepción de guía')] class extends Component {
                             <div class="mt-2 flex justify-between">
                                 <flux:text>{{ __('Ganancia a cargar en cta cte del cliente') }}</flux:text>
                                 <flux:heading class="font-mono">{{ $this->montoGanancia !== null ? '$ '.number_format($this->montoGanancia, 2, ',', '.') : '—' }}</flux:heading>
+                            </div>
+                            <div class="mt-2 flex justify-between">
+                                <flux:text>{{ __('Monto a cargar en cta cte del fletero') }}</flux:text>
+                                <flux:heading class="font-mono">{{ is_numeric($monto_fletero) ? '$ '.number_format((float) $monto_fletero, 2, ',', '.') : '—' }}</flux:heading>
                             </div>
                         </div>
                     </div>

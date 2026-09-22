@@ -18,6 +18,7 @@ class Recibo extends Model
         'monto',
         'concepto',
         'medio_pago',
+        'estado',
         'usuario_id',
     ];
 
@@ -73,6 +74,42 @@ class Recibo extends Model
             );
 
             return $recibo;
+        });
+    }
+
+    /**
+     * Marca un cobro hecho con cheque como rechazado y revierte el pago: la
+     * deuda vuelve a la cta cte del cliente, porque el cheque nunca se hizo
+     * efectivo. Solo válido para recibos con medio_pago 'cheque' que todavía
+     * estén confirmados (evita revertir dos veces por doble clic).
+     */
+    public static function rechazarCheque(self $recibo): self
+    {
+        return DB::transaction(function () use ($recibo) {
+            $reciboBloqueado = self::whereKey($recibo->id)->lockForUpdate()->first();
+
+            if ($reciboBloqueado->medio_pago !== 'cheque') {
+                throw new \RuntimeException('Solo se puede rechazar un cobro hecho con cheque.');
+            }
+
+            if ($reciboBloqueado->estado !== 'confirmado') {
+                throw new \RuntimeException('Este recibo ya fue marcado como rechazado.');
+            }
+
+            $reciboBloqueado->update(['estado' => 'rechazado']);
+
+            // Sin 'recibo_id': esa columna es unique (protege contra
+            // doble-submit del cobro original) y esta reversión es un
+            // segundo movimiento sobre el mismo recibo. La referencia
+            // queda en el concepto.
+            CuentaCorrienteMovimiento::registrar(
+                $reciboBloqueado->cliente,
+                'cargo',
+                "Cheque rechazado - Recibo {$reciboBloqueado->folio()}",
+                (float) $reciboBloqueado->monto,
+            );
+
+            return $reciboBloqueado;
         });
     }
 }

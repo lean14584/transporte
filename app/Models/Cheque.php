@@ -97,7 +97,10 @@ class Cheque extends Model
 
     /**
      * Marca el cheque como rechazado y devuelve el monto a la cuenta bancaria
-     * (el débito de emitir() nunca se hizo efectivo en el banco).
+     * (el débito de emitir() nunca se hizo efectivo en el banco). Si el cheque
+     * corresponde a una orden de pago a un fletero, revierte también el pago
+     * en su cta cte: la empresa vuelve a deberle ese monto, porque el fletero
+     * nunca cobró de verdad.
      */
     public static function rechazar(self $cheque): self
     {
@@ -112,6 +115,21 @@ class Cheque extends Model
 
             $cuentaBloqueada = CuentaBancaria::whereKey($chequeBloqueado->cuenta_bancaria_id)->lockForUpdate()->first();
             $cuentaBloqueada->forceFill(['saldo' => $cuentaBloqueada->saldo + $chequeBloqueado->monto])->save();
+
+            $ordenPago = $chequeBloqueado->ordenPago;
+
+            if ($ordenPago !== null) {
+                // Sin 'orden_pago_id': esa columna es unique (protege contra
+                // doble-submit del pago original) y esta reversión es un
+                // segundo movimiento sobre la misma orden. La referencia
+                // queda en el concepto.
+                FleteroCuentaCorrienteMovimiento::registrar(
+                    $ordenPago->fletero,
+                    'cargo',
+                    "Cheque {$chequeBloqueado->numero} rechazado - revierte {$ordenPago->folio()}",
+                    (float) $chequeBloqueado->monto,
+                );
+            }
 
             return $chequeBloqueado;
         });

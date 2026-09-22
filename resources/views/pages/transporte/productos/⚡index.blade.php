@@ -28,8 +28,9 @@ new #[Title('Productos')] class extends Component {
     public function productos()
     {
         return Producto::query()
-            ->when($this->search, fn ($query) => $query->where('nombre', 'like', "%{$this->search}%")
-                ->orWhere('numero_producto', 'like', "%{$this->search}%"))
+            ->when($this->search, fn ($query) => $query->where(fn ($q) => $q
+                ->where('nombre', 'like', "%{$this->search}%")
+                ->orWhere('numero_producto', 'like', "%{$this->search}%")))
             ->orderBy('nombre')
             ->orderBy('id')
             ->paginate(10);
