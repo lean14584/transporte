@@ -59,7 +59,7 @@ new #[Title('Cheques')] class extends Component {
         }
 
         unset($this->cheques);
-        Flux::toast(variant: 'success', text: __('Cheque marcado como rechazado; el saldo vuelve a la cuenta bancaria.'));
+        Flux::toast(variant: 'success', text: __('Cheque marcado como rechazado; el saldo vuelve a la cuenta bancaria y, si correspondía a una orden de pago, la deuda vuelve a la cta cte del fletero.'));
     }
 }; ?>
 
