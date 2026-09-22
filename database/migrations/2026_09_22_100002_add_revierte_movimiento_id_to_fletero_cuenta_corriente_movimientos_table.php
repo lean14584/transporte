@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Nombre de constraint explícito y corto: el generado por defecto
+        // (fletero_cuenta_corriente_movimientos_revierte_movimiento_id_foreign,
+        // 68 caracteres) supera el límite de 64 de MySQL.
         Schema::table('fletero_cuenta_corriente_movimientos', function (Blueprint $table) {
-            $table->foreignId('revierte_movimiento_id')
-                ->nullable()
-                ->after('orden_pago_id')
-                ->constrained('fletero_cuenta_corriente_movimientos')
+            $table->unsignedBigInteger('revierte_movimiento_id')->nullable()->after('orden_pago_id');
+            $table->foreign('revierte_movimiento_id', 'fccm_revierte_movimiento_fk')
+                ->references('id')->on('fletero_cuenta_corriente_movimientos')
                 ->nullOnDelete();
         });
     }
@@ -25,7 +27,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('fletero_cuenta_corriente_movimientos', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('revierte_movimiento_id');
+            $table->dropForeign('fccm_revierte_movimiento_fk');
+            $table->dropColumn('revierte_movimiento_id');
         });
     }
 };
