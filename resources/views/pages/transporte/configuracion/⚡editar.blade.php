@@ -11,9 +11,6 @@ use Livewire\WithFileUploads;
 new #[Title('Configuración')] class extends Component {
     use WithFileUploads;
 
-    public string $porcentaje_ganancia_kilo = '';
-    public string $porcentaje_ganancia_unidad = '';
-
     public string $empresa_nombre = '';
     public string $empresa_propietario = '';
     public string $empresa_direccion = '';
@@ -25,8 +22,6 @@ new #[Title('Configuración')] class extends Component {
         abort_unless(Auth::user()->isAdministrador(), 403);
 
         $configuracion = Configuracion::actual();
-        $this->porcentaje_ganancia_kilo = (string) $configuracion->porcentaje_ganancia_kilo;
-        $this->porcentaje_ganancia_unidad = (string) $configuracion->porcentaje_ganancia_unidad;
         $this->empresa_nombre = (string) $configuracion->empresa_nombre;
         $this->empresa_propietario = (string) $configuracion->empresa_propietario;
         $this->empresa_direccion = (string) $configuracion->empresa_direccion;
@@ -35,8 +30,6 @@ new #[Title('Configuración')] class extends Component {
     public function guardar(): void
     {
         $validated = $this->validate([
-            'porcentaje_ganancia_kilo' => ['required', 'numeric', 'gte:0', 'max:100'],
-            'porcentaje_ganancia_unidad' => ['required', 'numeric', 'gte:0', 'max:100'],
             'empresa_nombre' => ['nullable', 'string', 'max:255'],
             'empresa_propietario' => ['nullable', 'string', 'max:255'],
             'empresa_direccion' => ['nullable', 'string', 'max:255'],
@@ -74,10 +67,10 @@ new #[Title('Configuración')] class extends Component {
     }
 }; ?>
 
-<div class="flex max-w-2xl flex-col gap-6">
+<div class="flex flex-col gap-6">
     <div>
         <flux:heading size="xl">{{ __('Configuración') }}</flux:heading>
-        <flux:subheading>{{ __('Datos de la empresa y porcentajes de ganancia por defecto.') }}</flux:subheading>
+        <flux:subheading>{{ __('Datos de la empresa.') }}</flux:subheading>
     </div>
 
     <form wire:submit="guardar" class="flex flex-col gap-6">
@@ -126,43 +119,8 @@ new #[Title('Configuración')] class extends Component {
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="overflow-hidden rounded-2xl border border-blue-200/70 bg-gradient-to-br from-blue-100/70 via-blue-50/40 to-indigo-100/70 shadow-sm dark:border-blue-900/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-indigo-950/60">
-            <div class="space-y-6 p-6">
-                <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
-                        {{ __('Ganancia por defecto') }}
-                    </flux:heading>
-
-                    <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                        {{ __('Se precargan al abrir la recepción de una guía; siguen siendo editables ese día si hace falta un ajuste puntual.') }}
-                    </p>
-
-                    <div class="mt-4 grid grid-cols-2 gap-4">
-                        <flux:input
-                            wire:model="porcentaje_ganancia_kilo"
-                            :label="__('% ganancia por tonelada (TN)')"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="100"
-                            required
-                        />
-                        <flux:input
-                            wire:model="porcentaje_ganancia_unidad"
-                            :label="__('% ganancia por unidad')"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="100"
-                            required
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-2 border-t border-blue-200/70 bg-white/50 px-6 py-4 dark:border-blue-900/40 dark:bg-black/10">
+            <div class="flex justify-end gap-2 border-t border-indigo-200/70 bg-white/50 px-6 py-4 dark:border-indigo-900/40 dark:bg-black/10">
                 <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar,logo">{{ __('Guardar') }}</flux:button>
             </div>
         </div>

@@ -10,28 +10,18 @@ class Configuracion extends Model
     protected $table = 'configuraciones';
 
     protected $fillable = [
-        'porcentaje_ganancia_kilo',
-        'porcentaje_ganancia_unidad',
         'empresa_nombre',
         'empresa_propietario',
         'empresa_direccion',
         'logo_path',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'porcentaje_ganancia_kilo' => 'decimal:2',
-            'porcentaje_ganancia_unidad' => 'decimal:2',
-        ];
-    }
-
     private static ?self $instanciaActual = null;
 
     /**
-     * Fila única de configuración global, creada con los defaults de la migración
-     * si todavía no existe. Memoizada por request: se llama varias veces por
-     * página (header, sidebar, etc.) y es siempre la misma fila.
+     * Fila única de configuración global, creada si todavía no existe.
+     * Memoizada por request: se llama varias veces por página (header,
+     * sidebar, etc.) y es siempre la misma fila.
      */
     public static function actual(): self
     {
@@ -39,14 +29,7 @@ class Configuracion extends Model
             return static::$instanciaActual;
         }
 
-        // Se pasan los defaults explícitos acá (no solo en la migración):
-        // firstOrCreate([]) con create() no relee los defaults de columna de
-        // la base tras el insert, así que sin esto el modelo recién creado
-        // queda con los % en null en memoria hasta el próximo request.
-        return static::$instanciaActual = static::query()->firstOrCreate([], [
-            'porcentaje_ganancia_kilo' => 10,
-            'porcentaje_ganancia_unidad' => 10,
-        ]);
+        return static::$instanciaActual = static::query()->firstOrCreate([]);
     }
 
     /**
