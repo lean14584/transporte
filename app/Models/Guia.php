@@ -170,19 +170,22 @@ class Guia extends Model
      * Cierra la recepción de una guía por unidades: la cantidad recibida
      * (puede diferir de la declarada al cargar) es directamente el neto,
      * y la ganancia se calcula sobre un porcentaje configurado y se carga
-     * a la cta cte del cliente.
+     * a la cta cte del cliente. El monto a pagar al fletero se carga a mano
+     * (no hay un valor por unidad configurado, a diferencia del flujo por
+     * kilos) y se carga a su cta cte, igual que en recepcionar().
      */
-    public function recepcionarPorCantidad(float $cantidadRecibida, float $porcentajeGanancia): void
+    public function recepcionarPorCantidad(float $cantidadRecibida, float $porcentajeGanancia, float $montoFletero): void
     {
         $montoGanancia = round($cantidadRecibida * $porcentajeGanancia / 100, 2);
 
-        DB::transaction(function () use ($cantidadRecibida, $porcentajeGanancia, $montoGanancia) {
+        DB::transaction(function () use ($cantidadRecibida, $porcentajeGanancia, $montoGanancia, $montoFletero) {
             $guiaBloqueada = $this->lockParaRecepcion();
 
             $guiaBloqueada->update([
                 'neto' => $cantidadRecibida,
                 'porcentaje_ganancia' => $porcentajeGanancia,
                 'monto_ganancia' => $montoGanancia,
+                'total_fletero' => $montoFletero,
                 'estado' => 'recibida',
                 'fecha_recepcion' => now()->toDateString(),
                 'usuario_recepcion_id' => Auth::id(),
@@ -195,6 +198,16 @@ class Guia extends Model
                 $montoGanancia,
                 ['guia_id' => $guiaBloqueada->id],
             );
+
+            if ($guiaBloqueada->fletero_id !== null) {
+                FleteroCuentaCorrienteMovimiento::registrar(
+                    $guiaBloqueada->fletero,
+                    'cargo',
+                    "Guía {$guiaBloqueada->folio()} - flete {$guiaBloqueada->mercaderia}",
+                    $montoFletero,
+                    ['guia_id' => $guiaBloqueada->id],
+                );
+            }
         });
 
         $this->refresh();

@@ -165,6 +165,12 @@
                         </td>
                         <td class="valor">$ {{ number_format((float) $guia->monto_ganancia, 2, ',', '.') }}</td>
                     </tr>
+                    @if ($guia->total_fletero !== null)
+                        <tr>
+                            <td class="label">Total fletero</td>
+                            <td class="valor">$ {{ number_format((float) $guia->total_fletero, 2, ',', '.') }}</td>
+                        </tr>
+                    @endif
                 @endif
             </table>
         </div>

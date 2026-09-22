@@ -136,6 +136,7 @@ test('recepcionar una guía por unidades usa la cantidad recibida como neto', fu
 
     $component->set('cantidad_recibida', '480')
         ->set('porcentaje_ganancia', '10')
+        ->set('monto_fletero', '0')
         ->call('recepcionar')
         ->assertHasNoErrors();
 
@@ -146,4 +147,27 @@ test('recepcionar una guía por unidades usa la cantidad recibida como neto', fu
         ->and($guia->pesaje_bruto)->toBeNull()
         ->and($guia->tara)->toBeNull()
         ->and($cliente->refresh()->saldo_cta_cte)->toEqual('48.00');
+});
+
+test('recepcionar una guía por unidades carga el monto a pagar al fletero en su cta cte', function () {
+    $user = User::factory()->create();
+    $cliente = Cliente::factory()->create();
+    $fletero = Fletero::factory()->create();
+    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->for($fletero)->create([
+        'unidad' => 'unidades',
+        'cantidad' => 500,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
+        ->set('cantidad_recibida', '480')
+        ->set('porcentaje_ganancia', '10')
+        ->set('monto_fletero', '15000')
+        ->call('recepcionar')
+        ->assertHasNoErrors();
+
+    $guia->refresh();
+
+    expect($guia->total_fletero)->toEqual('15000.00')
+        ->and($fletero->refresh()->saldo_cta_cte)->toEqual('15000.00');
 });
