@@ -176,8 +176,8 @@ new #[Title('Cargar guía')] class extends Component {
             'camion_color' => ['nullable', 'string', 'max:255'],
             'cantidad' => $esPorKilos ? ['nullable'] : ['required', 'numeric', 'gt:0'],
             'tn_cargadas' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
-            'precio_cliente' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
-            'precio_fletero' => $esPorKilos ? ['required', 'numeric', 'gt:0'] : ['nullable'],
+            'precio_cliente' => ['required', 'numeric', 'gt:0'],
+            'precio_fletero' => ['required', 'numeric', 'gt:0'],
             'unidad' => ['required', 'in:kilos,unidades'],
             'fecha_carga' => ['required', 'date'],
         ]);
@@ -186,8 +186,6 @@ new #[Title('Cargar guía')] class extends Component {
             ...$validated,
             'cantidad' => $esPorKilos ? $validated['tn_cargadas'] : $validated['cantidad'],
             'tn_cargadas' => $esPorKilos ? $validated['tn_cargadas'] : null,
-            'precio_cliente' => $esPorKilos ? $validated['precio_cliente'] : null,
-            'precio_fletero' => $esPorKilos ? $validated['precio_fletero'] : null,
             'transportista' => $this->transportista,
             'transportista_documento' => $this->transportista_documento ?: null,
             'mercaderia' => $this->mercaderia,
@@ -387,7 +385,7 @@ new #[Title('Cargar guía')] class extends Component {
                             @error('producto_id') <flux:error>{{ $message }}</flux:error> @enderror
                         </div>
 
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 {{ $unidad === 'kilos' ? 'lg:grid-cols-5' : 'lg:grid-cols-3' }}">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                             <flux:select wire:model.live="unidad" :label="__('Unidad')">
                                 <flux:select.option value="kilos">{{ __('Toneladas (TN)') }}</flux:select.option>
                                 <flux:select.option value="unidades">{{ __('Unidades') }}</flux:select.option>
@@ -395,11 +393,12 @@ new #[Title('Cargar guía')] class extends Component {
 
                             @if ($unidad === 'kilos')
                                 <flux:input wire:model="tn_cargadas" :label="__('TN Cargadas')" type="number" step="0.01" min="0.01" required />
-                                <flux:input wire:model="precio_cliente" :label="__('Precio Cliente')" type="number" step="0.01" min="0.01" required />
-                                <flux:input wire:model="precio_fletero" :label="__('Precio Fletero')" type="number" step="0.01" min="0.01" required />
                             @else
                                 <flux:input wire:model="cantidad" :label="__('Cantidad')" type="number" step="0.01" min="0.01" required />
                             @endif
+
+                            <flux:input wire:model="precio_cliente" :label="__($unidad === 'kilos' ? 'Precio Cliente (por TN)' : 'Precio Cliente (por unidad)')" type="number" step="0.01" min="0.01" required />
+                            <flux:input wire:model="precio_fletero" :label="__($unidad === 'kilos' ? 'Precio Fletero (por TN)' : 'Precio Fletero (por unidad)')" type="number" step="0.01" min="0.01" required />
 
                             <flux:input wire:model="fecha_carga" :label="__('Fecha de carga')" type="date" required />
                         </div>
