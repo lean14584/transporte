@@ -2,6 +2,7 @@
 
 use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Recibo;
+use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -27,6 +28,20 @@ new #[Title('Cobranzas')] class extends Component {
     public function totalDelDia(): float
     {
         return (float) Recibo::whereDate('fecha', now()->toDateString())->sum('monto');
+    }
+
+    public function marcarRechazado(int $id): void
+    {
+        try {
+            Recibo::rechazarCheque(Recibo::findOrFail($id));
+        } catch (\RuntimeException $e) {
+            Flux::toast(variant: 'danger', text: $e->getMessage());
+
+            return;
+        }
+
+        unset($this->recibos);
+        Flux::toast(variant: 'success', text: __('Cheque marcado como rechazado; la deuda vuelve a la cta cte del cliente.'));
     }
 }; ?>
 
@@ -68,10 +83,20 @@ new #[Title('Cobranzas')] class extends Component {
                             </flux:link>
                         </flux:table.cell>
                         <flux:table.cell>{{ $recibo->concepto ?: '—' }}</flux:table.cell>
-                        <flux:table.cell>{{ ucfirst($recibo->medio_pago) }}</flux:table.cell>
+                        <flux:table.cell>
+                            {{ ucfirst($recibo->medio_pago) }}
+                            @if ($recibo->medio_pago === 'cheque')
+                                <flux:badge size="sm" :color="$recibo->estado === 'rechazado' ? 'red' : 'green'">
+                                    {{ $recibo->estado === 'rechazado' ? __('Rechazado') : __('Confirmado') }}
+                                </flux:badge>
+                            @endif
+                        </flux:table.cell>
                         <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $recibo->monto, 2, ',', '.') }}</flux:table.cell>
                         <flux:table.cell align="end">
                             <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir recibo') }}" :href="route('recibos.pdf', $recibo)" target="_blank" />
+                            @if ($recibo->medio_pago === 'cheque' && $recibo->estado === 'confirmado')
+                                <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar cheque rechazado') }}" wire:click="marcarRechazado({{ $recibo->id }})" />
+                            @endif
                         </flux:table.cell>
                     </flux:table.row>
                 @empty
@@ -95,9 +120,21 @@ new #[Title('Cobranzas')] class extends Component {
                             {{ $recibo->cliente->nombre }}
                         </flux:link>
                     </div>
-                    <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir recibo') }}" :href="route('recibos.pdf', $recibo)" target="_blank" />
+                    <div class="flex shrink-0 gap-1">
+                        <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir recibo') }}" :href="route('recibos.pdf', $recibo)" target="_blank" />
+                        @if ($recibo->medio_pago === 'cheque' && $recibo->estado === 'confirmado')
+                            <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar cheque rechazado') }}" wire:click="marcarRechazado({{ $recibo->id }})" />
+                        @endif
+                    </div>
                 </div>
-                <div class="mt-2 text-sm text-zinc-500">{{ $recibo->fecha->format('d/m/Y') }} · {{ ucfirst($recibo->medio_pago) }}</div>
+                <div class="mt-2 text-sm text-zinc-500">
+                    {{ $recibo->fecha->format('d/m/Y') }} · {{ ucfirst($recibo->medio_pago) }}
+                    @if ($recibo->medio_pago === 'cheque')
+                        <flux:badge size="sm" :color="$recibo->estado === 'rechazado' ? 'red' : 'green'">
+                            {{ $recibo->estado === 'rechazado' ? __('Rechazado') : __('Confirmado') }}
+                        </flux:badge>
+                    @endif
+                </div>
                 <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-white/5">
                     <span class="text-sm text-zinc-500">{{ $recibo->concepto ?: '—' }}</span>
                     <span class="font-mono">$ {{ number_format((float) $recibo->monto, 2, ',', '.') }}</span>
