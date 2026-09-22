@@ -3,6 +3,7 @@
 use App\Models\Cheque;
 use App\Models\CuentaBancaria;
 use App\Models\Fletero;
+use App\Models\FleteroCuentaCorrienteMovimiento;
 use App\Models\OrdenPago;
 use Illuminate\Support\Facades\DB;
 
@@ -62,7 +63,8 @@ test('rechazar un cheque emitido a un fletero revierte el pago en su cta cte', f
         'monto' => 50000,
     ]);
 
-    OrdenPago::emitir($fletero, 50000, 'cheque', 'Pago flete', $cheque->id);
+    $ordenPago = OrdenPago::emitir($fletero, 50000, 'cheque', 'Pago flete', $cheque->id);
+    $movimientoOriginal = FleteroCuentaCorrienteMovimiento::where('orden_pago_id', $ordenPago->id)->firstOrFail();
 
     expect($fletero->refresh()->saldo_cta_cte)->toEqual('0.00');
 
@@ -71,6 +73,11 @@ test('rechazar un cheque emitido a un fletero revierte el pago en su cta cte', f
     expect($fletero->refresh()->saldo_cta_cte)->toEqual('50000.00')
         ->and($cuenta->refresh()->saldo)->toEqual('100000.00')
         ->and($cheque->refresh()->estado)->toBe('rechazado');
+
+    $movimientoReversion = FleteroCuentaCorrienteMovimiento::where('revierte_movimiento_id', $movimientoOriginal->id)->firstOrFail();
+
+    expect($movimientoReversion->tipo)->toBe('cargo')
+        ->and((float) $movimientoReversion->monto)->toBe(50000.0);
 });
 
 test('rechazar un cheque que no está ligado a ninguna orden de pago no rompe (solo devuelve el saldo bancario)', function () {

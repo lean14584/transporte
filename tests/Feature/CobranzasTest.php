@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Cliente;
+use App\Models\CuentaCorrienteMovimiento;
 use App\Models\Recibo;
 use App\Models\User;
 use Livewire\Livewire;
@@ -30,6 +31,7 @@ test('marcar un cobro con cheque como rechazado revierte la deuda en la cta cte 
     expect($cliente->refresh()->saldo_cta_cte)->toEqual('-5000.00');
 
     $recibo = Recibo::whereMedioPago('cheque')->firstOrFail();
+    $movimientoOriginal = CuentaCorrienteMovimiento::where('recibo_id', $recibo->id)->firstOrFail();
 
     Livewire::actingAs($user)
         ->test('pages::transporte.cobranzas.index')
@@ -38,6 +40,11 @@ test('marcar un cobro con cheque como rechazado revierte la deuda en la cta cte 
 
     expect($recibo->refresh()->estado)->toBe('rechazado')
         ->and($cliente->refresh()->saldo_cta_cte)->toEqual('0.00');
+
+    $movimientoReversion = CuentaCorrienteMovimiento::where('revierte_movimiento_id', $movimientoOriginal->id)->firstOrFail();
+
+    expect($movimientoReversion->tipo)->toBe('cargo')
+        ->and((float) $movimientoReversion->monto)->toBe(5000.0);
 });
 
 test('no se puede rechazar un cobro que no fue hecho con cheque, ni rechazar el mismo cheque dos veces', function () {

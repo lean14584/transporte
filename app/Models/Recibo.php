@@ -100,13 +100,17 @@ class Recibo extends Model
 
             // Sin 'recibo_id': esa columna es unique (protege contra
             // doble-submit del cobro original) y esta reversión es un
-            // segundo movimiento sobre el mismo recibo. La referencia
-            // queda en el concepto.
+            // segundo movimiento sobre el mismo recibo. El enlace
+            // estructurado al movimiento original va por
+            // 'revierte_movimiento_id' en su lugar.
+            $movimientoOriginal = CuentaCorrienteMovimiento::where('recibo_id', $reciboBloqueado->id)->first();
+
             CuentaCorrienteMovimiento::registrar(
                 $reciboBloqueado->cliente,
                 'cargo',
                 "Cheque rechazado - Recibo {$reciboBloqueado->folio()}",
                 (float) $reciboBloqueado->monto,
+                ['revierte_movimiento_id' => $movimientoOriginal?->id],
             );
 
             return $reciboBloqueado;

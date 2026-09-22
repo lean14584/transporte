@@ -21,6 +21,7 @@ class FleteroCuentaCorrienteMovimiento extends Model
         'saldo',
         'guia_id',
         'orden_pago_id',
+        'revierte_movimiento_id',
         'usuario_id',
     ];
 
@@ -46,6 +47,15 @@ class FleteroCuentaCorrienteMovimiento extends Model
     public function ordenPago()
     {
         return $this->belongsTo(OrdenPago::class);
+    }
+
+    /**
+     * Si este movimiento es la reversión de otro (ej. un cheque rechazado),
+     * el movimiento original que revierte.
+     */
+    public function revierteMovimiento()
+    {
+        return $this->belongsTo(self::class, 'revierte_movimiento_id');
     }
 
     public function usuario()
@@ -75,6 +85,7 @@ class FleteroCuentaCorrienteMovimiento extends Model
                 'saldo' => $nuevoSaldo,
                 'guia_id' => $extra['guia_id'] ?? null,
                 'orden_pago_id' => $extra['orden_pago_id'] ?? null,
+                'revierte_movimiento_id' => $extra['revierte_movimiento_id'] ?? null,
                 'usuario_id' => Auth::id(),
             ]);
 

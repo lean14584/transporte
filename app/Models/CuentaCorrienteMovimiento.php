@@ -21,6 +21,7 @@ class CuentaCorrienteMovimiento extends Model
         'saldo',
         'guia_id',
         'recibo_id',
+        'revierte_movimiento_id',
         'usuario_id',
     ];
 
@@ -46,6 +47,15 @@ class CuentaCorrienteMovimiento extends Model
     public function recibo()
     {
         return $this->belongsTo(Recibo::class);
+    }
+
+    /**
+     * Si este movimiento es la reversión de otro (ej. un cheque rechazado),
+     * el movimiento original que revierte.
+     */
+    public function revierteMovimiento()
+    {
+        return $this->belongsTo(self::class, 'revierte_movimiento_id');
     }
 
     public function usuario()
@@ -74,6 +84,7 @@ class CuentaCorrienteMovimiento extends Model
                 'saldo' => $nuevoSaldo,
                 'guia_id' => $extra['guia_id'] ?? null,
                 'recibo_id' => $extra['recibo_id'] ?? null,
+                'revierte_movimiento_id' => $extra['revierte_movimiento_id'] ?? null,
                 'usuario_id' => Auth::id(),
             ]);
 
