@@ -121,13 +121,17 @@ class Cheque extends Model
             if ($ordenPago !== null) {
                 // Sin 'orden_pago_id': esa columna es unique (protege contra
                 // doble-submit del pago original) y esta reversión es un
-                // segundo movimiento sobre la misma orden. La referencia
-                // queda en el concepto.
+                // segundo movimiento sobre la misma orden. El enlace
+                // estructurado al movimiento original va por
+                // 'revierte_movimiento_id' en su lugar.
+                $movimientoOriginal = FleteroCuentaCorrienteMovimiento::where('orden_pago_id', $ordenPago->id)->first();
+
                 FleteroCuentaCorrienteMovimiento::registrar(
                     $ordenPago->fletero,
                     'cargo',
                     "Cheque {$chequeBloqueado->numero} rechazado - revierte {$ordenPago->folio()}",
                     (float) $chequeBloqueado->monto,
+                    ['revierte_movimiento_id' => $movimientoOriginal?->id],
                 );
             }
 
