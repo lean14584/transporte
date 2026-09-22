@@ -33,8 +33,9 @@ new #[Title('Fleteros')] class extends Component {
     public function fleteros()
     {
         return Fletero::query()
-            ->when($this->search, fn ($query) => $query->where('razon_social', 'like', "%{$this->search}%")
-                ->orWhere('cuit', 'like', "%{$this->search}%"))
+            ->when($this->search, fn ($query) => $query->where(fn ($q) => $q
+                ->where('razon_social', 'like', "%{$this->search}%")
+                ->orWhere('cuit', 'like', "%{$this->search}%")))
             ->orderBy('razon_social')
             ->orderBy('id')
             ->paginate(10);
