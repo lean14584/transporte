@@ -52,7 +52,7 @@ test('se puede cargar una guía buscando transporte, cliente, fletero y producto
         ->and($guia->estado)->toBe('cargada');
 });
 
-test('cargar una guía por unidades no pide TN, solo cantidad', function () {
+test('cargar una guía por unidades pide precio cliente/fletero pero no TN cargadas', function () {
     $user = User::factory()->create();
     $transporte = Transporte::factory()->create();
     $cliente = Cliente::factory()->create();
@@ -67,6 +67,8 @@ test('cargar una guía por unidades no pide TN, solo cantidad', function () {
         ->call('seleccionarProducto', $producto->id)
         ->set('unidad', 'unidades')
         ->set('cantidad', '500')
+        ->set('precio_cliente', '120')
+        ->set('precio_fletero', '80')
         ->call('guardar')
         ->assertHasNoErrors();
 
@@ -74,8 +76,23 @@ test('cargar una guía por unidades no pide TN, solo cantidad', function () {
 
     expect($guia->cantidad)->toEqual('500.00')
         ->and($guia->tn_cargadas)->toBeNull()
-        ->and($guia->precio_cliente)->toBeNull()
-        ->and($guia->precio_fletero)->toBeNull();
+        ->and($guia->precio_cliente)->toEqual('120.00')
+        ->and($guia->precio_fletero)->toEqual('80.00');
+});
+
+test('cargar una guía por unidades sin precio cliente/fletero falla la validación', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::transporte.guias.crear')
+        ->call('seleccionarTransporte', Transporte::factory()->create()->id)
+        ->call('seleccionarCliente', Cliente::factory()->create()->id)
+        ->call('seleccionarFletero', Fletero::factory()->create()->id)
+        ->call('seleccionarProducto', Producto::factory()->create()->id)
+        ->set('unidad', 'unidades')
+        ->set('cantidad', '500')
+        ->call('guardar')
+        ->assertHasErrors(['precio_cliente', 'precio_fletero']);
 });
 
 test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la pérdida y carga Total Cliente $ a la cta cte del cliente y Total Flete $ a la del fletero', function () {
@@ -84,6 +101,7 @@ test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la p�
     $fletero = Fletero::factory()->create();
     $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->for($fletero)->create([
         'unidad' => 'kilos',
+        'cantidad' => 12500,
         'tn_cargadas' => 12500,
         'precio_cliente' => 50,
         'precio_fletero' => 30,
@@ -93,7 +111,6 @@ test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la p�
         ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
         ->assertSee('TN Descargadas')
         ->assertDontSee('Bruto (kg)')
-        ->assertDontSee('Ganancia a cargar en cta cte del cliente')
         ->set('tn_descargadas', '12000');
 
     expect($component->instance()->perdida)->toBe(500.0)
@@ -119,55 +136,35 @@ test('recepcionar una guía por kilos carga TN descargadas a mano, calcula la p�
         ->assertSee('Recibida');
 });
 
-test('recepcionar una guía por unidades usa la cantidad recibida como neto', function () {
-    $user = User::factory()->create();
-    $cliente = Cliente::factory()->create();
-    $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->create([
-        'unidad' => 'unidades',
-        'cantidad' => 500,
-    ]);
-
-    $component = Livewire::actingAs($user)
-        ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
-        ->assertSee('Unidades recibidas')
-        ->assertDontSee('Bruto (kg)');
-
-    expect($component->get('cantidad_recibida'))->toBe('500');
-
-    $component->set('cantidad_recibida', '480')
-        ->set('porcentaje_ganancia', '10')
-        ->set('monto_fletero', '0')
-        ->call('recepcionar')
-        ->assertHasNoErrors();
-
-    $guia->refresh();
-
-    expect($guia->estado)->toBe('recibida')
-        ->and($guia->neto)->toEqual('480.00')
-        ->and($guia->pesaje_bruto)->toBeNull()
-        ->and($guia->tara)->toBeNull()
-        ->and($cliente->refresh()->saldo_cta_cte)->toEqual('48.00');
-});
-
-test('recepcionar una guía por unidades carga el monto a pagar al fletero en su cta cte', function () {
+test('recepcionar una guía por unidades cruza el precio cliente/fletero cargado con la cantidad realmente recibida, igual que por tonelada', function () {
     $user = User::factory()->create();
     $cliente = Cliente::factory()->create();
     $fletero = Fletero::factory()->create();
     $guia = Guia::factory()->for($cliente)->for(Transporte::factory())->for($fletero)->create([
         'unidad' => 'unidades',
         'cantidad' => 500,
+        'precio_cliente' => 120,
+        'precio_fletero' => 80,
     ]);
 
-    Livewire::actingAs($user)
+    $component = Livewire::actingAs($user)
         ->test('pages::transporte.guias.recepcion', ['guia' => $guia])
-        ->set('cantidad_recibida', '480')
-        ->set('porcentaje_ganancia', '10')
-        ->set('monto_fletero', '15000')
-        ->call('recepcionar')
-        ->assertHasNoErrors();
+        ->assertSee('unidades Descargadas')
+        ->assertDontSee('Bruto (kg)')
+        ->set('tn_descargadas', '480');
+
+    expect($component->instance()->perdida)->toBe(20.0)
+        ->and($component->instance()->totalCliente)->toBe(57600.0)
+        ->and($component->instance()->totalFletero)->toBe(38400.0);
+
+    $component->call('recepcionar')->assertHasNoErrors();
 
     $guia->refresh();
 
-    expect($guia->total_fletero)->toEqual('15000.00')
-        ->and($fletero->refresh()->saldo_cta_cte)->toEqual('15000.00');
+    expect($guia->estado)->toBe('recibida')
+        ->and($guia->neto)->toEqual('480.00')
+        ->and($guia->total_cliente)->toEqual('57600.00')
+        ->and($guia->total_fletero)->toEqual('38400.00')
+        ->and($cliente->refresh()->saldo_cta_cte)->toEqual('57600.00')
+        ->and($fletero->refresh()->saldo_cta_cte)->toEqual('38400.00');
 });

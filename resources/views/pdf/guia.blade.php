@@ -106,18 +106,12 @@
                 <td class="label">Cantidad declarada</td>
                 <td class="valor">{{ number_format((float) $guia->cantidad, 2, ',', '.') }} {{ $guia->unidadLabel() }}</td>
             </tr>
-            @if ($guia->unidad === 'kilos' && $guia->tn_cargadas !== null)
+            @if ($guia->precio_cliente !== null && $guia->precio_fletero !== null)
                 <tr>
-                    <td class="label">TN Cargadas</td>
-                    <td class="valor">{{ number_format((float) $guia->tn_cargadas, 2, ',', '.') }}</td>
                     <td class="label">Precio Cliente</td>
                     <td class="valor">$ {{ number_format((float) $guia->precio_cliente, 2, ',', '.') }}</td>
-                </tr>
-                <tr>
                     <td class="label">Precio Fletero</td>
                     <td class="valor">$ {{ number_format((float) $guia->precio_fletero, 2, ',', '.') }}</td>
-                    <td class="label"></td>
-                    <td class="valor"></td>
                 </tr>
             @endif
         </table>
@@ -141,10 +135,11 @@
                     <td class="label">{{ $guia->unidad === 'kilos' ? 'TN Descargadas' : 'Total descargado' }}</td>
                     <td class="valor">{{ number_format((float) $guia->neto, 2, ',', '.') }} {{ $guia->unidadLabel() }}</td>
                 </tr>
-                @if ($guia->unidad === 'kilos')
+                @if ($guia->total_cliente !== null)
+                    {{-- Modelo unificado (kilos siempre; unidades desde 20260922): precio x cantidad --}}
                     <tr>
                         <td class="label">Pérdida</td>
-                        <td class="valor">{{ number_format((float) $guia->tn_cargadas - (float) $guia->neto, 2, ',', '.') }} {{ $guia->unidadLabel() }}</td>
+                        <td class="valor">{{ number_format((float) $guia->cantidad - (float) $guia->neto, 2, ',', '.') }} {{ $guia->unidadLabel() }}</td>
                     </tr>
                     <tr>
                         <td class="label">Total cliente</td>
@@ -154,8 +149,8 @@
                         <td class="label">Total fletero</td>
                         <td class="valor">$ {{ number_format((float) $guia->total_fletero, 2, ',', '.') }}</td>
                     </tr>
-                @endif
-                @if ($guia->unidad !== 'kilos')
+                @elseif ($guia->monto_ganancia !== null)
+                    {{-- Guías "por unidades" recepcionadas antes del 20260922, modelo de % de ganancia --}}
                     <tr>
                         <td class="label">
                             Ganancia

@@ -118,11 +118,13 @@ class Guia extends Model
     }
 
     /**
-     * Cierra la recepción de una guía por kilos: TN descargadas, total cliente y
-     * total fletero se cargan a mano (números reales de esa guía). El total cliente
-     * se carga como "cargo" en la cta cte del cliente, y el total fletero como
-     * "cargo" en la cta cte del fletero (lo que la empresa le debe por este flete).
-     * El pesaje bruto/tara son opcionales, solo quedan como referencia si se informan.
+     * Cierra la recepción de una guía (kilos o unidades, mismo cálculo desde
+     * 20260922: precio_cliente/precio_fletero se cargan al crear la guía,
+     * acá solo se cruza la cantidad realmente descargada/recibida). El total
+     * cliente se carga como "cargo" en la cta cte del cliente, y el total
+     * fletero como "cargo" en la cta cte del fletero (lo que la empresa le
+     * debe por este flete). El pesaje bruto/tara son opcionales (solo
+     * aplican a kilos), quedan como referencia si se informan.
      */
     public function recepcionar(float $totalDescargado, float $totalCliente, float $totalFletero, ?float $pesajeBruto = null, ?float $tara = null): void
     {
@@ -158,53 +160,6 @@ class Guia extends Model
                     'cargo',
                     "Guía {$guiaBloqueada->folio()} - flete {$guiaBloqueada->mercaderia}",
                     $totalFletero,
-                    ['guia_id' => $guiaBloqueada->id],
-                );
-            }
-        });
-
-        $this->refresh();
-    }
-
-    /**
-     * Cierra la recepción de una guía por unidades: la cantidad recibida
-     * (puede diferir de la declarada al cargar) es directamente el neto,
-     * y la ganancia se calcula sobre un porcentaje configurado y se carga
-     * a la cta cte del cliente. El monto a pagar al fletero se carga a mano
-     * (no hay un valor por unidad configurado, a diferencia del flujo por
-     * kilos) y se carga a su cta cte, igual que en recepcionar().
-     */
-    public function recepcionarPorCantidad(float $cantidadRecibida, float $porcentajeGanancia, float $montoFletero): void
-    {
-        $montoGanancia = round($cantidadRecibida * $porcentajeGanancia / 100, 2);
-
-        DB::transaction(function () use ($cantidadRecibida, $porcentajeGanancia, $montoGanancia, $montoFletero) {
-            $guiaBloqueada = $this->lockParaRecepcion();
-
-            $guiaBloqueada->update([
-                'neto' => $cantidadRecibida,
-                'porcentaje_ganancia' => $porcentajeGanancia,
-                'monto_ganancia' => $montoGanancia,
-                'total_fletero' => $montoFletero,
-                'estado' => 'recibida',
-                'fecha_recepcion' => now()->toDateString(),
-                'usuario_recepcion_id' => Auth::id(),
-            ]);
-
-            CuentaCorrienteMovimiento::registrar(
-                $guiaBloqueada->cliente,
-                'cargo',
-                "Guía {$guiaBloqueada->folio()} - flete {$guiaBloqueada->mercaderia}",
-                $montoGanancia,
-                ['guia_id' => $guiaBloqueada->id],
-            );
-
-            if ($guiaBloqueada->fletero_id !== null) {
-                FleteroCuentaCorrienteMovimiento::registrar(
-                    $guiaBloqueada->fletero,
-                    'cargo',
-                    "Guía {$guiaBloqueada->folio()} - flete {$guiaBloqueada->mercaderia}",
-                    $montoFletero,
                     ['guia_id' => $guiaBloqueada->id],
                 );
             }
