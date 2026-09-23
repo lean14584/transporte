@@ -2,8 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\RespaldoGenerado;
 use App\Support\BackupPruner;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Process\Process;
 
 class BackupDatabase extends Command
@@ -75,7 +78,32 @@ class BackupDatabase extends Command
             $this->info("Respaldos vencidos eliminados: {$borrados}");
         }
 
+        $this->enviarCopiaOffSite($archivoComprimido);
+
         return self::SUCCESS;
+    }
+
+    /**
+     * Manda el respaldo por email como copia off-site (mismo disco/servidor
+     * que la DB real, si no). Best-effort: si falla, no hace fallar el
+     * comando completo — el respaldo local ya se generó bien.
+     */
+    private function enviarCopiaOffSite(string $archivoComprimido): void
+    {
+        $destinatario = config('backup.email_to');
+
+        if (! $destinatario) {
+            return;
+        }
+
+        try {
+            Mail::to($destinatario)->send(new RespaldoGenerado($archivoComprimido));
+
+            $this->info("Copia enviada por email a {$destinatario}.");
+        } catch (\Throwable $e) {
+            $this->warn("No se pudo enviar la copia por email: {$e->getMessage()}");
+            Log::warning('db:backup: fallo al enviar copia off-site por email.', ['error' => $e->getMessage()]);
+        }
     }
 
     private function comprimir(string $origen, string $destino): void
