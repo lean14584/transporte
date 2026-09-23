@@ -77,10 +77,10 @@
                             <rect x="8" y="34" width="110" height="13" rx="6" fill="#22d3ee" />
                             <rect x="8" y="64" width="110" height="4" fill="#cbd5e1" />
 
-                            <path d="M118 50 H162 L190 78 V86 H118 Z" fill="#0891b2" />
-                            <rect x="149" y="58" width="30" height="20" rx="3" fill="#083344" />
-                            <rect x="152" y="61" width="19" height="13" rx="2" fill="#a5f3fc" />
-                            <circle cx="192" cy="83" r="3.5" fill="#fef08a" />
+                            <rect x="118" y="50" width="72" height="36" rx="3" fill="#0891b2" />
+                            <rect x="134" y="58" width="42" height="20" rx="2" fill="#083344" />
+                            <rect x="137" y="61" width="36" height="13" rx="2" fill="#a5f3fc" />
+                            <circle cx="184" cy="83" r="3.5" fill="#fef08a" />
 
                             <circle cx="44" cy="90" r="15" fill="#0f172a" />
                             <circle cx="44" cy="90" r="6.5" fill="#94a3b8" />
