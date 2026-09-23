@@ -20,4 +20,17 @@ return [
 
     'retention_days' => (int) env('BACKUP_RETENTION_DAYS', 14),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Copia off-site
+    |--------------------------------------------------------------------------
+    |
+    | Si se configura, cada respaldo se manda también por email (además de
+    | quedar en el disco local) — así sobrevive aunque el servidor entero
+    | falle. Vacío/null desactiva el envío (default: no manda nada).
+    |
+    */
+
+    'email_to' => env('BACKUP_EMAIL_TO'),
+
 ];
