@@ -131,7 +131,9 @@ new #[Title('Clientes')] class extends Component {
                 <flux:table.column>{{ __('Razón social') }}</flux:table.column>
                 <flux:table.column>{{ __('CUIT') }}</flux:table.column>
                 <flux:table.column>{{ __('Condición IVA') }}</flux:table.column>
-                <flux:table.column align="end">{{ __('Saldo cta cte') }}</flux:table.column>
+                @unless (auth()->user()->isUsuarioCarga())
+                    <flux:table.column align="end">{{ __('Saldo cta cte') }}</flux:table.column>
+                @endunless
                 <flux:table.column></flux:table.column>
             </flux:table.columns>
 
@@ -144,9 +146,11 @@ new #[Title('Clientes')] class extends Component {
                         <flux:table.cell>
                             <flux:badge size="sm">{{ str($cliente->condicion_iva)->headline() }}</flux:badge>
                         </flux:table.cell>
-                        <flux:table.cell align="end" class="font-mono {{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}">
-                            $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
-                        </flux:table.cell>
+                        @unless (auth()->user()->isUsuarioCarga())
+                            <flux:table.cell align="end" class="font-mono {{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}">
+                                $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
+                            </flux:table.cell>
+                        @endunless
                         <flux:table.cell align="end">
                             @unless (auth()->user()->isUsuarioCarga())
                                 <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('clientes.cta-cte', $cliente)" wire:navigate />
@@ -190,11 +194,13 @@ new #[Title('Clientes')] class extends Component {
                     <span>{{ __('CUIT') }} {{ $cliente->cuit ?: '—' }}</span>
                 </div>
                 <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-white/5">
-                    <span
-                        class="font-mono text-sm {{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}"
-                    >
-                        $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
-                    </span>
+                    @unless (auth()->user()->isUsuarioCarga())
+                        <span
+                            class="font-mono text-sm {{ $cliente->saldo_cta_cte > 0 ? 'text-red-600 dark:text-red-400' : ($cliente->saldo_cta_cte < 0 ? 'text-green-600 dark:text-green-400' : '') }}"
+                        >
+                            $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
+                        </span>
+                    @endunless
                     <div class="flex shrink-0 gap-1">
                         @unless (auth()->user()->isUsuarioCarga())
                             <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('clientes.cta-cte', $cliente)" wire:navigate />

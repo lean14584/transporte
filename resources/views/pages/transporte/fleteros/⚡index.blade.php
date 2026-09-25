@@ -124,7 +124,9 @@ new #[Title('Fleteros')] class extends Component {
                 <flux:table.column>{{ __('CUIT') }}</flux:table.column>
                 <flux:table.column>{{ __('Teléfono') }}</flux:table.column>
                 <flux:table.column>{{ __('Contacto') }}</flux:table.column>
-                <flux:table.column align="end">{{ __('Saldo cta cte') }}</flux:table.column>
+                @unless (auth()->user()->isUsuarioCarga())
+                    <flux:table.column align="end">{{ __('Saldo cta cte') }}</flux:table.column>
+                @endunless
                 <flux:table.column></flux:table.column>
             </flux:table.columns>
 
@@ -135,9 +137,11 @@ new #[Title('Fleteros')] class extends Component {
                         <flux:table.cell>{{ $fletero->cuit ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $fletero->telefono ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $fletero->contacto ?: '—' }}</flux:table.cell>
-                        <flux:table.cell align="end" class="font-mono {{ $fletero->saldo_cta_cte > 0 ? 'text-amber-600 dark:text-amber-400' : '' }}">
-                            $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
-                        </flux:table.cell>
+                        @unless (auth()->user()->isUsuarioCarga())
+                            <flux:table.cell align="end" class="font-mono {{ $fletero->saldo_cta_cte > 0 ? 'text-amber-600 dark:text-amber-400' : '' }}">
+                                $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
+                            </flux:table.cell>
+                        @endunless
                         <flux:table.cell align="end">
                             @unless (auth()->user()->isUsuarioCarga())
                                 <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('fleteros.cta-cte', $fletero)" wire:navigate />
@@ -196,9 +200,11 @@ new #[Title('Fleteros')] class extends Component {
                         <span>{{ __('Tel.') }} {{ $fletero->telefono ?: '—' }}</span>
                         <span>{{ __('Contacto') }} {{ $fletero->contacto ?: '—' }}</span>
                     </span>
-                    <span class="font-mono text-sm {{ $fletero->saldo_cta_cte > 0 ? 'text-amber-600 dark:text-amber-400' : '' }}">
-                        $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
-                    </span>
+                    @unless (auth()->user()->isUsuarioCarga())
+                        <span class="font-mono text-sm {{ $fletero->saldo_cta_cte > 0 ? 'text-amber-600 dark:text-amber-400' : '' }}">
+                            $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
+                        </span>
+                    @endunless
                 </div>
             </div>
         @empty

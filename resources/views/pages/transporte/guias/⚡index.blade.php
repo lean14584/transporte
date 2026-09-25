@@ -97,7 +97,8 @@ new #[Title('Guías')] class extends Component {
                             </flux:badge>
                         </flux:table.cell>
                         <flux:table.cell align="end" class="font-mono">
-                            {{ $guia->unidad === 'kilos' ? ($guia->total_cliente !== null ? '$ '.number_format((float) $guia->total_cliente, 2, ',', '.') : '—') : ($guia->monto_ganancia !== null ? '$ '.number_format((float) $guia->monto_ganancia, 2, ',', '.') : '—') }}
+                            {{-- Modelo unificado (kilos siempre; unidades desde 20260922): total_cliente. monto_ganancia solo queda como fallback para guías "por unidades" recepcionadas antes de esa fecha (ver pdf/guia.blade.php). --}}
+                            {{ $guia->total_cliente !== null ? '$ '.number_format((float) $guia->total_cliente, 2, ',', '.') : ($guia->monto_ganancia !== null ? '$ '.number_format((float) $guia->monto_ganancia, 2, ',', '.') : '—') }}
                         </flux:table.cell>
                         <flux:table.cell align="end">
                             @if ($guia->estado === 'cargada' && ! auth()->user()->isUsuarioCarga())
@@ -136,7 +137,7 @@ new #[Title('Guías')] class extends Component {
                 </div>
                 <div class="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-white/5">
                     <span class="font-mono text-sm">
-                        {{ $guia->unidad === 'kilos' ? ($guia->total_cliente !== null ? '$ '.number_format((float) $guia->total_cliente, 2, ',', '.') : '—') : ($guia->monto_ganancia !== null ? '$ '.number_format((float) $guia->monto_ganancia, 2, ',', '.') : '—') }}
+                        {{ $guia->total_cliente !== null ? '$ '.number_format((float) $guia->total_cliente, 2, ',', '.') : ($guia->monto_ganancia !== null ? '$ '.number_format((float) $guia->monto_ganancia, 2, ',', '.') : '—') }}
                     </span>
                     <div class="flex shrink-0 gap-1">
                         @if ($guia->estado === 'cargada')

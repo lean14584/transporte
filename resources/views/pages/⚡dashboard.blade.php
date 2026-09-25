@@ -18,14 +18,22 @@ new #[Title('Dashboard')] class extends Component {
     }
 
     #[Computed]
-    public function cobradoHoy(): float
+    public function cobradoHoy(): ?float
     {
+        if (Auth::user()->isUsuarioCarga()) {
+            return null;
+        }
+
         return (float) Recibo::whereDate('fecha', now()->toDateString())->sum('monto');
     }
 
     #[Computed]
-    public function totalACobrar(): float
+    public function totalACobrar(): ?float
     {
+        if (Auth::user()->isUsuarioCarga()) {
+            return null;
+        }
+
         return (float) Cliente::where('saldo_cta_cte', '>', 0)->sum('saldo_cta_cte');
     }
 
@@ -80,25 +88,27 @@ new #[Title('Dashboard')] class extends Component {
             <flux:heading size="xl" class="mt-3 text-blue-900 dark:text-blue-100">{{ $this->guiasEnTransito }}</flux:heading>
         </div>
 
-        <div class="min-w-0 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-            <div class="flex items-center gap-3">
-                <div class="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/50">
-                    <flux:icon.banknotes class="size-5 text-emerald-600 dark:text-emerald-400" />
+        @unless (auth()->user()->isUsuarioCarga())
+            <div class="min-w-0 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+                <div class="flex items-center gap-3">
+                    <div class="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/50">
+                        <flux:icon.banknotes class="size-5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <flux:text size="sm" class="text-emerald-900/70 dark:text-emerald-300">{{ __('Cobrado hoy') }}</flux:text>
                 </div>
-                <flux:text size="sm" class="text-emerald-900/70 dark:text-emerald-300">{{ __('Cobrado hoy') }}</flux:text>
+                <flux:heading size="xl" class="mt-3 font-mono text-emerald-900 dark:text-emerald-100">$ {{ number_format($this->cobradoHoy, 2, ',', '.') }}</flux:heading>
             </div>
-            <flux:heading size="xl" class="mt-3 font-mono text-emerald-900 dark:text-emerald-100">$ {{ number_format($this->cobradoHoy, 2, ',', '.') }}</flux:heading>
-        </div>
 
-        <div class="min-w-0 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
-            <div class="flex items-center gap-3">
-                <div class="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/50">
-                    <flux:icon.exclamation-triangle class="size-5 text-amber-600 dark:text-amber-400" />
+            <div class="min-w-0 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
+                <div class="flex items-center gap-3">
+                    <div class="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/50">
+                        <flux:icon.exclamation-triangle class="size-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <flux:text size="sm" class="text-amber-900/70 dark:text-amber-300">{{ __('Total a cobrar (cta cte)') }}</flux:text>
                 </div>
-                <flux:text size="sm" class="text-amber-900/70 dark:text-amber-300">{{ __('Total a cobrar (cta cte)') }}</flux:text>
+                <flux:heading size="xl" class="mt-3 font-mono text-amber-900 dark:text-amber-100">$ {{ number_format($this->totalACobrar, 2, ',', '.') }}</flux:heading>
             </div>
-            <flux:heading size="xl" class="mt-3 font-mono text-amber-900 dark:text-amber-100">$ {{ number_format($this->totalACobrar, 2, ',', '.') }}</flux:heading>
-        </div>
+        @endunless
 
         @if (auth()->user()->isAdministrador())
             <div class="min-w-0 rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/50 dark:bg-violet-950/30">
