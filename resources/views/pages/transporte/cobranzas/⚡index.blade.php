@@ -3,6 +3,7 @@
 use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Recibo;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -11,6 +12,11 @@ use Livewire\WithPagination;
 new #[Title('Cobranzas')] class extends Component {
     use WithPagination;
     use FiltraPorRangoDeFechas;
+
+    public function mount(): void
+    {
+        abort_if(Auth::user()->isUsuarioCarga(), 403);
+    }
 
     #[Computed]
     public function recibos()

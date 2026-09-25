@@ -139,7 +139,9 @@ new #[Title('Fleteros')] class extends Component {
                             $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
                         </flux:table.cell>
                         <flux:table.cell align="end">
-                            <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('fleteros.cta-cte', $fletero)" wire:navigate />
+                            @unless (auth()->user()->isUsuarioCarga())
+                                <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('fleteros.cta-cte', $fletero)" wire:navigate />
+                            @endunless
                             <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $fletero->id }})" />
                             @if (auth()->user()->isAdministrador())
                                 <flux:button
@@ -173,7 +175,9 @@ new #[Title('Fleteros')] class extends Component {
                         <div class="mt-1 text-sm text-zinc-500">{{ __('CUIT') }} {{ $fletero->cuit ?: '—' }}</div>
                     </div>
                     <div class="flex shrink-0 gap-1">
-                        <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('fleteros.cta-cte', $fletero)" wire:navigate />
+                        @unless (auth()->user()->isUsuarioCarga())
+                            <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Cuenta corriente') }}" :href="route('fleteros.cta-cte', $fletero)" wire:navigate />
+                        @endunless
                         <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $fletero->id }})" />
                         @if (auth()->user()->isAdministrador())
                             <flux:button

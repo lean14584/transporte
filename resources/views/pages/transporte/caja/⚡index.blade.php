@@ -3,6 +3,7 @@
 use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\OrdenPago;
 use App\Models\Recibo;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -12,6 +13,11 @@ use Livewire\WithPagination;
 new #[Title('Caja')] class extends Component {
     use WithPagination;
     use FiltraPorRangoDeFechas;
+
+    public function mount(): void
+    {
+        abort_if(Auth::user()->isUsuarioCarga(), 403);
+    }
 
     /**
      * Cobranzas (Recibo) y Órdenes de pago (OrdenPago) combinadas en un solo

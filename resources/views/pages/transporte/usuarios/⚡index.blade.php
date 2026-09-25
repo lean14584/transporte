@@ -56,7 +56,7 @@ new #[Title('Usuarios')] class extends Component {
             'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9._-]+$/', 'unique:users,username,'.$this->editingId],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$this->editingId],
             'password' => [$this->editingId ? 'nullable' : 'required', 'string', 'min:8'],
-            'role' => ['required', 'in:administrador,administrativo'],
+            'role' => ['required', 'in:administrador,administrativo,usuario_carga'],
         ]);
 
         if (
@@ -93,13 +93,32 @@ new #[Title('Usuarios')] class extends Component {
         unset($this->usuarios);
         Flux::toast(variant: 'success', text: __('Usuario eliminado.'));
     }
+
+    public function roleLabel(string $role): string
+    {
+        return match ($role) {
+            'administrador' => __('Administrador'),
+            'administrativo' => __('Administrativo'),
+            'usuario_carga' => __('Usuario de carga'),
+            default => ucfirst($role),
+        };
+    }
+
+    public function roleColor(string $role): string
+    {
+        return match ($role) {
+            'administrador' => 'blue',
+            'usuario_carga' => 'amber',
+            default => 'zinc',
+        };
+    }
 }; ?>
 
 <div class="flex flex-col gap-6">
     <div class="flex items-center justify-between gap-4">
         <div>
             <flux:heading size="xl">{{ __('Usuarios') }}</flux:heading>
-            <flux:subheading>{{ __('Accesos al sistema: Administrador y Administrativo.') }}</flux:subheading>
+            <flux:subheading>{{ __('Accesos al sistema: Administrador, Administrativo y Usuario de carga.') }}</flux:subheading>
         </div>
 
         <flux:button variant="primary" icon="plus" wire:click="crear">
@@ -155,8 +174,8 @@ new #[Title('Usuarios')] class extends Component {
                         <div class="font-medium">{{ $usuario->name }}</div>
                         <div class="mt-1 text-sm text-zinc-500">{{ $usuario->username }} · {{ $usuario->email }}</div>
                     </div>
-                    <flux:badge size="sm" :color="$usuario->role === 'administrador' ? 'blue' : 'zinc'">
-                        {{ ucfirst($usuario->role) }}
+                    <flux:badge size="sm" :color="$this->roleColor($usuario->role)">
+                        {{ $this->roleLabel($usuario->role) }}
                     </flux:badge>
                 </div>
                 <div class="mt-3 flex justify-end gap-1 border-t border-zinc-100 pt-3 dark:border-white/5">
@@ -194,6 +213,7 @@ new #[Title('Usuarios')] class extends Component {
             <flux:select wire:model="role" :label="__('Rol')">
                 <flux:select.option value="administrador">{{ __('Administrador') }}</flux:select.option>
                 <flux:select.option value="administrativo">{{ __('Administrativo') }}</flux:select.option>
+                <flux:select.option value="usuario_carga">{{ __('Usuario de carga') }}</flux:select.option>
             </flux:select>
 
             <div class="flex justify-end gap-2">

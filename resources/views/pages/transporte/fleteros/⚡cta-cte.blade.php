@@ -2,6 +2,7 @@
 
 use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Fletero;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -19,6 +20,8 @@ new #[Title('Cuenta corriente')] class extends Component {
 
     public function mount(Fletero $fletero): void
     {
+        abort_if(Auth::user()->isUsuarioCarga(), 403);
+
         $this->fletero = $fletero;
     }
 

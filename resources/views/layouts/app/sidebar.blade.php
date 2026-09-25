@@ -35,31 +35,33 @@
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
-                <flux:sidebar.group :heading="__('Administración')" class="grid">
-                    <flux:sidebar.item icon="calculator" :href="route('caja.index')" :current="request()->routeIs('caja.*')" wire:navigate>
-                        {{ __('Caja') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="banknotes" :href="route('cobranzas.index')" :current="request()->routeIs('cobranzas.*')" wire:navigate>
-                        {{ __('Cobranzas') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="clipboard-document-check" :href="route('ordenes-pago.index')" :current="request()->routeIs('ordenes-pago.*')" wire:navigate>
-                        {{ __('Órdenes de pago') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="rectangle-stack" :href="route('cheques.index')" :current="request()->routeIs('cheques.*')" wire:navigate>
-                        {{ __('Cheques') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="building-library" :href="route('cuentas-bancarias.index')" :current="request()->routeIs('cuentas-bancarias.*')" wire:navigate>
-                        {{ __('Cuentas bancarias') }}
-                    </flux:sidebar.item>
-                    @if (auth()->user()->isAdministrador())
-                        <flux:sidebar.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.*')" wire:navigate>
-                            {{ __('Usuarios') }}
+                @unless (auth()->user()->isUsuarioCarga())
+                    <flux:sidebar.group :heading="__('Administración')" class="grid">
+                        <flux:sidebar.item icon="calculator" :href="route('caja.index')" :current="request()->routeIs('caja.*')" wire:navigate>
+                            {{ __('Caja') }}
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="adjustments-horizontal" :href="route('configuracion.edit')" :current="request()->routeIs('configuracion.*')" wire:navigate>
-                            {{ __('Configuración') }}
+                        <flux:sidebar.item icon="banknotes" :href="route('cobranzas.index')" :current="request()->routeIs('cobranzas.*')" wire:navigate>
+                            {{ __('Cobranzas') }}
                         </flux:sidebar.item>
-                    @endif
-                </flux:sidebar.group>
+                        <flux:sidebar.item icon="clipboard-document-check" :href="route('ordenes-pago.index')" :current="request()->routeIs('ordenes-pago.*')" wire:navigate>
+                            {{ __('Órdenes de pago') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="rectangle-stack" :href="route('cheques.index')" :current="request()->routeIs('cheques.*')" wire:navigate>
+                            {{ __('Cheques') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="building-library" :href="route('cuentas-bancarias.index')" :current="request()->routeIs('cuentas-bancarias.*')" wire:navigate>
+                            {{ __('Cuentas bancarias') }}
+                        </flux:sidebar.item>
+                        @if (auth()->user()->isAdministrador())
+                            <flux:sidebar.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.*')" wire:navigate>
+                                {{ __('Usuarios') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="adjustments-horizontal" :href="route('configuracion.edit')" :current="request()->routeIs('configuracion.*')" wire:navigate>
+                                {{ __('Configuración') }}
+                            </flux:sidebar.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endunless
             </flux:sidebar.nav>
 
             <flux:spacer />

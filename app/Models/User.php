@@ -65,4 +65,9 @@ class User extends Authenticatable implements PasskeyUser
     {
         return $this->role === 'administrador';
     }
+
+    public function isUsuarioCarga(): bool
+    {
+        return $this->role === 'usuario_carga';
+    }
 }
