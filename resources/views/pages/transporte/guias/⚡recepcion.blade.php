@@ -2,6 +2,7 @@
 
 use App\Models\Guia;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -15,6 +16,7 @@ new #[Title('Recepción de guía')] class extends Component {
 
     public function mount(Guia $guia): void
     {
+        abort_if(Auth::user()->isUsuarioCarga(), 403);
         abort_if($guia->estado === 'recibida', 403, __('Esta guía ya fue recepcionada.'));
 
         $this->guia = $guia;

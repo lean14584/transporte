@@ -23,6 +23,8 @@ class PdfController extends Controller
 
     public function recibo(Recibo $recibo): Response
     {
+        abort_if(Auth::user()->isUsuarioCarga(), 403);
+
         $recibo->load('cliente');
 
         return Pdf::loadView('pdf.recibo', ['recibo' => $recibo, 'empresa' => Configuracion::actual()])

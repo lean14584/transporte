@@ -100,7 +100,7 @@ new #[Title('Guías')] class extends Component {
                             {{ $guia->unidad === 'kilos' ? ($guia->total_cliente !== null ? '$ '.number_format((float) $guia->total_cliente, 2, ',', '.') : '—') : ($guia->monto_ganancia !== null ? '$ '.number_format((float) $guia->monto_ganancia, 2, ',', '.') : '—') }}
                         </flux:table.cell>
                         <flux:table.cell align="end">
-                            @if ($guia->estado === 'cargada')
+                            @if ($guia->estado === 'cargada' && ! auth()->user()->isUsuarioCarga())
                                 <flux:button size="sm" variant="ghost" icon="scale" :href="route('guias.recepcion', $guia)" wire:navigate>
                                     {{ __('Recepcionar') }}
                                 </flux:button>

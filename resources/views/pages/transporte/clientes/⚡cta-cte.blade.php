@@ -4,6 +4,7 @@ use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Cliente;
 use App\Models\Recibo;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -25,6 +26,8 @@ new #[Title('Cuenta corriente')] class extends Component {
 
     public function mount(Cliente $cliente): void
     {
+        abort_if(Auth::user()->isUsuarioCarga(), 403);
+
         $this->cliente = $cliente;
     }
 
