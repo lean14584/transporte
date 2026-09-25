@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\CuentaBancaria;
+use App\Models\CuentaBancariaMovimiento;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -14,6 +15,11 @@ new #[Title('Cuentas bancarias')] class extends Component {
     public string $numero_cuenta = '';
     public string $alias_cbu = '';
     public string $saldo = '0';
+
+    public ?int $ajustandoId = null;
+    public string $ajuste_tipo = 'ingreso';
+    public string $ajuste_monto = '';
+    public string $ajuste_motivo = '';
 
     public function mount(): void
     {
@@ -72,6 +78,44 @@ new #[Title('Cuentas bancarias')] class extends Component {
         Flux::toast(variant: 'success', text: __('Cuenta bancaria guardada.'));
     }
 
+    public function abrirAjuste(int $id): void
+    {
+        $this->reset(['ajustandoId', 'ajuste_tipo', 'ajuste_monto', 'ajuste_motivo']);
+        $this->ajustandoId = $id;
+        $this->ajuste_tipo = 'ingreso';
+
+        Flux::modal('ajustar-saldo')->show();
+    }
+
+    public function guardarAjuste(): void
+    {
+        $validated = $this->validate([
+            'ajuste_tipo' => ['required', 'in:ingreso,egreso'],
+            'ajuste_monto' => ['required', 'numeric', 'gt:0'],
+            'ajuste_motivo' => ['required', 'string', 'min:5', 'max:255'],
+        ]);
+
+        $cuenta = CuentaBancaria::findOrFail($this->ajustandoId);
+
+        try {
+            CuentaBancariaMovimiento::registrar(
+                $cuenta,
+                $validated['ajuste_tipo'],
+                "Ajuste manual: {$validated['ajuste_motivo']}",
+                (float) $validated['ajuste_monto'],
+            );
+        } catch (\RuntimeException $e) {
+            $this->addError('ajuste_monto', $e->getMessage());
+
+            return;
+        }
+
+        Flux::modal('ajustar-saldo')->close();
+        unset($this->cuentas);
+
+        Flux::toast(variant: 'success', text: __('Ajuste registrado.'));
+    }
+
     public function eliminar(int $id): void
     {
         try {
@@ -118,6 +162,8 @@ new #[Title('Cuentas bancarias')] class extends Component {
                         <flux:table.cell>{{ $cuenta->alias_cbu ?: '—' }}</flux:table.cell>
                         <flux:table.cell align="end" class="font-mono">$ {{ number_format((float) $cuenta->saldo, 2, ',', '.') }}</flux:table.cell>
                         <flux:table.cell align="end">
+                            <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Movimientos') }}" :href="route('cuentas-bancarias.movimientos', $cuenta)" wire:navigate />
+                            <flux:button size="sm" variant="ghost" icon="adjustments-horizontal" aria-label="{{ __('Ajustar saldo') }}" wire:click="abrirAjuste({{ $cuenta->id }})" />
                             <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $cuenta->id }})" />
                             <flux:button
                                 size="sm"
@@ -149,6 +195,8 @@ new #[Title('Cuentas bancarias')] class extends Component {
                         <div class="mt-1 text-sm text-violet-900/70 dark:text-violet-300">{{ $cuenta->numero_cuenta ?: '—' }}</div>
                     </div>
                     <div class="flex shrink-0 gap-1">
+                        <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Movimientos') }}" :href="route('cuentas-bancarias.movimientos', $cuenta)" wire:navigate />
+                        <flux:button size="sm" variant="ghost" icon="adjustments-horizontal" aria-label="{{ __('Ajustar saldo') }}" wire:click="abrirAjuste({{ $cuenta->id }})" />
                         <flux:button size="sm" variant="ghost" icon="pencil" aria-label="{{ __('Editar') }}" wire:click="editar({{ $cuenta->id }})" />
                         <flux:button
                             size="sm"
@@ -187,7 +235,7 @@ new #[Title('Cuentas bancarias')] class extends Component {
                     value="{{ number_format((float) $saldo, 2, ',', '.') }}"
                     :label="__('Saldo actual')"
                     disabled
-                    :description="__('El saldo solo cambia al emitir o rechazar cheques.')"
+                    :description="__('El saldo cambia al emitir/rechazar cheques o con un ajuste manual (ver botón Ajustar saldo).')"
                 />
             @else
                 <flux:input wire:model="saldo" :label="__('Saldo inicial')" type="number" step="0.01" />
@@ -199,6 +247,32 @@ new #[Title('Cuentas bancarias')] class extends Component {
                 </flux:modal.close>
 
                 <flux:button type="submit" variant="primary">{{ __('Guardar') }}</flux:button>
+            </div>
+        </form>
+    </flux:modal>
+
+    <flux:modal name="ajustar-saldo" class="max-w-md" @close="$set('ajustandoId', null)">
+        <form wire:submit="guardarAjuste" class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('Ajustar saldo') }}</flux:heading>
+                <flux:subheading>{{ __('Queda registrado en el historial de movimientos con tu usuario y el motivo.') }}</flux:subheading>
+            </div>
+
+            <flux:select wire:model="ajuste_tipo" :label="__('Tipo')">
+                <flux:select.option value="ingreso">{{ __('Ingreso (suma al saldo)') }}</flux:select.option>
+                <flux:select.option value="egreso">{{ __('Egreso (resta del saldo)') }}</flux:select.option>
+            </flux:select>
+
+            <flux:input wire:model="ajuste_monto" :label="__('Monto')" type="number" step="0.01" required autofocus />
+
+            <flux:textarea wire:model="ajuste_motivo" :label="__('Motivo')" :description="__('Obligatorio: por qué se hace este ajuste.')" required rows="3" />
+
+            <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
+                </flux:modal.close>
+
+                <flux:button type="submit" variant="primary">{{ __('Registrar ajuste') }}</flux:button>
             </div>
         </form>
     </flux:modal>

@@ -70,7 +70,13 @@ class Cheque extends Model
                 'estado' => 'emitido',
             ]);
 
-            $cuentaBloqueada->forceFill(['saldo' => $nuevoSaldo])->save();
+            CuentaBancariaMovimiento::registrar(
+                $cuentaBloqueada,
+                'egreso',
+                "Emisión cheque {$cheque->numero}",
+                (float) $datos['monto'],
+                ['cheque_id' => $cheque->id],
+            );
 
             return $cheque;
         });
@@ -113,8 +119,18 @@ class Cheque extends Model
 
             $chequeBloqueado->update(['estado' => 'rechazado']);
 
-            $cuentaBloqueada = CuentaBancaria::whereKey($chequeBloqueado->cuenta_bancaria_id)->lockForUpdate()->first();
-            $cuentaBloqueada->forceFill(['saldo' => $cuentaBloqueada->saldo + $chequeBloqueado->monto])->save();
+            $cuentaBancaria = CuentaBancaria::findOrFail($chequeBloqueado->cuenta_bancaria_id);
+            $movimientoEmision = CuentaBancariaMovimiento::where('cheque_id', $chequeBloqueado->id)
+                ->where('tipo', 'egreso')
+                ->first();
+
+            CuentaBancariaMovimiento::registrar(
+                $cuentaBancaria,
+                'ingreso',
+                "Rechazo cheque {$chequeBloqueado->numero}",
+                (float) $chequeBloqueado->monto,
+                ['cheque_id' => $chequeBloqueado->id, 'revierte_movimiento_id' => $movimientoEmision?->id],
+            );
 
             $ordenPago = $chequeBloqueado->ordenPago;
 

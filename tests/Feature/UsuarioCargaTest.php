@@ -43,12 +43,14 @@ test('un usuario de carga no puede acceder a caja, cobranzas, cta cte, cuentas b
     $usuarioCarga = User::factory()->create(['role' => 'usuario_carga']);
     $cliente = Cliente::factory()->create();
     $fletero = Fletero::factory()->create();
+    $cuentaBancaria = \App\Models\CuentaBancaria::factory()->create();
 
     $this->actingAs($usuarioCarga)->get(route('caja.index'))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('cobranzas.index'))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('clientes.cta-cte', $cliente))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('fleteros.cta-cte', $fletero))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('cuentas-bancarias.index'))->assertForbidden();
+    $this->actingAs($usuarioCarga)->get(route('cuentas-bancarias.movimientos', $cuentaBancaria))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('cheques.index'))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('ordenes-pago.index'))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('usuarios.index'))->assertForbidden();

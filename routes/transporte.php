@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('guias/{guia}/pdf', [PdfController::class, 'guia'])->name('guias.pdf');
 
     Route::livewire('cuentas-bancarias', 'pages::transporte.cuentas-bancarias.index')->name('cuentas-bancarias.index');
+    Route::livewire('cuentas-bancarias/{cuentaBancaria}/movimientos', 'pages::transporte.cuentas-bancarias.movimientos')->name('cuentas-bancarias.movimientos');
     Route::livewire('cheques', 'pages::transporte.cheques.index')->name('cheques.index');
 
     Route::livewire('ordenes-pago', 'pages::transporte.ordenes-pago.index')->name('ordenes-pago.index');
