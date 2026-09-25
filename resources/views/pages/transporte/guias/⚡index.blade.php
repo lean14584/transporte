@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Guia;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -9,11 +10,19 @@ use Livewire\WithPagination;
 
 new #[Title('Guías')] class extends Component {
     use WithPagination;
+    use FiltraPorRangoDeFechas;
 
     #[Url]
     public string $estado = '';
 
+    public string $buscar = '';
+
     public function updatingEstado(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingBuscar(): void
     {
         $this->resetPage();
     }
@@ -24,6 +33,13 @@ new #[Title('Guías')] class extends Component {
         return Guia::query()
             ->with(['cliente', 'transporte'])
             ->when($this->estado, fn ($query) => $query->where('estado', $this->estado))
+            ->when($this->desde, fn ($query) => $query->whereDate('fecha_carga', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('fecha_carga', '<=', $this->hasta))
+            ->when($this->buscar, fn ($query) => $query->where(function ($query) {
+                $query->where('mercaderia', 'like', "%{$this->buscar}%")
+                    ->orWhereHas('cliente', fn ($query) => $query->where('nombre', 'like', "%{$this->buscar}%"))
+                    ->orWhereHas('transporte', fn ($query) => $query->where('nombre', 'like', "%{$this->buscar}%"));
+            }))
             ->latest('fecha_carga')
             ->latest('id')
             ->paginate(10);
@@ -42,11 +58,17 @@ new #[Title('Guías')] class extends Component {
         </flux:button>
     </div>
 
-    <flux:select wire:model.live="estado" class="max-w-xs">
-        <flux:select.option value="">{{ __('Todos los estados') }}</flux:select.option>
-        <flux:select.option value="cargada">{{ __('Cargada') }}</flux:select.option>
-        <flux:select.option value="recibida">{{ __('Recibida') }}</flux:select.option>
-    </flux:select>
+    <div class="flex flex-wrap items-end gap-4">
+        <flux:select wire:model.live="estado" class="max-w-xs">
+            <flux:select.option value="">{{ __('Todos los estados') }}</flux:select.option>
+            <flux:select.option value="cargada">{{ __('Cargada') }}</flux:select.option>
+            <flux:select.option value="recibida">{{ __('Recibida') }}</flux:select.option>
+        </flux:select>
+
+        <flux:input wire:model.live.debounce.300ms="buscar" icon="magnifying-glass" placeholder="{{ __('Buscar por cliente, transporte o mercadería...') }}" class="max-w-sm" />
+    </div>
+
+    <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
     <div class="hidden overflow-x-auto md:block">
         <flux:table>

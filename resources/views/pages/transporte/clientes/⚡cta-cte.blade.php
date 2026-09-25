@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Cliente;
 use App\Models\Recibo;
 use Flux\Flux;
@@ -11,9 +12,12 @@ use Livewire\WithPagination;
 
 new #[Title('Cuenta corriente')] class extends Component {
     use WithPagination;
+    use FiltraPorRangoDeFechas;
 
     #[Locked]
     public Cliente $cliente;
+
+    public string $buscar = '';
 
     public float $monto = 0;
     public string $medio_pago = 'efectivo';
@@ -24,10 +28,21 @@ new #[Title('Cuenta corriente')] class extends Component {
         $this->cliente = $cliente;
     }
 
+    public function updatingBuscar(): void
+    {
+        $this->resetPage();
+    }
+
     #[Computed]
     public function movimientos()
     {
-        return $this->cliente->movimientosCtaCte()->latest('fecha')->latest('id')->paginate(15);
+        return $this->cliente->movimientosCtaCte()
+            ->when($this->desde, fn ($query) => $query->whereDate('fecha', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('fecha', '<=', $this->hasta))
+            ->when($this->buscar, fn ($query) => $query->where('concepto', 'like', "%{$this->buscar}%"))
+            ->latest('fecha')
+            ->latest('id')
+            ->paginate(15);
     }
 
     public function cobrar(): void
@@ -77,6 +92,12 @@ new #[Title('Cuenta corriente')] class extends Component {
             $ {{ number_format((float) $cliente->saldo_cta_cte, 2, ',', '.') }}
         </flux:heading>
     </div>
+
+    <div class="flex flex-wrap items-end gap-4">
+        <flux:input wire:model.live.debounce.300ms="buscar" icon="magnifying-glass" placeholder="{{ __('Buscar por concepto...') }}" class="max-w-sm" />
+    </div>
+
+    <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
     <div class="hidden overflow-x-auto md:block">
         <flux:table>

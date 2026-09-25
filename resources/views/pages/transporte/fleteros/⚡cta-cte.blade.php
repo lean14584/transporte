@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Concerns\FiltraPorRangoDeFechas;
 use App\Models\Fletero;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -9,19 +10,33 @@ use Livewire\WithPagination;
 
 new #[Title('Cuenta corriente')] class extends Component {
     use WithPagination;
+    use FiltraPorRangoDeFechas;
 
     #[Locked]
     public Fletero $fletero;
+
+    public string $buscar = '';
 
     public function mount(Fletero $fletero): void
     {
         $this->fletero = $fletero;
     }
 
+    public function updatingBuscar(): void
+    {
+        $this->resetPage();
+    }
+
     #[Computed]
     public function movimientos()
     {
-        return $this->fletero->movimientosCtaCte()->latest('fecha')->latest('id')->paginate(15);
+        return $this->fletero->movimientosCtaCte()
+            ->when($this->desde, fn ($query) => $query->whereDate('fecha', '>=', $this->desde))
+            ->when($this->hasta, fn ($query) => $query->whereDate('fecha', '<=', $this->hasta))
+            ->when($this->buscar, fn ($query) => $query->where('concepto', 'like', "%{$this->buscar}%"))
+            ->latest('fecha')
+            ->latest('id')
+            ->paginate(15);
     }
 }; ?>
 
@@ -45,6 +60,12 @@ new #[Title('Cuenta corriente')] class extends Component {
             $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
         </flux:heading>
     </div>
+
+    <div class="flex flex-wrap items-end gap-4">
+        <flux:input wire:model.live.debounce.300ms="buscar" icon="magnifying-glass" placeholder="{{ __('Buscar por concepto...') }}" class="max-w-sm" />
+    </div>
+
+    <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
     <div class="hidden overflow-x-auto md:block">
         <flux:table>
