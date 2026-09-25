@@ -64,6 +64,11 @@ new #[Title('Órdenes de pago')] class extends Component {
         return CuentaBancaria::orderBy('banco')->get();
     }
 
+    public function updatedCuentaBancariaId(): void
+    {
+        $this->resetErrorBag('cuenta_bancaria_id');
+    }
+
     public function seleccionarFletero(int $id): void
     {
         $fletero = Fletero::findOrFail($id);
@@ -274,7 +279,7 @@ new #[Title('Órdenes de pago')] class extends Component {
 
             @if ($medio_pago === 'cheque')
                 <div class="space-y-4 rounded-lg border border-zinc-200 p-4 dark:border-white/10">
-                    <flux:select wire:model="cuenta_bancaria_id" :label="__('Cuenta bancaria')" placeholder="{{ __('Elegir cuenta...') }}">
+                    <flux:select wire:model.live="cuenta_bancaria_id" :label="__('Cuenta bancaria')" placeholder="{{ __('Elegir cuenta...') }}">
                         @foreach ($this->cuentasBancarias as $cuenta)
                             <flux:select.option value="{{ $cuenta->id }}">{{ $cuenta->banco }} ({{ $cuenta->numero_cuenta }})</flux:select.option>
                         @endforeach

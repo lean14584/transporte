@@ -55,6 +55,22 @@ test('emitir una orden de pago con cheque descuenta el saldo de la cuenta bancar
         ->and($fletero->refresh()->saldo_cta_cte)->toEqual('20000.00');
 });
 
+test('elegir la cuenta bancaria despues de un intento fallido limpia el error de ese campo', function () {
+    $user = User::factory()->create(['role' => 'administrador']);
+    $fletero = Fletero::factory()->create();
+    $cuenta = CuentaBancaria::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::transporte.ordenes-pago.index')
+        ->call('seleccionarFletero', $fletero->id)
+        ->set('monto', '1000')
+        ->set('medio_pago', 'cheque')
+        ->call('emitir')
+        ->assertHasErrors('cuenta_bancaria_id')
+        ->set('cuenta_bancaria_id', $cuenta->id)
+        ->assertHasNoErrors('cuenta_bancaria_id');
+});
+
 test('las órdenes de pago se pueden filtrar por rango de fechas', function () {
     $user = User::factory()->create(['role' => 'administrador']);
     $fletero = Fletero::factory()->create();
