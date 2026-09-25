@@ -69,6 +69,13 @@ new #[Title('Órdenes de pago')] class extends Component {
         $this->resetErrorBag('cuenta_bancaria_id');
     }
 
+    public function updatedMedioPago(): void
+    {
+        if ($this->medio_pago !== 'cheque') {
+            $this->cuenta_bancaria_id = null;
+        }
+    }
+
     public function seleccionarFletero(int $id): void
     {
         $fletero = Fletero::findOrFail($id);
@@ -279,7 +286,11 @@ new #[Title('Órdenes de pago')] class extends Component {
 
             @if ($medio_pago === 'cheque')
                 <div class="space-y-4 rounded-lg border border-zinc-200 p-4 dark:border-white/10">
-                    <flux:select wire:model.live="cuenta_bancaria_id" :label="__('Cuenta bancaria')" placeholder="{{ __('Elegir cuenta...') }}">
+                    <flux:select wire:model.live="cuenta_bancaria_id" :label="__('Cuenta bancaria')" required>
+                        {{-- Opción vacía propia (no "disabled") en vez del placeholder de Flux: un <option disabled selected>
+                        no se muestra como seleccionado en Chrome/Edge cuando hay otras opciones habilitadas, y el navegador
+                        termina mostrando la primera cuenta real como si ya estuviera elegida sin que el usuario la tocara. --}}
+                        <option value="" class="placeholder" @selected(! $cuenta_bancaria_id)>{{ __('Elegir cuenta...') }}</option>
                         @foreach ($this->cuentasBancarias as $cuenta)
                             <flux:select.option value="{{ $cuenta->id }}">{{ $cuenta->banco }} ({{ $cuenta->numero_cuenta }})</flux:select.option>
                         @endforeach

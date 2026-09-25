@@ -55,7 +55,7 @@ test('emitir una orden de pago con cheque descuenta el saldo de la cuenta bancar
         ->and($fletero->refresh()->saldo_cta_cte)->toEqual('20000.00');
 });
 
-test('elegir la cuenta bancaria despues de un intento fallido limpia el error de ese campo', function () {
+test('elegir la cuenta bancaria despues de un intento fallido limpia el error y permite emitir', function () {
     $user = User::factory()->create(['role' => 'administrador']);
     $fletero = Fletero::factory()->create();
     $cuenta = CuentaBancaria::factory()->create();
@@ -68,7 +68,58 @@ test('elegir la cuenta bancaria despues de un intento fallido limpia el error de
         ->call('emitir')
         ->assertHasErrors('cuenta_bancaria_id')
         ->set('cuenta_bancaria_id', $cuenta->id)
-        ->assertHasNoErrors('cuenta_bancaria_id');
+        ->assertHasNoErrors('cuenta_bancaria_id')
+        ->set('numero_cheque', '00099999')
+        ->set('banco_cheque', 'Banco Nación')
+        ->set('fecha_pago_cheque', now()->addMonth()->toDateString())
+        ->call('emitir')
+        ->assertHasNoErrors();
+
+    expect(OrdenPago::whereNotNull('cheque_id')->exists())->toBeTrue();
+});
+
+test('el select de cuenta bancaria exige elegir una opción explícitamente (atributo required)', function () {
+    $user = User::factory()->create(['role' => 'administrador']);
+    $fletero = Fletero::factory()->create();
+
+    $html = Livewire::actingAs($user)
+        ->test('pages::transporte.ordenes-pago.index')
+        ->call('seleccionarFletero', $fletero->id)
+        ->set('medio_pago', 'cheque')
+        ->html();
+
+    expect($html)->toMatch('/<select[^>]*wire:model\.live="cuenta_bancaria_id"[^>]*\brequired\b/s');
+});
+
+test('el placeholder de cuenta bancaria aparece realmente seleccionado hasta que se elige una cuenta de verdad', function () {
+    $user = User::factory()->create(['role' => 'administrador']);
+    $fletero = Fletero::factory()->create();
+    $cuenta = CuentaBancaria::factory()->create();
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::transporte.ordenes-pago.index')
+        ->call('seleccionarFletero', $fletero->id)
+        ->set('medio_pago', 'cheque');
+
+    expect($component->html())->toContain('<option value="" class="placeholder" selected>');
+
+    $component->set('cuenta_bancaria_id', $cuenta->id);
+
+    expect($component->html())->not->toContain('<option value="" class="placeholder" selected>');
+});
+
+test('cambiar el medio de pago a uno distinto de cheque limpia la cuenta bancaria elegida', function () {
+    $user = User::factory()->create(['role' => 'administrador']);
+    $fletero = Fletero::factory()->create();
+    $cuenta = CuentaBancaria::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::transporte.ordenes-pago.index')
+        ->call('seleccionarFletero', $fletero->id)
+        ->set('medio_pago', 'cheque')
+        ->set('cuenta_bancaria_id', $cuenta->id)
+        ->set('medio_pago', 'efectivo')
+        ->assertSet('cuenta_bancaria_id', null);
 });
 
 test('las órdenes de pago se pueden filtrar por rango de fechas', function () {
