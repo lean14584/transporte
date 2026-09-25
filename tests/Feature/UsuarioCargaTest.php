@@ -54,6 +54,7 @@ test('un usuario de carga no puede acceder a caja, cobranzas, cta cte, cuentas b
     $this->actingAs($usuarioCarga)->get(route('cheques.index'))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('ordenes-pago.index'))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('usuarios.index'))->assertForbidden();
+    $this->actingAs($usuarioCarga)->get(route('auditoria.index'))->assertForbidden();
     $this->actingAs($usuarioCarga)->get(route('configuracion.edit'))->assertForbidden();
 });
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use App\Models\Concerns\RegistraAutoria;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ class Fletero extends Model
 {
     /** @use HasFactory<\Database\Factories\FleteroFactory> */
     use HasFactory;
+    use Auditable;
     use RegistraAutoria;
 
     protected $fillable = [

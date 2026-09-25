@@ -56,6 +56,9 @@
                             <flux:sidebar.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.*')" wire:navigate>
                                 {{ __('Usuarios') }}
                             </flux:sidebar.item>
+                            <flux:sidebar.item icon="clipboard-document-list" :href="route('auditoria.index')" :current="request()->routeIs('auditoria.*')" wire:navigate>
+                                {{ __('Auditoría') }}
+                            </flux:sidebar.item>
                             <flux:sidebar.item icon="adjustments-horizontal" :href="route('configuracion.edit')" :current="request()->routeIs('configuracion.*')" wire:navigate>
                                 {{ __('Configuración') }}
                             </flux:sidebar.item>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,7 @@ class Guia extends Model
 {
     /** @use HasFactory<\Database\Factories\GuiaFactory> */
     use HasFactory;
+    use Auditable;
 
     protected $fillable = [
         'transporte_id',

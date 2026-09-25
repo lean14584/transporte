@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,7 @@ class Cheque extends Model
 {
     /** @use HasFactory<\Database\Factories\ChequeFactory> */
     use HasFactory;
+    use Auditable;
 
     protected $fillable = [
         'cuenta_bancaria_id',

@@ -33,5 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::livewire('usuarios', 'pages::transporte.usuarios.index')->name('usuarios.index');
 
+    Route::livewire('auditoria', 'pages::transporte.auditoria.index')->name('auditoria.index');
+
     Route::livewire('configuracion', 'pages::transporte.configuracion.editar')->name('configuracion.edit');
 });

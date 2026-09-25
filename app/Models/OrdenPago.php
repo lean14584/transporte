@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,7 @@ class OrdenPago extends Model
 {
     /** @use HasFactory<\Database\Factories\OrdenPagoFactory> */
     use HasFactory;
+    use Auditable;
 
     protected $fillable = [
         'fletero_id',
