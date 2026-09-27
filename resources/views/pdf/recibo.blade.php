@@ -50,7 +50,7 @@
     <div class="header">
         <div class="titulo">
             <h1>Recibo de cobranza</h1>
-            <div class="subtitulo">Transporte internacional</div>
+            <div class="subtitulo">{{ $empresa->subtituloPdf() }}</div>
         </div>
         <div class="folio">
             <div class="folio-numero">{{ $recibo->folio() }}</div>

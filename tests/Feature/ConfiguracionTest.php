@@ -14,6 +14,7 @@ test('un administrador puede cargar nombre, dueño, dirección y logo de la empr
     Livewire::actingAs($admin)
         ->test('pages::transporte.configuracion.editar')
         ->set('empresa_nombre', 'Transportes del Sur SRL')
+        ->set('empresa_subtitulo', 'Cargas generales en todo el país')
         ->set('empresa_propietario', 'Juan Pérez')
         ->set('empresa_direccion', 'Ruta 9 Km 123, Rosario')
         ->set('logo', UploadedFile::fake()->image('logo.png'))
@@ -23,12 +24,18 @@ test('un administrador puede cargar nombre, dueño, dirección y logo de la empr
     $configuracion = Configuracion::actual();
 
     expect($configuracion->empresa_nombre)->toBe('Transportes del Sur SRL')
+        ->and($configuracion->empresa_subtitulo)->toBe('Cargas generales en todo el país')
+        ->and($configuracion->subtituloPdf())->toBe('Cargas generales en todo el país')
         ->and($configuracion->empresa_propietario)->toBe('Juan Pérez')
         ->and($configuracion->empresa_direccion)->toBe('Ruta 9 Km 123, Rosario')
         ->and($configuracion->logo_path)->not->toBeNull();
 
     Storage::disk('public')->assertExists($configuracion->logo_path);
     expect($configuracion->logoUrl())->not->toBeNull();
+});
+
+test('el subtítulo del PDF cae a un default cuando no se configuró', function () {
+    expect((new Configuracion)->subtituloPdf())->toBe('Transporte de cargas');
 });
 
 test('quitar logo borra el archivo y limpia logo_path', function () {

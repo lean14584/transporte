@@ -56,7 +56,7 @@
     <div class="header">
         <div class="titulo">
             <h1>Orden de pago</h1>
-            <div class="subtitulo">Transporte internacional</div>
+            <div class="subtitulo">{{ $empresa->subtituloPdf() }}</div>
         </div>
         <div class="folio">
             <div class="folio-numero">{{ $ordenPago->folio() }}</div>

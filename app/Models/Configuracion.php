@@ -14,6 +14,7 @@ class Configuracion extends Model
 
     protected $fillable = [
         'empresa_nombre',
+        'empresa_subtitulo',
         'empresa_propietario',
         'empresa_direccion',
         'logo_path',
@@ -33,6 +34,16 @@ class Configuracion extends Model
         }
 
         return static::$instanciaActual = static::query()->firstOrCreate([]);
+    }
+
+    /**
+     * Subtítulo mostrado en los PDF (guía, orden de pago, recibo) debajo del
+     * título del documento. Si nunca se configuró, cae a un default genérico
+     * en vez de dejar el renglón vacío.
+     */
+    public function subtituloPdf(): string
+    {
+        return $this->empresa_subtitulo ?: 'Transporte de cargas';
     }
 
     /**
