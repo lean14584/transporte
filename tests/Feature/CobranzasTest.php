@@ -47,6 +47,20 @@ test('marcar un cobro con cheque como rechazado revierte la deuda en la cta cte 
         ->and((float) $movimientoReversion->monto)->toBe(5000.0);
 });
 
+test('el total cobrado hoy no cuenta un recibo marcado como rechazado', function () {
+    $user = User::factory()->create();
+    $cliente = Cliente::factory()->create();
+
+    Recibo::cobrar($cliente, 3000, 'efectivo', 'Cobro válido');
+    $recibo = Recibo::cobrar($cliente, 7000, 'cheque', 'Cobro con cheque');
+    Recibo::rechazarCheque($recibo);
+
+    Livewire::actingAs($user)
+        ->test('pages::transporte.cobranzas.index')
+        ->assertSee('3.000,00')
+        ->assertDontSee('10.000,00');
+});
+
 test('no se puede rechazar un cobro que no fue hecho con cheque, ni rechazar el mismo cheque dos veces', function () {
     $cliente = Cliente::factory()->create();
 

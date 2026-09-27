@@ -24,7 +24,9 @@ new #[Title('Dashboard')] class extends Component {
             return null;
         }
 
-        return (float) Recibo::whereDate('fecha', now()->toDateString())->sum('monto');
+        return (float) Recibo::whereDate('fecha', now()->toDateString())
+            ->where('estado', '!=', 'rechazado')
+            ->sum('monto');
     }
 
     #[Computed]

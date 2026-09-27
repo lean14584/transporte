@@ -33,7 +33,9 @@ new #[Title('Cobranzas')] class extends Component {
     #[Computed]
     public function totalDelDia(): float
     {
-        return (float) Recibo::whereDate('fecha', now()->toDateString())->sum('monto');
+        return (float) Recibo::whereDate('fecha', now()->toDateString())
+            ->where('estado', '!=', 'rechazado')
+            ->sum('monto');
     }
 
     public function marcarRechazado(int $id): void
