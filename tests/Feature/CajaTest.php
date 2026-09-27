@@ -29,6 +29,40 @@ test('la caja muestra cobranzas y órdenes de pago como debe y haber, con el sal
     $response->assertSee('12.000,00'); // saldo: 20000-8000
 });
 
+test('la caja no cuenta cobros ni pagos con cheque rechazado en el debe/haber ni en el listado', function () {
+    $user = User::factory()->create();
+    $cliente = Cliente::factory()->create();
+    $fletero = Fletero::factory()->create();
+    $cuentaBancaria = \App\Models\CuentaBancaria::factory()->create(['saldo' => 100000]);
+
+    Recibo::cobrar($cliente, 15000, 'efectivo', 'Cobro válido');
+    $reciboRechazado = Recibo::cobrar($cliente, 9000, 'cheque', 'Cobro con cheque rechazado');
+    Recibo::rechazarCheque($reciboRechazado);
+
+    OrdenPago::emitir($fletero, 4000, 'efectivo', 'Pago válido');
+    $cheque = \App\Models\Cheque::emitir($cuentaBancaria, [
+        'numero' => '001',
+        'banco' => 'Banco QA',
+        'beneficiario' => $fletero->razon_social,
+        'fecha_pago' => now()->addDays(30)->toDateString(),
+        'monto' => 6000,
+    ]);
+    OrdenPago::emitir($fletero, 6000, 'cheque', 'Pago con cheque rechazado', $cheque->id);
+    \App\Models\Cheque::rechazar($cheque);
+
+    $response = $this->actingAs($user)
+        ->get(route('caja.index'))
+        ->assertOk()
+        ->assertSee('Cobro válido')
+        ->assertSee('Pago válido')
+        ->assertDontSee('Cobro con cheque rechazado')
+        ->assertDontSee('Pago con cheque rechazado');
+
+    $response->assertSee('15.000,00'); // total debe: solo el cobro válido
+    $response->assertSee('4.000,00');  // total haber: solo el pago válido
+    $response->assertSee('11.000,00'); // saldo: 15000-4000
+});
+
 test('la caja se puede filtrar por rango de fechas', function () {
     $user = User::factory()->create();
     $cliente = Cliente::factory()->create();

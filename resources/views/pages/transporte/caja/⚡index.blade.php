@@ -29,12 +29,17 @@ new #[Title('Caja')] class extends Component {
     {
         $cobros = DB::table('recibos as r')
             ->join('clientes as c', 'c.id', '=', 'r.cliente_id')
+            ->where('r.estado', '!=', 'rechazado')
             ->when($this->desde, fn ($query) => $query->whereDate('r.fecha', '>=', $this->desde))
             ->when($this->hasta, fn ($query) => $query->whereDate('r.fecha', '<=', $this->hasta))
             ->selectRaw("r.id, r.fecha, r.monto, r.concepto, 'cobro' as tipo, c.nombre as referencia");
 
         $pagos = DB::table('orden_pagos as o')
             ->join('fleteros as f', 'f.id', '=', 'o.fletero_id')
+            ->leftJoin('cheques as ch', 'ch.id', '=', 'o.cheque_id')
+            ->where(function ($query) {
+                $query->whereNull('ch.id')->orWhere('ch.estado', '!=', 'rechazado');
+            })
             ->when($this->desde, fn ($query) => $query->whereDate('o.fecha', '>=', $this->desde))
             ->when($this->hasta, fn ($query) => $query->whereDate('o.fecha', '<=', $this->hasta))
             ->selectRaw("o.id, o.fecha, o.monto, o.concepto, 'pago' as tipo, f.razon_social as referencia");
@@ -49,6 +54,7 @@ new #[Title('Caja')] class extends Component {
     public function totalDebe(): float
     {
         return (float) Recibo::query()
+            ->where('estado', '!=', 'rechazado')
             ->when($this->desde, fn ($query) => $query->whereDate('fecha', '>=', $this->desde))
             ->when($this->hasta, fn ($query) => $query->whereDate('fecha', '<=', $this->hasta))
             ->sum('monto');
@@ -58,6 +64,7 @@ new #[Title('Caja')] class extends Component {
     public function totalHaber(): float
     {
         return (float) OrdenPago::query()
+            ->whereDoesntHave('cheque', fn ($query) => $query->where('estado', 'rechazado'))
             ->when($this->desde, fn ($query) => $query->whereDate('fecha', '>=', $this->desde))
             ->when($this->hasta, fn ($query) => $query->whereDate('fecha', '<=', $this->hasta))
             ->sum('monto');
