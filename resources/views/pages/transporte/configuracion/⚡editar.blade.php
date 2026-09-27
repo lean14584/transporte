@@ -12,6 +12,7 @@ new #[Title('Configuración')] class extends Component {
     use WithFileUploads;
 
     public string $empresa_nombre = '';
+    public string $empresa_subtitulo = '';
     public string $empresa_propietario = '';
     public string $empresa_direccion = '';
 
@@ -23,6 +24,7 @@ new #[Title('Configuración')] class extends Component {
 
         $configuracion = Configuracion::actual();
         $this->empresa_nombre = (string) $configuracion->empresa_nombre;
+        $this->empresa_subtitulo = (string) $configuracion->empresa_subtitulo;
         $this->empresa_propietario = (string) $configuracion->empresa_propietario;
         $this->empresa_direccion = (string) $configuracion->empresa_direccion;
     }
@@ -31,6 +33,7 @@ new #[Title('Configuración')] class extends Component {
     {
         $validated = $this->validate([
             'empresa_nombre' => ['nullable', 'string', 'max:255'],
+            'empresa_subtitulo' => ['nullable', 'string', 'max:255'],
             'empresa_propietario' => ['nullable', 'string', 'max:255'],
             'empresa_direccion' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'max:2048'],
@@ -114,6 +117,7 @@ new #[Title('Configuración')] class extends Component {
                         </div>
 
                         <flux:input wire:model="empresa_nombre" :label="__('Nombre de la empresa')" />
+                        <flux:input wire:model="empresa_subtitulo" :label="__('Subtítulo (aparece en guías, recibos y órdenes de pago impresas)')" placeholder="{{ __('Transporte de cargas') }}" />
                         <flux:input wire:model="empresa_propietario" :label="__('Dueño')" />
                         <flux:input wire:model="empresa_direccion" :label="__('Dirección')" />
                     </div>
