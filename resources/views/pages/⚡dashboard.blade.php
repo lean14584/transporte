@@ -74,61 +74,68 @@ new #[Title('Dashboard')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div>
-        <flux:heading size="xl">{{ __('Dashboard') }}</flux:heading>
-        <flux:subheading>{{ __('Resumen general de la operación.') }}</flux:subheading>
-    </div>
+    <x-page-header :title="__('Dashboard')" :subtitle="__('Resumen general de la operación.')" />
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="min-w-0 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-950/30">
-            <div class="flex items-center gap-3">
-                <div class="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/50">
-                    <flux:icon.truck class="size-5 text-blue-600 dark:text-blue-400" />
+    <div class="flex flex-col gap-4">
+        <div class="relative min-w-0 overflow-hidden rounded-2xl bg-linear-to-br from-route-700 via-route-600 to-route-500 p-6 text-white shadow-lg shadow-route-950/20">
+            <flux:icon.truck class="pointer-events-none absolute -right-6 -bottom-8 size-40 text-white/10" aria-hidden="true" />
+
+            <div class="relative flex flex-col gap-1">
+                <flux:text class="text-white/70">{{ __('Guías en tránsito') }}</flux:text>
+                <div class="flex items-baseline gap-3">
+                    <span class="font-mono text-5xl leading-none font-semibold">{{ $this->guiasEnTransito }}</span>
+                    <span class="text-sm text-white/70">{{ __('cargadas, esperando recepción') }}</span>
                 </div>
-                <flux:text size="sm" class="text-blue-900/70 dark:text-blue-300">{{ __('Guías en tránsito') }}</flux:text>
+                <flux:link :href="route('guias.index')" wire:navigate class="mt-3 text-sm text-white/90 hover:text-white">
+                    {{ __('Ver todas las guías') }}
+                </flux:link>
             </div>
-            <flux:heading size="xl" class="mt-3 text-blue-900 dark:text-blue-100">{{ $this->guiasEnTransito }}</flux:heading>
         </div>
 
-        @unless (auth()->user()->isUsuarioCarga())
-            <div class="min-w-0 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                <div class="flex items-center gap-3">
-                    <div class="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/50">
-                        <flux:icon.banknotes class="size-5 text-emerald-600 dark:text-emerald-400" />
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            @unless (auth()->user()->isUsuarioCarga())
+                <div class="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-500/10">
+                            <flux:icon.banknotes class="size-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <flux:text size="sm">{{ __('Cobrado hoy') }}</flux:text>
                     </div>
-                    <flux:text size="sm" class="text-emerald-900/70 dark:text-emerald-300">{{ __('Cobrado hoy') }}</flux:text>
+                    <flux:heading size="xl" class="mt-3 font-mono">$ {{ number_format($this->cobradoHoy, 2, ',', '.') }}</flux:heading>
                 </div>
-                <flux:heading size="xl" class="mt-3 font-mono text-emerald-900 dark:text-emerald-100">$ {{ number_format($this->cobradoHoy, 2, ',', '.') }}</flux:heading>
-            </div>
 
-            <div class="min-w-0 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
-                <div class="flex items-center gap-3">
-                    <div class="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/50">
-                        <flux:icon.exclamation-triangle class="size-5 text-amber-600 dark:text-amber-400" />
+                <div class="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="rounded-lg bg-amber-100 p-2 dark:bg-amber-500/10">
+                            <flux:icon.exclamation-triangle class="size-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <flux:text size="sm">{{ __('Total a cobrar (cta cte)') }}</flux:text>
                     </div>
-                    <flux:text size="sm" class="text-amber-900/70 dark:text-amber-300">{{ __('Total a cobrar (cta cte)') }}</flux:text>
+                    <flux:heading size="xl" class="mt-3 font-mono">$ {{ number_format($this->totalACobrar, 2, ',', '.') }}</flux:heading>
                 </div>
-                <flux:heading size="xl" class="mt-3 font-mono text-amber-900 dark:text-amber-100">$ {{ number_format($this->totalACobrar, 2, ',', '.') }}</flux:heading>
-            </div>
-        @endunless
+            @endunless
 
-        @if (auth()->user()->isAdministrador())
-            <div class="min-w-0 rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/50 dark:bg-violet-950/30">
-                <div class="flex items-center gap-3">
-                    <div class="rounded-lg bg-violet-100 p-2 dark:bg-violet-900/50">
-                        <flux:icon.building-library class="size-5 text-violet-600 dark:text-violet-400" />
+            @if (auth()->user()->isAdministrador())
+                <div class="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="rounded-lg bg-violet-100 p-2 dark:bg-violet-500/10">
+                            <flux:icon.building-library class="size-5 text-violet-600 dark:text-violet-400" />
+                        </div>
+                        <flux:text size="sm">{{ __('Saldo en cuentas bancarias') }}</flux:text>
                     </div>
-                    <flux:text size="sm" class="text-violet-900/70 dark:text-violet-300">{{ __('Saldo en cuentas bancarias') }}</flux:text>
+                    <flux:heading size="xl" class="mt-3 font-mono">$ {{ number_format($this->saldoBancario, 2, ',', '.') }}</flux:heading>
                 </div>
-                <flux:heading size="xl" class="mt-3 font-mono text-violet-900 dark:text-violet-100">$ {{ number_format($this->saldoBancario, 2, ',', '.') }}</flux:heading>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div class="min-w-0 rounded-xl border border-zinc-200 dark:border-white/10 overflow-hidden @unless (auth()->user()->isAdministrador()) lg:col-span-2 @endunless">
+        <div class="min-w-0 rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden @unless (auth()->user()->isAdministrador()) lg:col-span-2 @endunless">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 p-4 dark:border-white/10">
-                <flux:heading size="lg">{{ __('Últimas guías') }}</flux:heading>
+                <div class="flex items-center gap-2">
+                    <flux:icon.document-text class="size-4 text-zinc-400" />
+                    <flux:heading size="lg">{{ __('Últimas guías') }}</flux:heading>
+                </div>
                 <flux:link :href="route('guias.index')" wire:navigate>{{ __('Ver todas') }}</flux:link>
             </div>
 
@@ -180,9 +187,12 @@ new #[Title('Dashboard')] class extends Component {
         </div>
 
         @if (auth()->user()->isAdministrador())
-            <div class="min-w-0 rounded-xl border border-zinc-200 dark:border-white/10 overflow-hidden">
+            <div class="min-w-0 rounded-2xl border border-zinc-200 dark:border-white/10 overflow-hidden">
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 p-4 dark:border-white/10">
-                    <flux:heading size="lg">{{ __('Próximos cheques a pagar') }}</flux:heading>
+                    <div class="flex items-center gap-2">
+                        <flux:icon.rectangle-stack class="size-4 text-zinc-400" />
+                        <flux:heading size="lg">{{ __('Próximos cheques a pagar') }}</flux:heading>
+                    </div>
                     <flux:link :href="route('cheques.index')" wire:navigate>{{ __('Ver todos') }}</flux:link>
                 </div>
 

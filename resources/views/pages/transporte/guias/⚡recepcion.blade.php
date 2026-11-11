@@ -56,7 +56,12 @@ new #[Title('Recepción de guía')] class extends Component {
     public function recepcionar(): void
     {
         $validated = $this->validate([
-            'tn_descargadas' => ['required', 'numeric', 'gt:0'],
+            'tn_descargadas' => ['required', 'numeric', 'gt:0', 'lte:'.$this->guia->cantidad],
+        ], [
+            'tn_descargadas.lte' => __('No se puede descargar más de lo cargado (:cantidad :unidad).', [
+                'cantidad' => number_format((float) $this->guia->cantidad, 2, ',', '.'),
+                'unidad' => $this->guia->unidadLabel(),
+            ]),
         ]);
 
         if ($this->totalCliente === null || $this->totalFletero === null) {
@@ -85,16 +90,13 @@ new #[Title('Recepción de guía')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div>
-        <flux:heading size="xl">{{ __('Recepción de guía :folio', ['folio' => $guia->folio()]) }}</flux:heading>
-        <flux:subheading>{{ __('Cargado el :fecha', ['fecha' => $guia->fecha_carga->format('d/m/Y')]) }}</flux:subheading>
-    </div>
+    <x-page-header :title="__('Recepción de guía :folio', ['folio' => $guia->folio()])" :subtitle="__('Cargado el :fecha', ['fecha' => $guia->fecha_carga->format('d/m/Y')])" />
 
     <form wire:submit="recepcionar">
-        <div class="overflow-hidden rounded-2xl border border-blue-200/70 bg-gradient-to-br from-blue-100/70 via-blue-50/40 to-indigo-100/70 shadow-sm dark:border-blue-900/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-indigo-950/60">
+        <div class="overflow-hidden rounded-2xl border border-route-200/70 bg-gradient-to-br from-route-100/70 via-route-50/40 to-route-200/70 shadow-sm dark:border-route-800/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-route-950/60">
             <div class="space-y-6 p-6">
                 <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                    <flux:heading size="sm" class="uppercase tracking-wide text-route-700/70 dark:text-route-300/80">
                         {{ __('Datos generales') }}
                     </flux:heading>
 
@@ -117,7 +119,7 @@ new #[Title('Recepción de guía')] class extends Component {
                 <flux:separator />
 
                 <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                    <flux:heading size="sm" class="uppercase tracking-wide text-route-700/70 dark:text-route-300/80">
                         {{ __('Datos de la carga') }}
                     </flux:heading>
 
@@ -144,7 +146,7 @@ new #[Title('Recepción de guía')] class extends Component {
                 <flux:separator />
 
                 <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                    <flux:heading size="sm" class="uppercase tracking-wide text-route-700/70 dark:text-route-300/80">
                         {{ __(':unidad Descargadas', ['unidad' => $guia->unidadLabel()]) }}
                     </flux:heading>
 
@@ -171,7 +173,7 @@ new #[Title('Recepción de guía')] class extends Component {
                 <flux:separator />
 
                 <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                    <flux:heading size="sm" class="uppercase tracking-wide text-route-700/70 dark:text-route-300/80">
                         {{ __('Resultado facturación') }}
                     </flux:heading>
 
@@ -192,7 +194,7 @@ new #[Title('Recepción de guía')] class extends Component {
                 </div>
             </div>
 
-            <div class="flex justify-end gap-2 border-t border-blue-200/70 bg-white/50 px-6 py-4 dark:border-blue-900/40 dark:bg-black/10">
+            <div class="flex justify-end gap-2 border-t border-route-200/70 bg-white/50 px-6 py-4 dark:border-route-800/40 dark:bg-black/10">
                 <flux:button variant="filled" :href="route('guias.index')" wire:navigate>{{ __('Cancelar') }}</flux:button>
                 <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="recepcionar">{{ __('Confirmar recepción') }}</flux:button>
             </div>

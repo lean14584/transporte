@@ -37,16 +37,16 @@ new #[Title('Movimientos de cuenta bancaria')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ $cuentaBancaria->banco }}</flux:heading>
-            <flux:subheading>{{ __('Movimientos de la cuenta bancaria') }}</flux:subheading>
-        </div>
-    </div>
+    <x-page-header :title="$cuentaBancaria->banco" :subtitle="__('Movimientos de la cuenta bancaria')" />
 
-    <div class="rounded-xl border border-zinc-200 p-4 dark:border-white/10">
-        <flux:text size="sm">{{ __('Saldo actual') }}</flux:text>
-        <flux:heading size="xl" class="mt-1 font-mono">
+    <div class="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+        <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-violet-100 p-2 dark:bg-violet-500/10">
+                <flux:icon.building-library class="size-5 text-violet-600 dark:text-violet-400" />
+            </div>
+            <flux:text size="sm">{{ __('Saldo actual') }}</flux:text>
+        </div>
+        <flux:heading size="xl" class="mt-3 font-mono">
             $ {{ number_format((float) $cuentaBancaria->saldo, 2, ',', '.') }}
         </flux:heading>
     </div>

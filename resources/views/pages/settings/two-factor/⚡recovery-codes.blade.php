@@ -121,6 +121,7 @@ new class extends Component {
                                 role="listitem"
                                 class="select-text"
                                 wire:loading.class="opacity-50 animate-pulse"
+                                wire:key="recovery-code-{{ $loop->index }}"
                             >
                                 {{ $code }}
                             </div>

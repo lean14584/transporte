@@ -47,16 +47,11 @@ new #[Title('Guías')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ __('Guías') }}</flux:heading>
-            <flux:subheading>{{ __('Cargas de mercadería en tránsito.') }}</flux:subheading>
-        </div>
-
+    <x-page-header :title="__('Guías')" :subtitle="__('Cargas de mercadería en tránsito.')">
         <flux:button variant="primary" icon="plus" :href="route('guias.crear')" wire:navigate>
             {{ __('Cargar guía') }}
         </flux:button>
-    </div>
+    </x-page-header>
 
     <div class="flex flex-wrap items-end gap-4">
         <flux:select wire:model.live="estado" class="max-w-xs">

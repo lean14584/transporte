@@ -61,7 +61,7 @@ new #[Title('Cuentas bancarias')] class extends Component {
         ];
 
         if (! $this->editingId) {
-            $rules['saldo'] = ['required', 'numeric'];
+            $rules['saldo'] = ['required', 'numeric', 'gte:0'];
         }
 
         $validated = $this->validate($rules);
@@ -133,16 +133,11 @@ new #[Title('Cuentas bancarias')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ __('Cuentas bancarias') }}</flux:heading>
-            <flux:subheading>{{ __('Cuentas contra las que se emiten los cheques.') }}</flux:subheading>
-        </div>
-
+    <x-page-header :title="__('Cuentas bancarias')" :subtitle="__('Cuentas contra las que se emiten los cheques.')">
         <flux:button variant="primary" icon="plus" wire:click="crear">
             {{ __('Nueva cuenta') }}
         </flux:button>
-    </div>
+    </x-page-header>
 
     <div class="hidden overflow-x-auto md:block">
         <flux:table>
@@ -188,11 +183,11 @@ new #[Title('Cuentas bancarias')] class extends Component {
 
     <div class="grid gap-3 md:hidden">
         @forelse ($this->cuentas as $cuenta)
-            <div class="rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/50 dark:bg-violet-950/30" wire:key="cuenta-mobile-{{ $cuenta->id }}">
+            <div class="rounded-xl border border-zinc-200 p-4 dark:border-white/10" wire:key="cuenta-mobile-{{ $cuenta->id }}">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <div class="font-medium text-violet-900 dark:text-violet-100">{{ $cuenta->banco }}</div>
-                        <div class="mt-1 text-sm text-violet-900/70 dark:text-violet-300">{{ $cuenta->numero_cuenta ?: '—' }}</div>
+                        <div class="font-medium">{{ $cuenta->banco }}</div>
+                        <div class="mt-1 text-sm text-zinc-500">{{ $cuenta->numero_cuenta ?: '—' }}</div>
                     </div>
                     <div class="flex shrink-0 gap-1">
                         <flux:button size="sm" variant="ghost" icon="banknotes" aria-label="{{ __('Movimientos') }}" :href="route('cuentas-bancarias.movimientos', $cuenta)" wire:navigate />
@@ -208,7 +203,7 @@ new #[Title('Cuentas bancarias')] class extends Component {
                         />
                     </div>
                 </div>
-                <div class="mt-3 font-mono text-lg text-violet-900 dark:text-violet-100">$ {{ number_format((float) $cuenta->saldo, 2, ',', '.') }}</div>
+                <div class="mt-3 font-mono text-lg">$ {{ number_format((float) $cuenta->saldo, 2, ',', '.') }}</div>
             </div>
         @empty
             <div class="rounded-xl border border-zinc-200 p-4 text-center text-zinc-500 dark:border-white/10">
@@ -246,7 +241,7 @@ new #[Title('Cuentas bancarias')] class extends Component {
                     <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
                 </flux:modal.close>
 
-                <flux:button type="submit" variant="primary">{{ __('Guardar') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar">{{ __('Guardar') }}</flux:button>
             </div>
         </form>
     </flux:modal>
@@ -272,7 +267,7 @@ new #[Title('Cuentas bancarias')] class extends Component {
                     <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
                 </flux:modal.close>
 
-                <flux:button type="submit" variant="primary">{{ __('Registrar ajuste') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardarAjuste">{{ __('Registrar ajuste') }}</flux:button>
             </div>
         </form>
     </flux:modal>

@@ -10,6 +10,7 @@
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -23,16 +24,33 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    /* Identidad "ruta": panel de marca permanente del sidebar (ver layouts/app/sidebar.blade.php). */
+    --color-ink: #0b1220;
+    --color-ink-soft: #141b2e;
+    --color-ink-line: #1f2b45;
+
+    /* Acento de marca, continúa el azul/índigo/cian ya usado en la pantalla de login. */
+    --color-route-950: #071a2b;
+    --color-route-800: #0e3a57;
+    --color-route-700: #145676;
+    --color-route-600: #1b6f92;
+    --color-route-500: #2389ac;
+    --color-route-400: #3fb2ce;
+    --color-route-300: #72d3e8;
+    --color-route-200: #ade8f2;
+    --color-route-100: #d2f1f8;
+    --color-route-50: #eafafc;
+
+    --color-accent: var(--color-route-600);
+    --color-accent-content: var(--color-route-700);
     --color-accent-foreground: var(--color-white);
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        --color-accent: var(--color-route-300);
+        --color-accent-content: var(--color-route-300);
+        --color-accent-foreground: var(--color-route-950);
     }
 }
 
@@ -43,7 +61,15 @@
     ::before,
     ::backdrop,
     ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
+        border-color: var(--color-zinc-200, currentColor);
+    }
+}
+
+@layer utilities {
+    /* Toda cifra/folio/fecha de tabla usa font-mono (ver convención en los módulos de transporte);
+       tabular-nums evita que los números "bailen" de ancho entre filas. */
+    .font-mono {
+        font-variant-numeric: tabular-nums;
     }
 }
 

@@ -71,16 +71,13 @@ new #[Title('Configuración')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div>
-        <flux:heading size="xl">{{ __('Configuración') }}</flux:heading>
-        <flux:subheading>{{ __('Datos de la empresa.') }}</flux:subheading>
-    </div>
+    <x-page-header :title="__('Configuración')" :subtitle="__('Datos de la empresa.')" />
 
     <form wire:submit="guardar" class="flex flex-col gap-6">
-        <div class="overflow-hidden rounded-2xl border border-indigo-200/70 bg-gradient-to-br from-indigo-100/70 via-blue-50/40 to-cyan-100/70 shadow-sm dark:border-indigo-900/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-indigo-950/60">
+        <div class="overflow-hidden rounded-2xl border border-route-200/70 bg-gradient-to-br from-route-100/70 via-route-50/40 to-route-200/70 shadow-sm dark:border-route-800/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-route-950/60">
             <div class="space-y-6 p-6">
                 <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-indigo-700/70 dark:text-indigo-400/80">
+                    <flux:heading size="sm" class="uppercase tracking-wide text-route-700/70 dark:text-route-300/80">
                         {{ __('Datos de la empresa') }}
                     </flux:heading>
 
@@ -96,12 +93,12 @@ new #[Title('Configuración')] class extends Component {
                                 @elseif (Configuracion::actual()->logoUrl())
                                     <img src="{{ Configuracion::actual()->logoUrl() }}" alt="{{ __('Logo') }}" class="size-full object-contain" />
                                 @else
-                                    <flux:icon name="truck" class="size-8 text-indigo-400" />
+                                    <flux:icon name="truck" class="size-8 text-route-400" />
                                 @endif
                             </div>
 
                             <div class="flex flex-col gap-2">
-                                <label class="w-fit cursor-pointer rounded-lg border border-indigo-300 bg-white/80 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-white dark:border-indigo-800 dark:bg-white/5 dark:text-indigo-300 dark:hover:bg-white/10">
+                                <label class="w-fit cursor-pointer rounded-lg border border-route-300 bg-white/80 px-3 py-1.5 text-sm font-medium text-route-700 hover:bg-white dark:border-route-800 dark:bg-white/5 dark:text-route-300 dark:hover:bg-white/10">
                                     {{ __('Subir logo') }}
                                     <input type="file" wire:model="logo" accept="image/*" class="hidden" />
                                 </label>
@@ -124,7 +121,7 @@ new #[Title('Configuración')] class extends Component {
                 </div>
             </div>
 
-            <div class="flex justify-end gap-2 border-t border-indigo-200/70 bg-white/50 px-6 py-4 dark:border-indigo-900/40 dark:bg-black/10">
+            <div class="flex justify-end gap-2 border-t border-route-200/70 bg-white/50 px-6 py-4 dark:border-route-800/40 dark:bg-black/10">
                 <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar,logo">{{ __('Guardar') }}</flux:button>
             </div>
         </div>

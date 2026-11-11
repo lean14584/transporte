@@ -155,18 +155,13 @@ new #[Title('Órdenes de pago')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ __('Órdenes de pago') }}</flux:heading>
-            <flux:subheading>{{ __('Pagos a los fleteros por el flete prestado.') }}</flux:subheading>
-        </div>
-
+    <x-page-header :title="__('Órdenes de pago')" :subtitle="__('Pagos a los fleteros por el flete prestado.')">
         <flux:modal.trigger name="orden-pago-form">
             <flux:button variant="primary" icon="plus">
                 {{ __('Nueva orden de pago') }}
             </flux:button>
         </flux:modal.trigger>
-    </div>
+    </x-page-header>
 
     <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
@@ -261,6 +256,7 @@ new #[Title('Órdenes de pago')] class extends Component {
                             @foreach ($this->fleterosSugeridos as $sugerido)
                                 <button
                                     type="button"
+                                    wire:key="sugerido-fletero-{{ $sugerido->id }}"
                                     wire:click="seleccionarFletero({{ $sugerido->id }})"
                                     class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
                                 >

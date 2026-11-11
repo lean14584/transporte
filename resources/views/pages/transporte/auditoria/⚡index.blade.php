@@ -53,10 +53,7 @@ new #[Title('Auditoría')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div>
-        <flux:heading size="xl">{{ __('Auditoría') }}</flux:heading>
-        <flux:subheading>{{ __('Quién hizo qué en el sistema.') }}</flux:subheading>
-    </div>
+    <x-page-header :title="__('Auditoría')" :subtitle="__('Quién hizo qué en el sistema.')" />
 
     <div class="flex flex-wrap items-end gap-4">
         <flux:select wire:model.live="modelo" :label="__('Modelo')" class="max-w-xs">

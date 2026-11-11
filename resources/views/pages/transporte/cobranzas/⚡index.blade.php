@@ -54,17 +54,17 @@ new #[Title('Cobranzas')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ __('Cobranzas') }}</flux:heading>
-            <flux:subheading>{{ __('Recibos emitidos a clientes. El cobro puntual se registra desde la cuenta corriente de cada cliente.') }}</flux:subheading>
+    <x-page-header :title="__('Cobranzas')" :subtitle="__('Recibos emitidos a clientes. El cobro puntual se registra desde la cuenta corriente de cada cliente.')">
+        <div class="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 dark:border-white/10 dark:bg-white/5">
+            <div class="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-500/10">
+                <flux:icon.banknotes class="size-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+                <flux:text size="sm">{{ __('Cobrado hoy') }}</flux:text>
+                <div class="font-mono text-lg font-semibold">$ {{ number_format($this->totalDelDia, 2, ',', '.') }}</div>
+            </div>
         </div>
-
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-end dark:border-emerald-900/50 dark:bg-emerald-950/30">
-            <flux:text size="sm" class="text-emerald-900/70 dark:text-emerald-300">{{ __('Cobrado hoy') }}</flux:text>
-            <flux:heading size="lg" class="font-mono text-emerald-900 dark:text-emerald-100">$ {{ number_format($this->totalDelDia, 2, ',', '.') }}</flux:heading>
-        </div>
-    </div>
+    </x-page-header>
 
     <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
@@ -103,7 +103,7 @@ new #[Title('Cobranzas')] class extends Component {
                         <flux:table.cell align="end">
                             <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir recibo') }}" :href="route('recibos.pdf', $recibo)" target="_blank" />
                             @if ($recibo->medio_pago === 'cheque' && $recibo->estado === 'confirmado')
-                                <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar cheque rechazado') }}" wire:click="marcarRechazado({{ $recibo->id }})" />
+                                <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar cheque rechazado') }}" wire:click="marcarRechazado({{ $recibo->id }})" wire:confirm="{{ __('¿Marcar este cheque como rechazado? La deuda vuelve a la cuenta corriente del cliente.') }}" />
                             @endif
                         </flux:table.cell>
                     </flux:table.row>
@@ -131,7 +131,7 @@ new #[Title('Cobranzas')] class extends Component {
                     <div class="flex shrink-0 gap-1">
                         <flux:button size="sm" variant="ghost" icon="printer" aria-label="{{ __('Imprimir recibo') }}" :href="route('recibos.pdf', $recibo)" target="_blank" />
                         @if ($recibo->medio_pago === 'cheque' && $recibo->estado === 'confirmado')
-                            <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar cheque rechazado') }}" wire:click="marcarRechazado({{ $recibo->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar cheque rechazado') }}" wire:click="marcarRechazado({{ $recibo->id }})" wire:confirm="{{ __('¿Marcar este cheque como rechazado? La deuda vuelve a la cuenta corriente del cliente.') }}" />
                         @endif
                     </div>
                 </div>

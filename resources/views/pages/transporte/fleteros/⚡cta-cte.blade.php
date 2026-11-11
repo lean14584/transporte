@@ -44,22 +44,20 @@ new #[Title('Cuenta corriente')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ $fletero->razon_social }}</flux:heading>
-            <flux:subheading>{{ __('Cuenta corriente') }}</flux:subheading>
-        </div>
-
+    <x-page-header :title="$fletero->razon_social" :subtitle="__('Cuenta corriente')">
         <flux:button variant="primary" icon="banknotes" :href="route('ordenes-pago.index')" wire:navigate>
             {{ __('Registrar pago') }}
         </flux:button>
-    </div>
+    </x-page-header>
 
-    <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
-        <flux:text size="sm" class="text-amber-900/70 dark:text-amber-300">
-            {{ __('Saldo actual (lo que la empresa le debe al fletero)') }}
-        </flux:text>
-        <flux:heading size="xl" class="mt-1 font-mono text-amber-900 dark:text-amber-100">
+    <div class="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+        <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-amber-100 p-2 dark:bg-amber-500/10">
+                <flux:icon.banknotes class="size-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <flux:text size="sm">{{ __('Saldo actual (lo que la empresa le debe al fletero)') }}</flux:text>
+        </div>
+        <flux:heading size="xl" class="mt-3 font-mono">
             $ {{ number_format((float) $fletero->saldo_cta_cte, 2, ',', '.') }}
         </flux:heading>
     </div>

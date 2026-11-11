@@ -70,24 +70,19 @@ new #[Title('Cuenta corriente')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ $cliente->nombre }}</flux:heading>
-            <flux:subheading>{{ __('Cuenta corriente') }}</flux:subheading>
-        </div>
-
+    <x-page-header :title="$cliente->nombre" :subtitle="__('Cuenta corriente')">
         <flux:modal.trigger name="cobrar-form">
             <flux:button variant="primary" icon="banknotes">
                 {{ __('Registrar cobro') }}
             </flux:button>
         </flux:modal.trigger>
-    </div>
+    </x-page-header>
 
     @php
         $saldoPositivo = $cliente->saldo_cta_cte > 0;
         $saldoNegativo = $cliente->saldo_cta_cte < 0;
     @endphp
-    <div class="rounded-xl border p-4 {{ $saldoPositivo ? 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30' : ($saldoNegativo ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/30' : 'border-zinc-200 dark:border-white/10') }}">
+    <div class="rounded-2xl border p-4 {{ $saldoPositivo ? 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30' : ($saldoNegativo ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/30' : 'border-zinc-200 dark:border-white/10') }}">
         <flux:text size="sm" class="{{ $saldoPositivo ? 'text-red-900/70 dark:text-red-300' : ($saldoNegativo ? 'text-emerald-900/70 dark:text-emerald-300' : '') }}">
             {{ __('Saldo actual') }}
         </flux:text>

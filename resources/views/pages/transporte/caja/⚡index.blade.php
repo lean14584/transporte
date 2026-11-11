@@ -85,32 +85,42 @@ new #[Title('Caja')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ __('Caja') }}</flux:heading>
-            <flux:subheading>{{ __('Cobranzas y órdenes de pago juntas, como debe y haber.') }}</flux:subheading>
-        </div>
-    </div>
+    <x-page-header :title="__('Caja')" :subtitle="__('Cobranzas y órdenes de pago juntas, como debe y haber.')" />
 
     <x-filtro-rango-fechas :desde="$desde" :hasta="$hasta" :rango-invertido="$this->rangoFechasInvertido()" />
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-            <flux:text size="sm" class="text-emerald-900/70 dark:text-emerald-300">{{ __('Debe (cobranzas)') }}</flux:text>
-            <flux:heading size="xl" class="mt-1 font-mono text-emerald-900 dark:text-emerald-100">
+        <div class="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+            <div class="flex items-center gap-3">
+                <div class="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-500/10">
+                    <flux:icon.arrow-down-left class="size-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <flux:text size="sm">{{ __('Debe (cobranzas)') }}</flux:text>
+            </div>
+            <flux:heading size="xl" class="mt-3 font-mono">
                 $ {{ number_format($this->totalDebe, 2, ',', '.') }}
             </flux:heading>
         </div>
-        <div class="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/30">
-            <flux:text size="sm" class="text-red-900/70 dark:text-red-300">{{ __('Haber (órdenes de pago)') }}</flux:text>
-            <flux:heading size="xl" class="mt-1 font-mono text-red-900 dark:text-red-100">
+        <div class="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+            <div class="flex items-center gap-3">
+                <div class="rounded-lg bg-red-100 p-2 dark:bg-red-500/10">
+                    <flux:icon.arrow-up-right class="size-5 text-red-600 dark:text-red-400" />
+                </div>
+                <flux:text size="sm">{{ __('Haber (órdenes de pago)') }}</flux:text>
+            </div>
+            <flux:heading size="xl" class="mt-3 font-mono">
                 $ {{ number_format($this->totalHaber, 2, ',', '.') }}
             </flux:heading>
         </div>
         @php $saldoNegativo = $this->saldo < 0; @endphp
-        <div class="rounded-xl border p-4 {{ $saldoNegativo ? 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30' : 'border-zinc-200 dark:border-white/10' }}">
-            <flux:text size="sm" class="{{ $saldoNegativo ? 'text-red-900/70 dark:text-red-300' : '' }}">{{ __('Saldo') }}</flux:text>
-            <flux:heading size="xl" class="mt-1 font-mono {{ $saldoNegativo ? 'text-red-900 dark:text-red-100' : '' }}">
+        <div class="min-w-0 rounded-2xl border p-4 {{ $saldoNegativo ? 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30' : 'border-zinc-200 bg-white dark:border-white/10 dark:bg-white/5' }}">
+            <div class="flex items-center gap-3">
+                <div class="rounded-lg p-2 {{ $saldoNegativo ? 'bg-red-100 dark:bg-red-500/10' : 'bg-route-100 dark:bg-route-500/10' }}">
+                    <flux:icon.calculator class="size-5 {{ $saldoNegativo ? 'text-red-600 dark:text-red-400' : 'text-route-600 dark:text-route-300' }}" />
+                </div>
+                <flux:text size="sm" class="{{ $saldoNegativo ? 'text-red-900/70 dark:text-red-300' : '' }}">{{ __('Saldo') }}</flux:text>
+            </div>
+            <flux:heading size="xl" class="mt-3 font-mono {{ $saldoNegativo ? 'text-red-900 dark:text-red-100' : '' }}">
                 $ {{ number_format($this->saldo, 2, ',', '.') }}
             </flux:heading>
         </div>

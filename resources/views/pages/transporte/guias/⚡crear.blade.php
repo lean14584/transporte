@@ -200,16 +200,13 @@ new #[Title('Cargar guía')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div>
-        <flux:heading size="xl">{{ __('Cargar guía') }}</flux:heading>
-        <flux:subheading>{{ __('Datos de la carga: transporte, cliente, camión y mercadería.') }}</flux:subheading>
-    </div>
+    <x-page-header :title="__('Cargar guía')" :subtitle="__('Datos de la carga: transporte, cliente, camión y mercadería.')" />
 
     <form wire:submit="guardar">
-        <div class="overflow-hidden rounded-2xl border border-blue-200/70 bg-gradient-to-br from-blue-100/70 via-blue-50/40 to-indigo-100/70 shadow-sm dark:border-blue-900/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-indigo-950/60">
+        <div class="overflow-hidden rounded-2xl border border-route-200/70 bg-gradient-to-br from-route-100/70 via-route-50/40 to-route-200/70 shadow-sm dark:border-route-800/40 dark:from-zinc-900 dark:via-zinc-900 dark:to-route-950/60">
             <div class="space-y-6 p-6">
                 <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                    <flux:heading size="sm" class="uppercase tracking-wide text-route-700/70 dark:text-route-300/80">
                         {{ __('Transporte y cliente') }}
                     </flux:heading>
 
@@ -235,6 +232,7 @@ new #[Title('Cargar guía')] class extends Component {
                                         @foreach ($this->transportesSugeridos as $sugerido)
                                             <button
                                                 type="button"
+                                                wire:key="sugerido-transporte-{{ $sugerido->id }}"
                                                 wire:click="seleccionarTransporte({{ $sugerido->id }})"
                                                 class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
                                             >
@@ -271,6 +269,7 @@ new #[Title('Cargar guía')] class extends Component {
                                         @foreach ($this->clientesSugeridos as $sugerido)
                                             <button
                                                 type="button"
+                                                wire:key="sugerido-cliente-{{ $sugerido->id }}"
                                                 wire:click="seleccionarCliente({{ $sugerido->id }})"
                                                 class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
                                             >
@@ -291,7 +290,7 @@ new #[Title('Cargar guía')] class extends Component {
                 <flux:separator />
 
                 <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                    <flux:heading size="sm" class="uppercase tracking-wide text-route-700/70 dark:text-route-300/80">
                         {{ __('Transportista y camión') }}
                     </flux:heading>
 
@@ -317,6 +316,7 @@ new #[Title('Cargar guía')] class extends Component {
                                         @foreach ($this->fleterosSugeridos as $sugerido)
                                             <button
                                                 type="button"
+                                                wire:key="sugerido-fletero-{{ $sugerido->id }}"
                                                 wire:click="seleccionarFletero({{ $sugerido->id }})"
                                                 class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
                                             >
@@ -344,7 +344,7 @@ new #[Title('Cargar guía')] class extends Component {
                 <flux:separator />
 
                 <div>
-                    <flux:heading size="sm" class="uppercase tracking-wide text-blue-700/70 dark:text-blue-400/80">
+                    <flux:heading size="sm" class="uppercase tracking-wide text-route-700/70 dark:text-route-300/80">
                         {{ __('Mercadería') }}
                     </flux:heading>
 
@@ -370,6 +370,7 @@ new #[Title('Cargar guía')] class extends Component {
                                         @foreach ($this->productosSugeridos as $sugerido)
                                             <button
                                                 type="button"
+                                                wire:key="sugerido-producto-{{ $sugerido->id }}"
                                                 wire:click="seleccionarProducto({{ $sugerido->id }})"
                                                 class="block w-full px-3 py-2 text-start text-sm hover:bg-zinc-100 dark:hover:bg-white/10"
                                             >
@@ -406,7 +407,7 @@ new #[Title('Cargar guía')] class extends Component {
                 </div>
             </div>
 
-            <div class="flex justify-end gap-2 border-t border-blue-200/70 bg-white/50 px-6 py-4 dark:border-blue-900/40 dark:bg-black/10">
+            <div class="flex justify-end gap-2 border-t border-route-200/70 bg-white/50 px-6 py-4 dark:border-route-800/40 dark:bg-black/10">
                 <flux:button variant="filled" :href="route('guias.index')" wire:navigate>{{ __('Cancelar') }}</flux:button>
                 <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar">{{ __('Cargar guía') }}</flux:button>
             </div>

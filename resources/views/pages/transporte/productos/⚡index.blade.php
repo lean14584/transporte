@@ -89,16 +89,11 @@ new #[Title('Productos')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ __('Productos') }}</flux:heading>
-            <flux:subheading>{{ __('Mercadería que se transporta en las guías.') }}</flux:subheading>
-        </div>
-
+    <x-page-header :title="__('Productos')" :subtitle="__('Mercadería que se transporta en las guías.')">
         <flux:button variant="primary" icon="plus" wire:click="crear">
             {{ __('Nuevo producto') }}
         </flux:button>
-    </div>
+    </x-page-header>
 
     <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Buscar por nombre o número...') }}" class="max-w-sm" />
 
@@ -195,7 +190,7 @@ new #[Title('Productos')] class extends Component {
                     <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
                 </flux:modal.close>
 
-                <flux:button type="submit" variant="primary">{{ __('Guardar') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar">{{ __('Guardar') }}</flux:button>
             </div>
         </form>
     </flux:modal>

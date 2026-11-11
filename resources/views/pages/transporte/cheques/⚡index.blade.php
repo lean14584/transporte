@@ -64,10 +64,7 @@ new #[Title('Cheques')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div>
-        <flux:heading size="xl">{{ __('Cheques') }}</flux:heading>
-        <flux:subheading>{{ __('Cheques emitidos contra las cuentas bancarias.') }}</flux:subheading>
-    </div>
+    <x-page-header :title="__('Cheques')" :subtitle="__('Cheques emitidos contra las cuentas bancarias.')" />
 
     <flux:select wire:model.live="estado" class="max-w-xs">
         <flux:select.option value="">{{ __('Todos los estados') }}</flux:select.option>
@@ -107,10 +104,10 @@ new #[Title('Cheques')] class extends Component {
                         </flux:table.cell>
                         <flux:table.cell align="end">
                             @if ($cheque->estado === 'emitido')
-                                <flux:button size="sm" variant="ghost" icon="check" wire:click="marcarCobrado({{ $cheque->id }})">
+                                <flux:button size="sm" variant="ghost" icon="check" wire:click="marcarCobrado({{ $cheque->id }})" wire:confirm="{{ __('¿Marcar este cheque como cobrado?') }}">
                                     {{ __('Cobrado') }}
                                 </flux:button>
-                                <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar rechazado') }}" wire:click="marcarRechazado({{ $cheque->id }})">
+                                <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar rechazado') }}" wire:click="marcarRechazado({{ $cheque->id }})" wire:confirm="{{ __('¿Marcar este cheque como rechazado? El saldo vuelve a la cuenta bancaria.') }}">
                                     {{ __('Rechazado') }}
                                 </flux:button>
                             @endif
@@ -150,8 +147,8 @@ new #[Title('Cheques')] class extends Component {
                     </div>
                     @if ($cheque->estado === 'emitido')
                         <div class="flex shrink-0 gap-1">
-                            <flux:button size="sm" variant="ghost" icon="check" wire:click="marcarCobrado({{ $cheque->id }})" />
-                            <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar rechazado') }}" wire:click="marcarRechazado({{ $cheque->id }})" />
+                            <flux:button size="sm" variant="ghost" icon="check" aria-label="{{ __('Marcar cobrado') }}" wire:click="marcarCobrado({{ $cheque->id }})" wire:confirm="{{ __('¿Marcar este cheque como cobrado?') }}" />
+                            <flux:button size="sm" variant="ghost" icon="x-mark" aria-label="{{ __('Marcar rechazado') }}" wire:click="marcarRechazado({{ $cheque->id }})" wire:confirm="{{ __('¿Marcar este cheque como rechazado? El saldo vuelve a la cuenta bancaria.') }}" />
                         </div>
                     @endif
                 </div>

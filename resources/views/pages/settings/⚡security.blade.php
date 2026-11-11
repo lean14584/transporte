@@ -279,7 +279,7 @@ new #[Title('Seguridad')] class extends Component {
                 <div class="mt-6 flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>
                     <div class="border rounded-lg border-zinc-200 dark:border-zinc-700 overflow-hidden">
                         @forelse ($passkeys as $passkey)
-                            <div class="flex items-center justify-between p-4 {{ ! $loop->last ? 'border-b border-zinc-200 dark:border-zinc-700' : '' }}">
+                            <div class="flex items-center justify-between p-4 {{ ! $loop->last ? 'border-b border-zinc-200 dark:border-zinc-700' : '' }}" wire:key="passkey-{{ $passkey['id'] }}">
                                 <div class="flex items-center gap-4">
                                     <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
                                         <flux:icon.key class="size-5 text-zinc-500 dark:text-zinc-400" />
@@ -306,6 +306,7 @@ new #[Title('Seguridad')] class extends Component {
                                     size="sm"
                                     icon="trash"
                                     icon:variant="outline"
+                                    aria-label="{{ __('Eliminar passkey') }}"
                                     wire:click="confirmDelete({{ $passkey['id'] }})"
                                     class="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
                                 />

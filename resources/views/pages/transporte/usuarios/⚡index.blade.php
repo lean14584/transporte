@@ -115,16 +115,11 @@ new #[Title('Usuarios')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ __('Usuarios') }}</flux:heading>
-            <flux:subheading>{{ __('Accesos al sistema: Administrador, Administrativo y Usuario de carga.') }}</flux:subheading>
-        </div>
-
+    <x-page-header :title="__('Usuarios')" :subtitle="__('Accesos al sistema: Administrador, Administrativo y Usuario de carga.')">
         <flux:button variant="primary" icon="plus" wire:click="crear">
             {{ __('Nuevo usuario') }}
         </flux:button>
-    </div>
+    </x-page-header>
 
     <div class="hidden overflow-x-auto md:block">
         <flux:table>
@@ -221,7 +216,7 @@ new #[Title('Usuarios')] class extends Component {
                     <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
                 </flux:modal.close>
 
-                <flux:button type="submit" variant="primary">{{ __('Guardar') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar">{{ __('Guardar') }}</flux:button>
             </div>
         </form>
     </flux:modal>

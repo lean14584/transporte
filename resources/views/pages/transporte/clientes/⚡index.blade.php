@@ -111,16 +111,11 @@ new #[Title('Clientes')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading size="xl">{{ __('Clientes') }}</flux:heading>
-            <flux:subheading>{{ __('Clientes que contratan el flete, con su cuenta corriente.') }}</flux:subheading>
-        </div>
-
+    <x-page-header :title="__('Clientes')" :subtitle="__('Clientes que contratan el flete, con su cuenta corriente.')">
         <flux:button variant="primary" icon="plus" wire:click="crear">
             {{ __('Nuevo cliente') }}
         </flux:button>
-    </div>
+    </x-page-header>
 
     <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Buscar por nombre o DNI...') }}" class="max-w-sm" />
 
@@ -262,7 +257,7 @@ new #[Title('Clientes')] class extends Component {
                     <flux:button variant="filled">{{ __('Cancelar') }}</flux:button>
                 </flux:modal.close>
 
-                <flux:button type="submit" variant="primary">{{ __('Guardar') }}</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar">{{ __('Guardar') }}</flux:button>
             </div>
         </form>
     </flux:modal>
